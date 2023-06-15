@@ -9,3 +9,6 @@ cache/
 scratch.py
 .vscode/
 .ruff_cache/
+.pytest_cache
+database/
+metafile/
