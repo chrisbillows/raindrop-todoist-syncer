@@ -26,13 +26,15 @@ def main():
 def run():
     """
     Function that runs the main function and handles exceptions.
-    The main function will run 7 times, with a delay of 300 seconds between each run.
+    The main function will run for 4 hours (once every five minutes, a total of 480 
+    passes)
+        
     If an error occurs, the function enters post-mortem debugging.
     """
 
     count = 0
 
-    while count < 7:
+    while count < 481:
         count += 1
         print(f"RUN {count}".center(50, "-"))
         try:
