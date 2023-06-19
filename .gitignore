@@ -12,3 +12,4 @@ scratch.py
 .pytest_cache
 database/
 metafile/
+*.log
