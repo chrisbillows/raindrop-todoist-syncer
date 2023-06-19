@@ -1,6 +1,6 @@
 # Raindrop-Todoist-Syncer
 
-Raindrop-Todoist-Syncer is a Python script designed to convert any favorited Raindrop into a task in Todoist. It is intended to be run as a background cron job.
+Raindrop-Todoist-Syncer is a Python script designed to convert any favourited Raindrop into a task in Todoist. It is intended to be run as a background cron job.
 
 > VERY MUCH A WORK IN PROGRESS
 
