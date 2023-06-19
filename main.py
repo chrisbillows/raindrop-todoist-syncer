@@ -1,6 +1,21 @@
+import logging
+
 from raindrop import RaindropClient, RaindropsProcessor, Raindrop
 from todoist import TodoistTaskCreator
-from time import sleep
+from time import sleep, time
+
+logging.basicConfig(
+    filename="log.log",
+    level=logging.INFO,
+    format="%(levelname)s (%(asctime)s): %(message)s (Line: %(lineno)d) [%(filename)s])",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+    encoding="utf-8",
+)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+logging.getLogger().addHandler(console_handler)
 
 
 def main():
@@ -20,7 +35,7 @@ def main():
     for task in tasks_to_create:
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
-        print(f"Created task: {task.title}")
+        logging.info(f"Created task: {task.title}")
 
 
 def run():
@@ -35,12 +50,20 @@ def run():
     count = 0
 
     while count < 481:
+        
         count += 1
-        print(f"RUN {count}".center(50, "-"))
+        logging.info(f"Commence run {count}")
+        
+        start_time = time() 
+        
         try:
             main()
-            print("-" * 50)
-            print()
+            logging.info(f"Run {count} completed")
+            
+            end_time = time()
+            duration = end_time - start_time
+            logging.info(f"Run {count} took {duration:.2f} seconds")
+            
             sleep(300)
 
         except Exception as e:
