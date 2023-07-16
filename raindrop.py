@@ -530,7 +530,7 @@ class RaindropOauthManager:
         headers = {"Content-Type": "application/json"}
         data = {
             "grant_type": "authorization_code",
-            "code": self._get_access_code(),
+            "code": self._get_authorization_code(),
             "client_id": self.RAINDROP_CLIENT_ID,
             "client_secret": self.RAINDROP_CLIENT_SECRET,
             "redirect_uri": "http://localhost",
@@ -575,7 +575,8 @@ class RaindropOauthManager:
         authorize_url = f"https://raindrop.io/oauth/authorize?client_id={self.RAINDROP_CLIENT_ID}&redirect_uri={self.RAINDROP_CLIENT_ID}"
         webbrowser.open(authorize_url)
         code_url = input("Copy and paste the (FULL) returned url: ")
-        return True
+        code = self._parse_authorization_code(code_url)
+        return code
 
     def _parse_authorization_code(self, code_url: str) -> str:
         """
@@ -618,7 +619,7 @@ class RaindropOauthManager:
                 token_line_index = i
                 break
 
-        new_line = f"{token_key}={self.token}\n"
+        new_line = f'{token_key}="{self.token}"\n'
         if token_line_index is not None:
             env_lines[token_line_index] = new_line
         else:
