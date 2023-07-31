@@ -1,6 +1,12 @@
-from raindrop import RaindropClient, RaindropsProcessor, Raindrop
+import traceback
+import time
+from raindrop import RaindropClient, RaindropsProcessor
 from todoist import TodoistTaskCreator
-from time import sleep
+import logging
+
+logging.basicConfig(
+    filename="app.log", filemode="a", format="%(name)s - %(levelname)s - %(message)s"
+)
 
 
 def main():
@@ -26,29 +32,56 @@ def main():
 def run():
     """
     Function that runs the main function and handles exceptions.
-    The main function will run for 4 hours (once every five minutes, a total of 480 
-    passes)
-        
-    If an error occurs, the function enters post-mortem debugging.
+
+    Asks the user for a
+
+    a) number of runs: [int]
+    b) wait between runs in seconds [int]
+
+    (Four hours = 480 runs)
+
+    If an error occurs, currently caught and logged (in case of temporary issues with
+    Raindrop or Todoist APIs, for example).
+
     """
+    while True:
+        try:
+            runs = input("Enter the number of runs to complete: ")
+            runs = int(runs)
+            break
+        except ValueError:
+            print(f"{runs} is not a valid integer. Please try again.")
 
-    count = 0
+    while True:
+        try:
+            wait_time = input("Enter the wait time between runs in seconds: ")
+            wait_time = int(wait_time)
+            break
+        except ValueError:
+            print(f"{wait_time} is not a valid integer. Please try again.")
 
-    while count < 481:
-        count += 1
-        print(f"RUN {count}".center(50, "-"))
+    done = 0
+    while done < runs:
+        done += 1
+        print(f"RUN {done}".center(50, "-"))
         try:
             main()
             print("-" * 50)
             print()
-            sleep(300)
+            time.sleep(wait_time)
 
         except Exception as e:
-            import ipdb
-
-            ipdb.post_mortem()
+            print("ERROR. CODE WILL TRY AGAIN IF RUNS REMAINING. ELSE DEBUG WITH LOG.")
+            now = time.localtime()
+            logging.error(
+                f"{e}\n"
+                f"Run {done} of {runs} | Interval {wait_time}\n"
+                f"Run time: {time.strftime('%Y-%m-%d %H:%M:%S', now)}\n"
+                f"{traceback.format_exc()}\n"
+            )
+            if done < runs:
+                time.sleep(wait_time)
 
 
 if __name__ == "__main__":
     run()
-    
