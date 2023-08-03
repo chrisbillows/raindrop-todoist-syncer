@@ -1,5 +1,8 @@
+from unittest import mock
 from unittest.mock import patch
 import pytest
+import tempfile
+import os
 
 from raindrop import RaindropGetNewOauth
 
@@ -101,10 +104,45 @@ class TestCreateBody:
         expected_body = {
                 "grant_type": "authorization_code",
                 "code": authorization_code,
-                "client_id": self.RAINDROP_CLIENT_ID,
-                "client_secret": self.RAINDROP_CLIENT_SECRET,
+                "client_id": raindrop_oauth.RAINDROP_CLIENT_ID,
+                "client_secret": raindrop_oauth.RAINDROP_CLIENT_SECRET,
                 "redirect_uri": "http://localhost",
         }
         body = raindrop_oauth._create_body(authorization_code)
         assert body == expected_body
+        
+class TestValidateApiResponse:
+    
+    def test_check_200_response_success(self, raindrop_oauth):
+        mock_response = mock.Mock()
+        mock_response.status_code = 200
+        assert raindrop_oauth._check_200_response(mock_response) == True
+    
+    def test_check_200_response_failure(self, raindrop_oauth):
+        mock_response = mock.Mock()
+        mock_response.status_code = 400
+        mock_response.text = "Bad Request"
+        assert raindrop_oauth._check_200_response(mock_response) == False
+        
+    def test_extract_oauth_token(self, raindrop_oauth):
+        mock_response = mock.Mock()
+        mock_response.json.return_value = {"access_token": "I am your access token"}
+        assert raindrop_oauth._extract_oauth_token(mock_response) == "I am your access token"
+
+class TestWriteToEnv:
+    
+    def test_write_token_to_env(self, raindrop_oauth):
+        """
+
+        """
+        with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp:
+            temp.write("Existing content\n")
+            temp_file = temp.name
+        raindrop_oauth.env_file = temp_file
+        raindrop_oauth._write_token_to_env("test_token")
+        with open(temp_file, "r") as f:
+            lines = f.readlines()
+        assert lines[-1] == "RAINDROP_OAUTH_TOKEN='test_token'\n"
+        os.remove(temp_file)
+
         
