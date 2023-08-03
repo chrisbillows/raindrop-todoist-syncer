@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
+import logging
 
 import json
 import os
+import re
 import requests
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, parse_qs
@@ -9,6 +11,7 @@ import webbrowser
 
 from dotenv import load_dotenv
 import ipdb
+from requests import Request
 
 load_dotenv()
 
@@ -458,27 +461,35 @@ class RaindropClient:
         return headers
 
 
-class RaindropOauthManager:
+class ExistingTokenError(Exception):
+    pass
+
+
+class UserCancelledError(Exception):
+    pass
+
+
+class RaindropGetNewOauth:
     """
-    Very basic implimentation of a class to manage Raindrop API authorisation.
+    Class with one none private method to generate a new oauth token and write it the
+    .env file.
 
-    Currently has only two uses.
+    REQUIRED: manually delete any existing (expired) oauth token in .env
 
-        1) Creates an oauth if none exists, provided the .env
-        contains the raindrop client id and client secret.
+    Run from raindrop_oauth_gen.py.
 
-        2) Can be used to create a new oauth bearer when the old one expires or breaks.
-        Will overwrite the old oauth bearer in the .env with the new one.
+    NOTE: Will open a web browser requiring user to manually click to
+    confirm authentication + paste the resulting url back into the console.
 
-    No error handling etc.
+    Constants
+    ---------
+    AUTH_CODE_BASE_URL :
 
-    NOTE: Not working yet! Copy pasted version of what I used to get going.
 
-    ALSO NOTE: Would making this work be a massive security risk???
 
     Attributes
     ----------
-    redirect_uri : str
+    REDIRECT_URI : str
         The redirect URI for the OAuth process.
     RAINDROP_CLIENT_ID : str
         The client ID for the Raindrop API, fetched from environment variables.
@@ -486,84 +497,64 @@ class RaindropOauthManager:
         The client secret for the Raindrop API, fetched from environment variables.
     """
 
+    TOKEN_EXISTS_ERROR = (
+        "An OAuth token already exists in .env. "
+        "Please manually delete it and try again.\n"
+        "(Manual deletion helps ensure tokens aren't erased "
+        "in error.)"
+    )
+    AUTH_CODE_BASE_URL = "https://raindrop.io/oauth/authorize"
+    REDIRECT_URI = "http://localhost"
+    HEADERS = {"Content-Type": "application/json"}
+
     def __init__(self) -> None:
         """
-        Initialize a new instance of RaindropOauthManager.
-
-        If there is no OAuth token in the environment variables, a new one is generated
-        and saved. Otherwise, the existing token is used.
+        Initialize a an Get New Oauth object with the required client id and client
+        secret from a .env file.
         """
-
-        self.redirect_uri = "http://localhost"
+        self.env_file = ".env"
         self.RAINDROP_CLIENT_ID = os.getenv("RAINDROP_CLIENT_ID")
         self.RAINDROP_CLIENT_SECRET = os.getenv("RAINDROP_CLIENT_SECRET")
 
-        if os.getenv("RAINDROP_OAUTH_TOKEN") is None:
-            self.generate_and_save_new_token_to_env()
-        else:
-            self.RAINDROP_OAUTH_TOKEN = os.getenv("RAINDROP_OAUTH_TOKEN")
-
-    def generate_and_save_new_token_to_env(self) -> bool:
+    def oauth_process_runner(self) -> Optional[int]:
         """
-        Generate a new OAuth token and save it to environment variables.
+        Main "driver" method that orchestrates the entire oauth process and is 
+        responsible for calling all other methods in the class.
+        
+        Raises an error if an oauth token exists in .env. 
+        
+        Otherwise, runs the full oauth process.
 
-        Returns
-        -------
-        bool
-            Always returns True after generating and saving the token.
+        Returns the new auth code.
         """
-        self.token = self._get_oauth_token()
-        self._write_token_to_env()
-        return True
+        try:
+            if os.getenv("RAINDROP_OAUTH_TOKEN"):
+                raise ExistingTokenError(self.TOKEN_EXISTS_ERROR)
+            else:
+                self._open_authorization_code_url()
+                auth_code_url = self._user_paste_valid_auth_code_url()
+                auth_code = self._parse_authorization_code_url(auth_code_url)
+                headers = self.HEADERS
+                body = self._create_body(auth_code)
+                oauth_response = self._make_request(body)
+                if not self._check_200_response(oauth_response):
+                    return "Oauth failed." 
+                if not self._check_oauth_token_present(oauth_response):
+                    return "Oauth failed."
+                oauth_token = self._extract_oauth_token(oauth_response)
+                self._write_token_to_env(oauth_token)
+                return (f"Success! Oauth {oauth_token} written to .env." )
+        except UserCancelledError:
+            print("OAuth process cancelled by the user.")
+            return "Oauth failed."
 
-    def _get_oauth_token(self) -> str or bool:
+    def _open_authorization_code_url(self) -> bool:
         """
-        Generates a new oauth token using the raindrop client id, client secret and
-        an authorization code generated by the get authorization code method.
+        First step of oauth is to allow the "application" access.  (This is the
+        application you create within Raindrop).  Requires our app to have a web url -
+        we use local host (as defined on init).
 
-        Returns
-        -------
-        Union[str, bool]
-            The new OAuth token, or False if the token could not be generated.
-        """
-
-        headers = {"Content-Type": "application/json"}
-        data = {
-            "grant_type": "authorization_code",
-            "code": self._get_access_code(),
-            "client_id": self.RAINDROP_CLIENT_ID,
-            "client_secret": self.RAINDROP_CLIENT_SECRET,
-            "redirect_uri": "http://localhost",
-        }
-
-        response = requests.post(
-            "https://raindrop.io/oauth/access_token",
-            headers=headers,
-            data=json.dumps(data),
-        )
-
-        if response.status_code == 200:
-            data = response.json()
-            try:
-                access_token = data["access_token"]
-                print(f"Your access token is {access_token}")
-                return access_token
-            except KeyError:
-                print(f"No access token in the response. Full response: {data}")
-                return False
-        else:
-            print(
-                f"Failed to get access token: {response.status_code}, {response.text}"
-            )
-            return False
-
-    def _get_authorization_code(self) -> bool:
-        """
-        First step of oauth is to allow "the application" access.  (This is the
-        application you create within Raindrop).  Requires a web uri for which we use
-        local host (as defined in the class).
-
-        Local host (obviously) will get a load error but that is fine - the code
+        Local host  will get a load error (obviously) but that is fine - the code
         raindrop passes to the url will still work.
 
         Returns
@@ -571,60 +562,126 @@ class RaindropOauthManager:
         bool
             Always returns True after opening the web page.
         """
-
-        authorize_url = f"https://raindrop.io/oauth/authorize?client_id={self.RAINDROP_CLIENT_ID}&redirect_uri={self.RAINDROP_CLIENT_ID}"
-        webbrowser.open(authorize_url)
-        code_url = input("Copy and paste the (FULL) returned url: ")
+        print(
+            "NEXT: A browser window will take you to raindrop.io. "
+            'You need to click "Agree". You will then be redirected to an new URL that '
+            "contains the code. Copy this url and paste into the terminal where prompted."
+        )
+        ac_client_url = f"?client_id={self.RAINDROP_CLIENT_ID}"
+        ac_redirect_url = f"&redirect_uri={self.REDIRECT_URI}"
+        full_ac_url = self.AUTH_CODE_BASE_URL + ac_client_url + ac_redirect_url
+        webbrowser.open(full_ac_url)
         return True
 
-    def _parse_authorization_code(self, code_url: str) -> str:
+    def _user_paste_valid_auth_code_url(self) -> str:
         """
-        Strips out the authorization code Raindrop return in a URL.
+        Request the user input paste the url from the authorization code redirect.
 
-        The authorization code should return in this format:
-        localhost/?code=fa71d7d0-2648-40cf-806f-5a549bb4dbb7
+        Validates the output using regex & on invalid input, request the user try
+        again.
 
+        Regex requires string start "http://localhost/?code=" and then is followed
+        by a code made up of any combination of lower case letters, numbers and -.
+        The string must then end.
+
+        If the user passes "q" it raises a UserCancelledError which terminates the
+        programme.
         """
-        # urlparse() parses a URL into six components,
-        # returning a 6-item named tuple: scheme://netloc/path;parameters?query#fragment
-        url = urlparse(code_url)
+        pattern = r"^http://localhost/\?code=[a-z0-9\-]+$"
+        code_url = ""
+        while True:
+            code_url = input("\nPaste the full returned url (with https etc) here: ")
+            if re.match(pattern, code_url):
+                break
+            elif code_url == "q":
+                raise UserCancelledError("User cancelled the OAuth process.")
+            else:
+                print(
+                    "Invalid URL. The full format to paste should look like: "
+                    "http://localhost/?code=aa1a1aa1-1a11-1111-a111-aa1111111aa1"
+                    "\nPlease make sure it is in the correct format and re-try."
+                    "\nOr PRESS 'Q' to quit the oauth process (if raindrop.io failed to "
+                    "open correctly or the link format give is incorrect.)"
+                )
+        return code_url
 
-        # parse_qs() parses a query string given as a string argument.
-        # Data are returned as a dictionary.
-        # The dictionary keys are the unique query variable names and
-        # the values are lists of values for each name.
+    def _parse_authorization_code_url(self, auth_code_url: str) -> str:
+        """
+        Strips out the authorization code Raindrop returns in a URL.
+
+        Parameters
+        ----------
+        auth_code_rul: str
+            A authorizataion_code_url including an auth code, in a validated format.
+        """
+        url = urlparse(auth_code_url)
         query_dict = parse_qs(url.query)
-
-        # The authorization code should be under 'code' in the dictionary
         authorization_code = query_dict.get("code")[0]
         return authorization_code
 
-    def _write_token_to_env(self):
+    def _create_body(self, authorization_code: str) -> Dict[str, str]:
         """
-        Write or overwrite a new oauth token to the .env file.
+        Create body/data dict required for the Oauth request.
+        """
+        body = {
+            "grant_type": "authorization_code",
+            "code": authorization_code,
+            "client_id": self.RAINDROP_CLIENT_ID,
+            "client_secret": self.RAINDROP_CLIENT_SECRET,
+            "redirect_uri": "http://localhost",
+        }
+        return body
+
+    def _make_request(self, body) -> Request:
+        """
+        Makes the oauth request and returns a Request object.
+        """
+        headers = self.HEADERS
+        data = body
+        ipdb.set_trace()
+        oauth_response = requests.post(
+            "https://raindrop.io/oauth/access_token",
+            headers=headers,
+            data=json.dumps(data),
+        )
+        return oauth_response
+
+    def _check_200_response(self, oauth_response):
+        if oauth_response.status_code == 200:
+            return True
+        else:
+            print(
+                f"Failed to get access token: {oauth_response.status_code}, "
+                "{oauth_response.text}"
+            )
+            return False
+
+    def _check_oauth_token_present(self, oauth_response):
+        data = oauth_response.json()
+        access_token = data.get("access_token")
+        if access_token is None:
+            print(f"No access token in the response. Full response: {data}")
+            return None
+
+    def _extract_oauth_token(self, oauth_response):
+        data = oauth_response.json()
+        access_token = data.get("access_token")
+        print(f"Your access token is {access_token}")
+        return access_token
+
+    def _write_token_to_env(self, oauth_token):
+        """
+        Write the new oauth token to the .env file.
 
         Could be unstable if I have concurrent instances (unlikely but beware).
-
         """
         env_file = ".env"
         token_key = "RAINDROP_OAUTH_TOKEN"
-
-        with open(env_file, "r") as file:
-            env_lines = file.readlines()
-
-        token_line_index = None
-        for i, line in enumerate(env_lines):
-            if line.startswith(token_key):
-                token_line_index = i
-                break
-
-        new_line = f"{token_key}={self.token}\n"
-        if token_line_index is not None:
-            env_lines[token_line_index] = new_line
-        else:
-            env_lines.append(new_line)
-
-        with open(env_file, "w") as file:
-            file.writelines(env_lines)
-
+        with open(self.env_file, "a+") as f:
+            f.seek(0, 2)
+            if f.tell() > 0:
+                f.seek(f.tell() - 1)
+            if f.read(1) != "\n":
+                f.write("\n")
+            f.write(f"{token_key}='{oauth_token}'\n")
         return True
