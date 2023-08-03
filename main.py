@@ -31,10 +31,7 @@ def main():
 
 def run():
     """
-    Function that runs the main function and handles exceptions.
-
-    Asks the user for a
-
+    Function that runs the main function and handles exceptions. Asks the user for:
     a) number of runs: [int]
     b) wait between runs in seconds [int]
 
@@ -42,7 +39,6 @@ def run():
 
     If an error occurs, currently caught and logged (in case of temporary issues with
     Raindrop or Todoist APIs, for example).
-
     """
     while True:
         try:
@@ -64,10 +60,10 @@ def run():
     while done < runs:
         done += 1
         print(f"RUN {done}".center(50, "-"))
+        print("-" * 50)
+        print()
         try:
             main()
-            print("-" * 50)
-            print()
             time.sleep(wait_time)
 
         except Exception as e:
