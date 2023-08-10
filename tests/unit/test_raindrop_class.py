@@ -39,9 +39,11 @@ def rd_extracted_single_raindrop_dict():
         content = json.load(f)
     return content
 
+
 @pytest.fixture
 def raindrop_object(rd_extracted_single_raindrop_dict):
    return Raindrop(rd_extracted_single_raindrop_dict)
+
 
 class TestInit:
     """
@@ -49,7 +51,30 @@ class TestInit:
     """    
     def test_init_id(self, raindrop_object):
         assert raindrop_object.id == 621872658
-   
+        
+    def test_init_created_time(self, raindrop_object):
+        assert raindrop_object.created_time == "2023-08-06T19:56:44.948Z"
+        
+    def test_parsed_date_not_none(self, raindrop_object):
+        assert raindrop_object.parsed_time != None
+    
+    def test_init_title(self, raindrop_object):
+        assert raindrop_object.title == "tadashi-aikawa/shukuchi: Shukuchi is an Obsidian plugin that enables you to teleport to links (URL or internal link)."
+        
+    def test_init_notes(self, raindrop_object):
+        assert raindrop_object.notes == ""
+        
+    def test_init_link(self, raindrop_object):
+        assert raindrop_object.link == "https://github.com/tadashi-aikawa/shukuchi" 
+
+
+class TestInitTypes:
+
+    def tests_init
+
+
+
+
 
 """
 RD OBJECT EXAMPLE
