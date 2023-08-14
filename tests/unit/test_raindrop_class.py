@@ -67,10 +67,29 @@ class TestInit:
     def test_init_link(self, raindrop_object):
         assert raindrop_object.link == "https://github.com/tadashi-aikawa/shukuchi" 
 
+class TestToDict:
+    
+    def test_to_dict(self, raindrop_object):
+        raindrop_object.parsed_time = "2023-08-01T01:01:01.001Z"
+        expected_result = {
+            "id": 621872658,
+            "created_time": "2023-08-06T19:56:44.948Z",
+            "parsed_time": "2023-08-01T01:01:01.001Z",
+            "title": "tadashi-aikawa/shukuchi: Shukuchi is an Obsidian plugin that enables you to teleport to links (URL or internal link).",
+            "notes": "",
+            "link": "https://github.com/tadashi-aikawa/shukuchi",
+        }
+        assert raindrop_object.to_dict() == expected_result
+        
 
-class TestInitTypes:
 
-    def tests_init
+class TestInitErrors:
+    """
+    Test object for handling possible edge case data returned from the API.
+    """
+
+    def tests_init_no_id(self, raindrop_object):
+        pass
 
 
 
