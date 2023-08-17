@@ -12,6 +12,7 @@ import webbrowser
 from dotenv import load_dotenv
 import ipdb
 from requests import Request
+from requests import Response
 
 load_dotenv()
 
@@ -461,6 +462,191 @@ class RaindropClient:
         return headers
 
 
+class RaindropClient_dev:
+    """
+    Handles interactions with the Raindrop.io API.
+
+    DO NOT USE - currently in development (refactor RaindropClient).
+
+    The API returns paginated responses of (default) 25 raindrops(rds). This could be
+    increased to 50 (source: https://developer.raindrop.io/v1/raindrops/multiple) but
+    was unreliable in limited testing.
+
+    attributes:
+        BASE_URL (str)           : API uri
+        RAINDROPS_PER_PAGE (int) : total rds per paginated page
+        MAX_ALLOWED_PAGES (int)  : arbitrary fallback to prevent infinte loops etc. 200
+                                   pages @ 25 rds per page = 5,000 rds
+
+    example:
+    >>> raindrop_client = RaindropClient()
+    >>> all_raindrops = raindrop_client.get_all_raindrops()
+    """
+    BASE_URL = "https://api.raindrop.io/rest/v1"
+    RAINDROPS_PER_PAGE = 25
+    MAX_ALLOWED_PAGES = 200
+
+    def __init__(self) -> None:
+        """
+        Initializes an instance of Raindrop Client.
+
+        instance vars:
+            raindrop_oauth_token (str) : Oauth token extracted from .env
+            headers (dict)             : HTTP request header
+        """
+        self.raindrop_oauth_token = os.getenv("RAINDROP_OAUTH_TOKEN")
+        self.headers = {"Authorization": f"Bearer {self.raindrop_oauth_token}"}
+
+    def get_all_raindrops(self) -> List[Dict[str, Any]]:
+        """
+        Gets all rds from the API "{collection_id}" endpoint.
+
+        The primary class method.  It structures and makes API requests. It extracts
+        validation data. It validates the responses, the rds themselves, and the final
+        concatenated response payload. If data inconsistency is suggested, the
+        process raises an error and halts.
+
+        Structured to allow further validation checks etc. to be easily added.
+
+        Rds are served in pages (default 25).
+        Endpoint info: https://developer.raindrop.io/v1/raindrops/multiple.
+
+        NOTE: collection_id is defaulted to 0 which requests all collections. Individual
+        collections can be called if required in the future.
+
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries where each dictionary
+            represents a single raindrop. Returns an empty list if no raindrops are
+            found.
+
+        Raises:
+            ValueError: On various conditions. TODO: Complete list.
+        """
+        cumulative_rds = []
+        page = 0
+        while True:
+            response = self._make_api_call(page)
+            self._response_validator(response)
+            data = response.json()
+            if page == 0:
+                benchmark_count = self._extract_benchmark_count(data)
+                target_pages = self._calculate_max_pages(data)
+            self._data_validator(data)
+            current_rds = data.get("items", [])
+            self._individual_rd_validator(current_rds)
+            cumulative_rds.extend(current_rds)
+            page += 1
+            if page >= target_pages - 1:
+                break
+        self._cumulative_rds_validator(cumulative_rds, current_rds, benchmark_count)
+        return cumulative_rds
+
+    def _make_api_call(self, page: int) -> Response:
+        """
+        Calls the API with requests.get.
+
+        Constructs request params from class variable RAINDROPS_PER_PAGE and argument
+        'page'. Headers are class var HEADERS. API URI is constructed from class var
+        BASE URL.
+
+        NOTE: collection_id kept as var for later expansion.
+
+        returns:
+            Requests.Response where response.json()['items'] is a page
+            of rd dicts (and the total is <= RAINDROPS_PER_PAGE rds).
+        """
+        collection_id = 0
+        params = {"perpage": self.RAINDROPS_PER_PAGE, "page": page}
+        return requests.get(
+            f"{self.BASE_URL}/raindrops/{collection_id}/",
+            headers=self.headers,
+            params=params,
+        )
+
+    def _response_validator(self, response: Response) -> None:
+        """
+        Validates the response status code and raises error for non-200 response.
+
+        parameters:
+            response [response] : the full API requests.response object
+        """
+        if response.status_code != 200:
+            raise ValueError(f"API Error: {response.status_code}")
+
+    def _extract_benchmark_count(self, data: Dict[str, Any]) -> int:
+        """
+        Creates a variable benchmark_rd_count for the total rds on the server.
+
+        Every Raindrop.io collections endpoint response has a field 'count'. This method
+        extracts this value into the variable benchmark_rd_count
+
+        Extracts response_json['count'] from the first
+
+        parameters:
+            response [response] : the full API requests.response object
+        """
+        count = data.get("count")
+        if count is None:
+            if "count" in data:
+                raise ValueError("The 'count' key was found in the response data, but its value was None.")
+            else:
+                raise ValueError("The 'count' key was not found in the response data.")
+        return count
+
+    def _calculate_max_pages(self, benchmark_rd_count: int) -> int:
+        """
+        Placeholder: Calculates how many api calls are required to get all results (i.e.
+        the total number of pages to be extracted at RAINDROPS_PER_PAGE)
+        """
+        max_pages, remainder = divmod(benchmark_rd_count, self.RAINDROPS_PER_PAGE)
+        if remainder:
+            max_pages += 1
+        if max_pages > self.MAX_ALLOWED_PAGES:
+            raise ValueError("Max pages greater than allowed. Adjust setting in class constant to override.")
+        return max_pages
+
+    def _data_validator(self, data: Dict[str, Any], benchmark_count: int) -> None:
+        if data.get("result") is not True:
+            raise ValueError("API Result False")
+
+        new_count = data.get("count")
+        if new_count != benchmark_count:
+            raise ValueError(
+                f"Count changed during process. Benchmark count: {benchmark_count}. New count: {new_count}."
+            )
+
+    def _individual_rd_validator(self, rds: List[Dict[str, Any]]) -> None:
+        """
+        Validate each individual rd. Basically, if ANY rd doesn't have an rd this will
+        raise and abort the process. Overkill?
+        """
+        if any(rd.get("_id") is None for rd in rds):
+            raise ValueError("Invalid raindrop item found in current collection.")
+
+    def _cumulative_rds_validator(
+        self,
+        cumulative_rds: List[Dict[str, Any]],
+        current_rds: List[Dict[str, Any]],
+        benchmark_count: int,
+    ) -> None:
+        """
+        The rds are collected together, 25 by 25 (or RAINDROPS_PER_PAGE), like animals
+        boarding Noah's Ark, this check we got the expected number of animals. And, as
+        an extra, checks the last page of animals (which is likley to be < RAINDROPS_PER
+        _PAGE) is the expected length.
+        
+        Otherwise, raises an error and aborts the process. 
+        """
+        if len(cumulative_rds) != benchmark_count:
+            raise ValueError("Total raindrops extracted not expected length.")
+
+        expected_len_last_page = benchmark_count % self.RAINDROPS_PER_PAGE
+        if len(current_rds) != expected_len_last_page:
+            raise ValueError(
+                f"Last page results not expected length. Expected: {expected_len_last_page}, Got: {len(current_rds)}"
+            )
+
+
 class ExistingTokenError(Exception):
     pass
 
@@ -518,11 +704,11 @@ class RaindropGetNewOauth:
 
     def oauth_process_runner(self) -> Optional[int]:
         """
-        Main "driver" method that orchestrates the entire oauth process and is 
+        Main "driver" method that orchestrates the entire oauth process and is
         responsible for calling all other methods in the class.
-        
-        Raises an error if an oauth token exists in .env. 
-        
+
+        Raises an error if an oauth token exists in .env.
+
         Otherwise, runs the full oauth process.
 
         Returns the new auth code.
@@ -538,12 +724,12 @@ class RaindropGetNewOauth:
                 body = self._create_body(auth_code)
                 oauth_response = self._make_request(body)
                 if not self._check_200_response(oauth_response):
-                    return "Oauth failed." 
+                    return "Oauth failed."
                 if not self._check_oauth_token_present(oauth_response):
                     return "Oauth failed."
                 oauth_token = self._extract_oauth_token(oauth_response)
                 self._write_token_to_env(oauth_token)
-                return (f"Success! Oauth {oauth_token} written to .env." )
+                return f"Success! Oauth {oauth_token} written to .env."
         except UserCancelledError:
             print("OAuth process cancelled by the user.")
             return "Oauth failed."
