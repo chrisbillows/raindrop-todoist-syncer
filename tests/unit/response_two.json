@@ -1,0 +1,44 @@
+{
+  "result": true,
+  "items": [
+    {
+      "_id": 628161655,
+      "link": "https://www.bbc.co.uk/",
+      "title": "BBC - Home",
+      "excerpt": "The best of the BBC, with the latest news and sport headlines, weather, TV & radio highlights and much more from across the whole of BBC Online.",
+      "note": "A third test note",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://static.files.bbci.co.uk/core/website/assets/static/webcore/bbc_blocks_84x24.5b565ac136ea8f9cb3b0f8e02eca1e0f.svg",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://static.files.bbci.co.uk/core/website/assets/static/webcore/bbc_blocks_84x24.5b565ac136ea8f9cb3b0f8e02eca1e0f.svg"
+        }
+      ],
+      "tags": ["_dummy"],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.821Z",
+      "lastUpdate": "2023-08-14T09:46:09.157Z",
+      "domain": "bbc.co.uk",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161655,
+      "cache": {
+        "status": "ready",
+        "size": 4433099,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    }
+  ],
+  "count": 26,
+  "collectionId": 36697540
+}

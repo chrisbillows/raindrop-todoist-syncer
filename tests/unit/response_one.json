@@ -1,0 +1,913 @@
+{
+  "result": true,
+  "items": [
+    {
+      "_id": 628161680,
+      "link": "https://news.ycombinator.com/news",
+      "title": "Hacker News",
+      "excerpt": "",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://rdl.ink/render/https%3A%2F%2Fnews.ycombinator.com%2Fnews",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://rdl.ink/render/https%3A%2F%2Fnews.ycombinator.com%2Fnews",
+          "screenshot": true
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.868Z",
+      "lastUpdate": "2023-08-14T09:36:24.868Z",
+      "domain": "news.ycombinator.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161680,
+      "cache": {
+        "status": "ready",
+        "size": 7942,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "duplicate": null,
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161679,
+      "link": "https://www.thetimes.co.uk/",
+      "title": "The Times & The Sunday Times: breaking news & today's latest headlines",
+      "excerpt": "News and opinion from The Times & The Sunday Times",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://www.thetimes.co.uk/d/img/dual-masthead-placeholder-16x9-6a9822c61a.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://www.thetimes.co.uk/d/img/dual-masthead-placeholder-16x9-6a9822c61a.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.867Z",
+      "lastUpdate": "2023-08-14T09:36:24.867Z",
+      "domain": "thetimes.co.uk",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161679,
+      "cache": {
+        "status": "ready",
+        "size": 6295468,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161678,
+      "link": "https://github.com/",
+      "title": "GitHub",
+      "excerpt": "GitHub is where over 100 million developers shape the future of software, together. Contribute to the open source community, manage your Git repositories, review code like a pro, track bugs and fea...",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://github.githubassets.com/images/modules/site/social-cards/campaign-social.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://github.githubassets.com/images/modules/site/social-cards/campaign-social.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.866Z",
+      "lastUpdate": "2023-08-14T09:36:24.866Z",
+      "domain": "github.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161678,
+      "cache": {
+        "status": "ready",
+        "size": 1641936,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161677,
+      "link": "https://setapp.com/?ci=19601248527&adgroupid=145085984626&adpos=&ck=setapp&targetid=kwd-368712124987&match=e&gnetwork=g&creative=646099116464&placement=&placecat=&accname=setapp&extensionid=&gad=1&gclid=Cj0KCQjwoeemBhCfARIsADR2QCvIyhyQMAZKqZt7qV_mvqyBGBewUzJdzVKuZjqvKFgvBIME_7N3-44aAjajEALw_wcB",
+      "title": "Setapp | Powerful apps for Mac & iOS",
+      "excerpt": "Setapp is a large collection of powerful Mac apps available by subscription. Sign up and get full access to top software right away. Explore, discover, enjoy.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://cdn.setapp.com/master/50a1d71c3da10f43e342f804006aa1963dbaa566/static/shared/images/social/og.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://cdn.setapp.com/master/50a1d71c3da10f43e342f804006aa1963dbaa566/static/shared/images/social/og.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.865Z",
+      "lastUpdate": "2023-08-14T09:36:24.865Z",
+      "domain": "setapp.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161677,
+      "cache": { "status": "invalid-origin" },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161676,
+      "link": "https://obsidian.md/",
+      "title": "Obsidian - Sharpen your thinking",
+      "excerpt": "Obsidian is the private and flexible note\u2011taking app that adapts to the way you think.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://obsidian.md/images/banner.png",
+      "media": [
+        { "type": "image", "link": "https://obsidian.md/images/banner.png" }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.864Z",
+      "lastUpdate": "2023-08-14T09:36:24.864Z",
+      "domain": "obsidian.md",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161676,
+      "cache": {
+        "status": "ready",
+        "size": 1293530,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161675,
+      "link": "https://www.uber.com/gb/en/",
+      "title": "Earn Money by Driving or Get a Ride Now | Uber United Kingdom",
+      "excerpt": "Get a trip in minutes. Or become a driver and make money on your schedule. Uber is finding you better ways to move, work and succeed in United Kingdom.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://d3i4yxtzktqr9n.cloudfront.net/uber-sites/f452c7aefd72a6f52b36705c8015464e.jpg",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://d3i4yxtzktqr9n.cloudfront.net/uber-sites/f452c7aefd72a6f52b36705c8015464e.jpg"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.862Z",
+      "lastUpdate": "2023-08-14T09:36:24.862Z",
+      "domain": "uber.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161675,
+      "cache": {
+        "status": "ready",
+        "size": 175504,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161674,
+      "link": "https://www.ebay.co.uk/",
+      "title": "Electronics, Cars, Fashion, Collectibles & More | eBay",
+      "excerpt": "Buy & sell electronics, cars, clothes, collectibles & more on eBay, the world's online marketplace. Top brands, low prices & free shipping on many items.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://ir.ebaystatic.com/cr/v/c1/ebay-logo-1-1200x630-margin.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://ir.ebaystatic.com/cr/v/c1/ebay-logo-1-1200x630-margin.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.858Z",
+      "lastUpdate": "2023-08-14T09:36:24.858Z",
+      "domain": "ebay.co.uk",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161674,
+      "cache": {
+        "status": "ready",
+        "size": 690465,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161673,
+      "link": "https://open.spotify.com/",
+      "title": "Spotify - Web Player: Music for everyone",
+      "excerpt": "Spotify is a digital music service that gives you access to millions of songs.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://open.spotifycdn.com/cdn/images/og-image.548bc4b7.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://open.spotifycdn.com/cdn/images/og-image.548bc4b7.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.857Z",
+      "lastUpdate": "2023-08-14T09:36:24.857Z",
+      "domain": "open.spotify.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161673,
+      "cache": {
+        "status": "ready",
+        "size": 2598,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161672,
+      "link": "https://www.python.org/",
+      "title": "Welcome to Python.org",
+      "excerpt": "The official home of the Python Programming Language",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://www.python.org/static/opengraph-icon-200x200.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://www.python.org/static/opengraph-icon-200x200.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.856Z",
+      "lastUpdate": "2023-08-14T09:36:24.856Z",
+      "domain": "python.org",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161672,
+      "cache": {
+        "status": "ready",
+        "size": 297859,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161671,
+      "link": "https://duckduckgo.com/",
+      "title": "DuckDuckGo \u2014 Privacy, simplified.",
+      "excerpt": "The Internet privacy company that empowers you to seamlessly take control of your personal information online, without any tradeoffs.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.855Z",
+      "lastUpdate": "2023-08-14T09:36:24.855Z",
+      "domain": "duckduckgo.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161671,
+      "cache": { "status": "invalid-origin" },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161670,
+      "link": "https://www.bing.com/?toWww=1&redig=FC69D68C39C44693A6F600BF26E6A5A0",
+      "title": "Bing",
+      "excerpt": "When trying to draw attention to lizards, you don'",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://www.bing.com/th?id=OHR.GeckoLeaf_ROW1753443584_tmb.jpg&rf=",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://www.bing.com/th?id=OHR.GeckoLeaf_ROW1753443584_tmb.jpg&rf="
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.854Z",
+      "lastUpdate": "2023-08-14T09:36:24.854Z",
+      "domain": "bing.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161670,
+      "cache": {
+        "status": "ready",
+        "size": 1503572,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161669,
+      "link": "https://stackoverflow.com/",
+      "title": "Stack Overflow - Where Developers Learn, Share, & Build Careers",
+      "excerpt": "Stack Overflow | The World\u2019s Largest Online Community for Developers",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon.png?v=c78bd457575a",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon.png?v=c78bd457575a"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.853Z",
+      "lastUpdate": "2023-08-14T09:36:24.853Z",
+      "domain": "stackoverflow.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161669,
+      "cache": {
+        "status": "ready",
+        "size": 463669,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161668,
+      "link": "https://www.reddit.com/",
+      "title": "Reddit - Dive into anything",
+      "excerpt": "Reddit is a network of communities where people can dive into their interests, hobbies and passions. There's a community for whatever you're interested in on Reddit.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://www.redditstatic.com/icon.png",
+      "media": [
+        { "type": "image", "link": "https://www.redditstatic.com/icon.png" }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.852Z",
+      "lastUpdate": "2023-08-14T09:36:24.852Z",
+      "domain": "reddit.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161668,
+      "cache": {
+        "status": "ready",
+        "size": 161274,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161667,
+      "link": "https://www.amazon.co.uk/",
+      "title": "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
+      "excerpt": "Sign up to Amazon Prime for unlimited free delivery. Low prices at Amazon on digital cameras, MP3, sports, books, music, DVDs, video games, home & garden and much more.",
+      "note": "Test note",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://rdl.ink/render/https%3A%2F%2Fwww.amazon.co.uk%2F",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://rdl.ink/render/https%3A%2F%2Fwww.amazon.co.uk%2F",
+          "screenshot": true
+        }
+      ],
+      "tags": ["_dummy"],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.851Z",
+      "lastUpdate": "2023-08-14T09:45:57.192Z",
+      "domain": "amazon.co.uk",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161667,
+      "cache": {
+        "status": "ready",
+        "size": 7931,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "important": true,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161666,
+      "link": "https://www.facebook.com/",
+      "title": "Facebook",
+      "excerpt": "Log into Facebook to start sharing and connecting with your friends, family, and people you know.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://www.facebook.com/images/fb_icon_325x325.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://www.facebook.com/images/fb_icon_325x325.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.841Z",
+      "lastUpdate": "2023-08-14T09:44:04.472Z",
+      "domain": "facebook.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161666,
+      "cache": { "status": "invalid-origin" },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161665,
+      "link": "https://www.netflix.com/gb/",
+      "title": "Netflix United Kingdom \u2013 Watch TV Programmes Online, Watch Films Online",
+      "excerpt": "Watch Netflix films & TV programmes online or stream right to your smart TV, game console, PC, Mac, mobile, tablet and more.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://rdl.ink/render/https%3A%2F%2Fwww.netflix.com%2Fgb%2F",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://rdl.ink/render/https%3A%2F%2Fwww.netflix.com%2Fgb%2F",
+          "screenshot": true
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.840Z",
+      "lastUpdate": "2023-08-14T09:36:24.840Z",
+      "domain": "netflix.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161665,
+      "cache": {
+        "status": "ready",
+        "size": 634951,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161664,
+      "link": "https://www.msn.com/en-gb",
+      "title": "MSN UK: Latest news, weather, Hotmail sign in, Outlook email, Bing",
+      "excerpt": "",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://rdl.ink/render/https%3A%2F%2Fwww.msn.com%2Fen-gb",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://rdl.ink/render/https%3A%2F%2Fwww.msn.com%2Fen-gb",
+          "screenshot": true
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.839Z",
+      "lastUpdate": "2023-08-14T09:36:24.839Z",
+      "domain": "msn.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161664,
+      "cache": {
+        "status": "ready",
+        "size": 67832,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161663,
+      "link": "https://www.imdb.com/",
+      "title": "IMDb: Ratings, Reviews, and Where to Watch the Best Movies & TV Shows",
+      "excerpt": "IMDb is the world's most popular and authoritative source for movie, TV and celebrity content. Find ratings and reviews for the newest movie and TV shows. Get personalized recommendations, and learn where to watch across hundreds of streaming providers.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://m.media-amazon.com/images/G/01/imdb/images/social/imdb_logo.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://m.media-amazon.com/images/G/01/imdb/images/social/imdb_logo.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.835Z",
+      "lastUpdate": "2023-08-14T09:36:24.835Z",
+      "domain": "imdb.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161663,
+      "cache": {
+        "status": "ready",
+        "size": 2058986,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161662,
+      "link": "https://www.youtube.com/",
+      "title": "YouTube",
+      "excerpt": "",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://www.youtube.com/img/desktop/yt_1200.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://www.youtube.com/img/desktop/yt_1200.png"
+        }
+      ],
+      "tags": ["_dummy"],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.833Z",
+      "lastUpdate": "2023-08-14T09:45:24.855Z",
+      "domain": "youtube.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161662,
+      "cache": { "status": "invalid-origin" },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161661,
+      "link": "https://www.apple.com/",
+      "title": "Apple",
+      "excerpt": "Discover the innovative world of Apple and shop everything iPhone, iPad, Apple Watch, Mac, and Apple TV, plus explore accessories, entertainment, and expert device support.",
+      "note": "Another test note",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://www.apple.com/ac/structured-data/images/open_graph_logo.png?202110180743",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://www.apple.com/ac/structured-data/images/open_graph_logo.png?202110180743"
+        }
+      ],
+      "tags": ["_dummy"],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.832Z",
+      "lastUpdate": "2023-08-14T09:46:03.213Z",
+      "domain": "apple.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161661,
+      "cache": {
+        "status": "ready",
+        "size": 1724709,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161660,
+      "link": "https://www.google.com/",
+      "title": "Google",
+      "excerpt": "Let the games begin! #GoogleDoodle",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://rdl.ink/render/https%3A%2F%2Fwww.google.com%2F",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://rdl.ink/render/https%3A%2F%2Fwww.google.com%2F",
+          "screenshot": true
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.831Z",
+      "lastUpdate": "2023-08-14T09:36:24.831Z",
+      "domain": "google.com",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161660,
+      "cache": { "status": "invalid-origin" },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161659,
+      "link": "https://www.wikipedia.org/",
+      "title": "Wikipedia",
+      "excerpt": "Wikipedia is a free online encyclopedia, created and edited by volunteers around the world and hosted by the Wikimedia Foundation.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/2244px-Wikipedia-logo-v2.svg.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/2244px-Wikipedia-logo-v2.svg.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.830Z",
+      "lastUpdate": "2023-08-14T09:36:24.830Z",
+      "domain": "wikipedia.org",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161659,
+      "cache": {
+        "status": "ready",
+        "size": 61448,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161658,
+      "link": "https://www.bbc.co.uk/weather",
+      "title": "BBC Weather - Home",
+      "excerpt": "Latest weather conditions and forecasts for the UK and the world. Includes up to 14-days of hourly forecast information, warnings, maps, and the latest editorial analysis and videos from the BBC Weather Centre.",
+      "note": "",
+      "type": "article",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://m.files.bbci.co.uk/modules/bbc-morph-wr-page-metadata/3.0.2/og-image.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://m.files.bbci.co.uk/modules/bbc-morph-wr-page-metadata/3.0.2/og-image.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.824Z",
+      "lastUpdate": "2023-08-14T09:36:24.824Z",
+      "domain": "bbc.co.uk",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161658,
+      "cache": {
+        "status": "ready",
+        "size": 372326,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161657,
+      "link": "https://www.bbc.co.uk/sport",
+      "title": "BBC Sport - Scores, Fixtures, News - Live Sport",
+      "excerpt": "Sports news and live sports coverage including scores, results, video, audio and analysis on Football, F1, Cricket, Rugby Union and all other UK sports.",
+      "note": "",
+      "type": "link",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://m.files.bbci.co.uk/modules/bbc-morph-sport-seo-meta/1.16.9/images/bbc-sport-logo.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://m.files.bbci.co.uk/modules/bbc-morph-sport-seo-meta/1.16.9/images/bbc-sport-logo.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.823Z",
+      "lastUpdate": "2023-08-14T09:36:24.823Z",
+      "domain": "bbc.co.uk",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161657,
+      "cache": {
+        "status": "ready",
+        "size": 1187472,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    },
+    {
+      "_id": 628161656,
+      "link": "https://www.bbc.co.uk/news",
+      "title": "Home - BBC News",
+      "excerpt": "Visit BBC News for up-to-the-minute news, breaking news, video, audio and feature stories. BBC News provides trusted World and UK news as well as local and regional perspectives. Also entertainment, business, science, technology and health news.",
+      "note": "",
+      "type": "article",
+      "user": { "$ref": "users", "$id": 645158 },
+      "cover": "https://m.files.bbci.co.uk/modules/bbc-morph-news-waf-page-meta/5.3.0/bbc_news_logo.png",
+      "media": [
+        {
+          "type": "image",
+          "link": "https://m.files.bbci.co.uk/modules/bbc-morph-news-waf-page-meta/5.3.0/bbc_news_logo.png"
+        }
+      ],
+      "tags": [],
+      "removed": false,
+      "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+      "highlights": [],
+      "created": "2023-08-14T09:36:24.822Z",
+      "lastUpdate": "2023-08-14T09:36:24.822Z",
+      "domain": "bbc.co.uk",
+      "creatorRef": {
+        "_id": 645158,
+        "avatar": "",
+        "name": "christopherbillows",
+        "email": ""
+      },
+      "sort": 628161656,
+      "cache": {
+        "status": "ready",
+        "size": 230492,
+        "created": "2023-08-14T09:37:50.337Z"
+      },
+      "broken": false,
+      "collectionId": 36697540
+    }
+  ],
+  "count": 26,
+  "collectionId": 36697540
+}
