@@ -2,6 +2,7 @@ import json
 from unittest.mock import Mock
 
 import pytest
+from requests import HTTPError
 
 """
 response_one and response_two created using _dummy_collections/dummy_twenty_six in
@@ -28,8 +29,7 @@ def response_two_data():
 
 @pytest.fixture
 def mock_requests_get(monkeypatch, response_one_data, response_two_data):
-    print("Mock function called!")   
-    """ Mocks requests.get method """
+    """ Mocks requests.get method for two successful responses """
 
     def _mocked_requests_get(url, headers=None, params=None):
         mock_response = Mock()
@@ -41,6 +41,7 @@ def mock_requests_get(monkeypatch, response_one_data, response_two_data):
             mock_response.status_code = 200
         else:
             mock_response.status_code = 404
+            mock_response.raise_for_status.side_effect = HTTPError("404 Client Error")
         return mock_response
 
     monkeypatch.setattr("requests.get", _mocked_requests_get)
