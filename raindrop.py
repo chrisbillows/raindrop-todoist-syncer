@@ -1,18 +1,17 @@
 from datetime import datetime, timezone
-import logging
-
 import json
+import logging
 import os
 import re
-import requests
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, parse_qs
 import webbrowser
 
 from dotenv import load_dotenv
 import ipdb
-from requests import Request
-from requests import Response
+import requests
+from requests import Request, Response
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential 
 
 load_dotenv()
 
@@ -541,37 +540,33 @@ class RaindropClient_dev:
         self._cumulative_rds_validator(cumulative_rds, current_rds, benchmark_count)
         return cumulative_rds
 
-    def _make_api_call(self, page: int) -> Response:
-        """
-        Calls the API with requests.get.
-
-        Constructs request params from class variable RAINDROPS_PER_PAGE and argument
-        'page'. Headers are class var HEADERS. API URI is constructed from class var
-        BASE URL.
-
-        NOTE: collection_id kept as var for later expansion.
-
-        returns:
-            Requests.Response where response.json()['items'] is a page
-            of rd dicts (and the total is <= RAINDROPS_PER_PAGE rds).
-        """
+    def _core_api_call(self, page: int) -> Response:
         collection_id = 0
         params = {"perpage": self.RAINDROPS_PER_PAGE, "page": page}
-        return requests.get(
+        response = requests.get(
             f"{self.BASE_URL}/raindrops/{collection_id}/",
             headers=self.headers,
             params=params,
         )
+        response.raise_for_status()
+        return response
+
+
+    @retry(
+    stop=stop_after_attempt(3), 
+    wait=wait_exponential(multiplier=1, max=10), 
+    retry=retry_if_exception_type(requests.exceptions.RequestException)
+    )
+    def _make_api_call(self, page: int) -> Response:
+        return self._core_api_call(page)
+
 
     def _response_validator(self, response: Response) -> None:
         """
-        Validates the response status code and raises error for non-200 response.
-
-        parameters:
-            response [response] : the full API requests.response object
+        --DEPRECARED--  Replaced with raise_for_status() in _make_api_call. Kept to 
+        faciliate any additional response validation required in future.
         """
-        if response.status_code != 200:
-            raise ValueError(f"API Error: {response.status_code}")
+        pass
 
     def _extract_benchmark_count(self, data: Dict[str, Any]) -> int:
         """
@@ -630,12 +625,27 @@ class RaindropClient_dev:
         benchmark_count: int,
     ) -> None:
         """
-        The rds are collected together, 25 by 25 (or RAINDROPS_PER_PAGE), like animals
-        boarding Noah's Ark, this check we got the expected number of animals. And, as
-        an extra, checks the last page of animals (which is likley to be < RAINDROPS_PER
-        _PAGE) is the expected length.
+        Checks the expected total rds were collected, and in the correct order.
         
-        Otherwise, raises an error and aborts the process. 
+        The rds are collected together, 25 by 25 (or RAINDROPS_PER_PAGE), like animals
+        boarding Noah's Ark. 
+        
+        Current checks:
+            - the total number of collected rds matches the expected. (The 'count' which
+              is extracted from the first API call and checked on each subdequent API
+              call).
+            - checks the rds were collected in the correct order, e.g. by page, 25, 25,
+              3, and not 25, 3, 25.
+                
+        Returns:
+            None:  returns None if data is valid 
+        
+        Raises:
+            ValueError:
+                - If the total number of collected raindrops doesn't match the expected 
+                  benchmark count.
+                - If the number of raindrops on the last page does not match the 
+                  expected length of the last page.
         """
         if len(cumulative_rds) != benchmark_count:
             raise ValueError("Total raindrops extracted not expected length.")
