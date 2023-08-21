@@ -99,7 +99,7 @@ class TestParseAuthorizationCodeUrl:
         
 class TestCreateBody:
     
-    def test_create_body_valid(self, raindrop_oauth):
+    def test_new_token_create_body_valid(self, raindrop_oauth):
         authorization_code = "1234"
         expected_body = {
                 "grant_type": "authorization_code",
@@ -108,26 +108,65 @@ class TestCreateBody:
                 "client_secret": raindrop_oauth.RAINDROP_CLIENT_SECRET,
                 "redirect_uri": "http://localhost",
         }
-        body = raindrop_oauth._create_body(authorization_code)
+        body = raindrop_oauth._new_token_create_body(authorization_code)
         assert body == expected_body
+        
+        
+    def test_refresh_token_create_body_valid(self, raindrop_oauth):
+        expected_body =  {
+            "client_id": raindrop_oauth.RAINDROP_CLIENT_ID,
+            "client_secret": raindrop_oauth.RAINDROP_CLIENT_SECRET,
+            "grant_type": "refresh_token",
+            "refresh_token": raindrop_oauth.RAINDROP_REFRESH_TOKEN
+        }
+        body = raindrop_oauth._refresh_token_create_body()
+        assert body == expected_body
+        
+@pytest.fixture
+def response_object_200():
+    mock_response = mock.Mock()
+    mock_response.status_code = 200
+    mock_response.text = "Success"
+    mock_response.json.return_value = {"access_token": "I am your access token"}    
+    return mock_response
         
 class TestValidateApiResponse:
     
-    def test_check_200_response_success(self, raindrop_oauth):
-        mock_response = mock.Mock()
-        mock_response.status_code = 200
-        assert raindrop_oauth._check_200_response(mock_response) == True
+    def test_check_200_response_success(self, raindrop_oauth, response_object_200):
+        assert raindrop_oauth._response_validator(response_object_200) == None
     
     def test_check_200_response_failure(self, raindrop_oauth):
         mock_response = mock.Mock()
         mock_response.status_code = 400
         mock_response.text = "Bad Request"
-        assert raindrop_oauth._check_200_response(mock_response) == False
-        
-    def test_extract_oauth_token(self, raindrop_oauth):
+        with pytest.raises(ValueError, match="Response status code is not 200"):
+            raindrop_oauth._response_validator(mock_response)
+                
+    def test_check_200_but_token_missing(self, raindrop_oauth, response_object_200):
         mock_response = mock.Mock()
-        mock_response.json.return_value = {"access_token": "I am your access token"}
-        assert raindrop_oauth._extract_oauth_token(mock_response) == "I am your access token"
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        with pytest.raises(ValueError, match="Response code 200 but no token in response."):
+            raindrop_oauth._response_validator(mock_response)
+                
+    def test_extract_oauth_token(self, raindrop_oauth, response_object_200):
+        assert raindrop_oauth._extract_oauth_token(response_object_200) == "I am your access token"
+
+    # def test_check_200_response_success(self, raindrop_oauth):
+    #     mock_response = mock.Mock()
+    #     mock_response.status_code = 200
+    #     assert raindrop_oauth._check_200_response(mock_response) == True
+    
+    # def test_check_200_response_failure(self, raindrop_oauth):
+    #     mock_response = mock.Mock()
+    #     mock_response.status_code = 400
+    #     mock_response.text = "Bad Request"
+    #     assert raindrop_oauth._check_200_response(mock_response) == False
+        
+    # def test_extract_oauth_token(self, raindrop_oauth):
+    #     mock_response = mock.Mock()
+    #     mock_response.json.return_value = {"access_token": "I am your access token"}
+    #     assert raindrop_oauth._extract_oauth_token(mock_response) == "I am your access token"
 
 class TestWriteToEnv:
     

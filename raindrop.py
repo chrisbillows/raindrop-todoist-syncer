@@ -15,6 +15,8 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 load_dotenv()
 
+logging.basicConfig(level=logging.WARNING)
+
 
 class Raindrop:
     """
@@ -610,13 +612,30 @@ class RaindropClient_dev:
                 f"Count changed during process. Benchmark count: {benchmark_count}. New count: {new_count}."
             )
 
+    # def _individual_rd_validator(self, rds: List[Dict[str, Any]]) -> None:
+    #     """
+    #     Validate each individual rd. Basically, if ANY rd doesn't have an rd this will
+    #     raise and abort the process. Overkill?
+    #     """
+    #     if any(rd.get("_id") is None for rd in rds):
+    #         raise ValueError("Invalid raindrop item found in current collection.")
+
     def _individual_rd_validator(self, rds: List[Dict[str, Any]]) -> None:
         """
-        Validate each individual rd. Basically, if ANY rd doesn't have an rd this will
-        raise and abort the process. Overkill?
+        Validate each individual rd. If any rd doesn't have an _id of type int, 
+        this will raise a ValueError. If the _id length is not 9 digits, 
+        it will log a warning but continue processing.
         """
-        if any(rd.get("_id") is None for rd in rds):
-            raise ValueError("Invalid raindrop item found in current collection.")
+        if any(not isinstance(rd.get("_id"), int) for rd in rds):
+            raise ValueError("Invalid raindrop item found in current collection: _id is not of type int.")
+        # TODO: Finish, logger line added at top but needs to a child logger
+        # of the main page logger (I think)
+        # AND FIGURE OUT THE TESTS!
+        for rd in rds:
+            if len(str(rd.get("_id"))) != 9:
+                logging.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 digits.")
+
+
 
     def _cumulative_rds_validator(
         self,
@@ -660,6 +679,8 @@ class RaindropClient_dev:
 class ExistingTokenError(Exception):
     pass
 
+class MissingRefreshTokenError(Exception):
+    pass
 
 class UserCancelledError(Exception):
     pass
@@ -711,8 +732,9 @@ class RaindropGetNewOauth:
         self.env_file = ".env"
         self.RAINDROP_CLIENT_ID = os.getenv("RAINDROP_CLIENT_ID")
         self.RAINDROP_CLIENT_SECRET = os.getenv("RAINDROP_CLIENT_SECRET")
-
-    def oauth_process_runner(self) -> Optional[int]:
+        self.RAINDROP_REFRESH_TOKEN = os.getenv("RAINDROP_REFRESH_TOKEN")
+            
+    def new_token_process_runner(self) -> Optional[int]:
         """
         Main "driver" method that orchestrates the entire oauth process and is
         responsible for calling all other methods in the class.
@@ -731,18 +753,30 @@ class RaindropGetNewOauth:
                 auth_code_url = self._user_paste_valid_auth_code_url()
                 auth_code = self._parse_authorization_code_url(auth_code_url)
                 headers = self.HEADERS
-                body = self._create_body(auth_code)
-                oauth_response = self._make_request(body)
-                if not self._check_200_response(oauth_response):
-                    return "Oauth failed."
-                if not self._check_oauth_token_present(oauth_response):
-                    return "Oauth failed."
-                oauth_token = self._extract_oauth_token(oauth_response)
+                body = self._new_token_create_body(auth_code)
+                response = self._make_request(body)
+                self._response_validator(response)
+                oauth_token = self._extract_oauth_token(response)
                 self._write_token_to_env(oauth_token)
                 return f"Success! Oauth {oauth_token} written to .env."
         except UserCancelledError:
-            print("OAuth process cancelled by the user.")
-            return "Oauth failed."
+                # TODO : Figure out how this works
+                print("OAuth process cancelled by the user.")
+                return "Oauth failed."
+            
+    def refresh_token_process_runner(self) -> Optional[int]:
+        """
+        """
+        if not os.getenv("RAINDROP_REFRESH_TOKEN"):
+            raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
+        else:
+            headers = self.HEADERS
+            body = self._create_body_refresh_token()
+            response = self._make_request(body)
+            self._response_validator(response)
+            oauth_token = self._extract_oauth_token(response)
+            self._write_token_to_env(oauth_token)
+            return f"Success! Oauth {oauth_token} written to .env."
 
     def _open_authorization_code_url(self) -> bool:
         """
@@ -815,9 +849,9 @@ class RaindropGetNewOauth:
         authorization_code = query_dict.get("code")[0]
         return authorization_code
 
-    def _create_body(self, authorization_code: str) -> Dict[str, str]:
+    def _new_token_create_body(self, authorization_code: str) -> Dict[str, str]:
         """
-        Create body/data dict required for the Oauth request.
+        Create body/data dict required for a new Oauth request.
         """
         body = {
             "grant_type": "authorization_code",
@@ -827,7 +861,19 @@ class RaindropGetNewOauth:
             "redirect_uri": "http://localhost",
         }
         return body
-
+    
+    def _refresh_token_create_body(self) -> Dict[str, str]:
+        """
+        Create body/data dict required to refresh an Oauth token.
+        """
+        body = {
+            "client_id": self.RAINDROP_CLIENT_ID,
+            "client_secret": self.RAINDROP_CLIENT_SECRET,
+            "grant_type": "refresh_token",
+            "refresh_token": self.RAINDROP_REFRESH_TOKEN
+        }
+        return body
+ 
     def _make_request(self, body) -> Request:
         """
         Makes the oauth request and returns a Request object.
@@ -842,23 +888,13 @@ class RaindropGetNewOauth:
         )
         return oauth_response
 
-    def _check_200_response(self, oauth_response):
-        if oauth_response.status_code == 200:
-            return True
-        else:
-            print(
-                f"Failed to get access token: {oauth_response.status_code}, "
-                "{oauth_response.text}"
-            )
-            return False
-
-    def _check_oauth_token_present(self, oauth_response):
-        data = oauth_response.json()
-        access_token = data.get("access_token")
-        if access_token is None:
-            print(f"No access token in the response. Full response: {data}")
-            return None
-
+    def _response_validator(self, response):
+        if response.status_code != 200:
+            raise ValueError(f"Response status code is not 200 (as required in the docs). Status code was {response.status_code} - {response.text}")
+    
+        if response.json().get("access_token") is None:
+            raise ValueError(f"Response code 200 but no token in response. Full response {response.json()}")
+        
     def _extract_oauth_token(self, oauth_response):
         data = oauth_response.json()
         access_token = data.get("access_token")

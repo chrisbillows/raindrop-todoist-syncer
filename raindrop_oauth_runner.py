@@ -1,10 +1,10 @@
 from raindrop import RaindropGetNewOauth, ExistingTokenError
 
 if __name__ == "__main__":
-    # you need to delete the expired token first
+    # TODO: this will be for the first run only. Auto refresh will be built into main.
     try:
         rd_oauth = RaindropGetNewOauth()
-        new_oauth_code = rd_oauth.oauth_process_runner()
+        new_oauth_code = rd_oauth.new_token_process_runner()
         print(new_oauth_code)
     except ExistingTokenError as e:
         print(e)
