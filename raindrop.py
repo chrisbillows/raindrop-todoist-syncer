@@ -531,13 +531,13 @@ class RaindropClient_dev:
             data = response.json()
             if page == 0:
                 benchmark_count = self._extract_benchmark_count(data)
-                target_pages = self._calculate_max_pages(data)
-            self._data_validator(data)
+                target_pages = self._calculate_max_pages(benchmark_count)
+            self._data_validator(data, benchmark_count)
             current_rds = data.get("items", [])
             self._individual_rd_validator(current_rds)
             cumulative_rds.extend(current_rds)
             page += 1
-            if page >= target_pages - 1:
+            if page >= target_pages:
                 break
         self._cumulative_rds_validator(cumulative_rds, current_rds, benchmark_count)
         return cumulative_rds
@@ -634,8 +634,6 @@ class RaindropClient_dev:
         for rd in rds:
             if len(str(rd.get("_id"))) != 9:
                 logging.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 digits.")
-
-
 
     def _cumulative_rds_validator(
         self,
@@ -883,7 +881,6 @@ class RaindropGetNewOauth:
         """
         headers = self.HEADERS
         data = body
-        # ipdb.set_trace()
         oauth_response = requests.post(
             "https://raindrop.io/oauth/access_token",
             headers=headers,
