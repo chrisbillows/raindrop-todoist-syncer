@@ -305,14 +305,22 @@ class TestDev:
         with pytest.raises(ValueError, match=match_str):
             rd_client._individual_rd_validator(rds)
 
-    # def test__individual_rd_validator_manual_ids_fail_empty(self, rd_client):
-    #     rds = [{"_id": ""}, {"_id": 456}, {"_id": 789}]
-    #     #! Don't we want this to fail?
-    #     #! Why **am** I testing this??
-    #     with pytest.raises(
-    #         ValueError, match="Invalid raindrop item found in current collection."
-    #     ):
-    #         rd_client._individual_rd_validator(rds)
+    def test__individual_rd_validator_manual_ids_fail_empty(self, rd_client):
+        # TODO: Finish
+        rds = [{"_id": ""}, {"_id": 456}, {"_id": 789}]
+        with pytest.raises(
+            ValueError, match="Invalid raindrop item found in current collection."
+        ):
+            rd_client._individual_rd_validator(rds)
+
+    def test__individual_rd_validator_manual_ids_not_9_digits(self, rd_client):
+        # TODO: Finish
+        rds = [{"_id": ""}, {"_id": 456}, {"_id": 789}]
+        with pytest.raises(
+            ValueError, match="Invalid raindrop item found in current collection."
+        ):
+            rd_client._individual_rd_validator(rds)
+
 
     @pytest.mark.parametrize(
         "benchmark_count, exception, match_str",

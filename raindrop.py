@@ -757,6 +757,7 @@ class RaindropGetNewOauth:
                 response = self._make_request(body)
                 self._response_validator(response)
                 oauth_token = self._extract_oauth_token(response)
+                # TODO : Add writing the refersh token to .env
                 self._write_token_to_env(oauth_token)
                 return f"Success! Oauth {oauth_token} written to .env."
         except UserCancelledError:
@@ -771,11 +772,13 @@ class RaindropGetNewOauth:
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
         else:
             headers = self.HEADERS
-            body = self._create_body_refresh_token()
+            body = self._refresh_token_create_body()
             response = self._make_request(body)
             self._response_validator(response)
             oauth_token = self._extract_oauth_token(response)
             self._write_token_to_env(oauth_token)
+            # TODO: Add check to see if refresh token changes and
+            # write to .env if so.
             return f"Success! Oauth {oauth_token} written to .env."
 
     def _open_authorization_code_url(self) -> bool:
@@ -880,7 +883,7 @@ class RaindropGetNewOauth:
         """
         headers = self.HEADERS
         data = body
-        ipdb.set_trace()
+        # ipdb.set_trace()
         oauth_response = requests.post(
             "https://raindrop.io/oauth/access_token",
             headers=headers,
@@ -909,6 +912,7 @@ class RaindropGetNewOauth:
         """
         env_file = ".env"
         token_key = "RAINDROP_OAUTH_TOKEN"
+        # TODO - this doesn't work unless the oauth is last?
         with open(self.env_file, "a+") as f:
             f.seek(0, 2)
             if f.tell() > 0:
