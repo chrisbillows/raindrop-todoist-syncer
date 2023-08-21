@@ -6,8 +6,7 @@ venv/
 .DS_Store
 .env
 cache/
-scratch.py
-scratch2.py
+scratch*.py
 .vscode/
 .ruff_cache/
 .pytest_cache
