@@ -180,33 +180,29 @@ class TestMakeApiCall:
             assert mock_get.call_count == call_count
 
 
-class TestDev:
-    """
-    Additional test for refactored RaindropClass
+# @pytest.mark.parametrize(
+#     "status_code, exception, match_str",
+#     [
+#         (200, None, None),
+#         (403, ValueError, "API Error: 403"),
+#         (404, ValueError, "API Error: 404"),
+#         (500, ValueError, "API Error: 500"),
+#     ],
+# )
+# def test__response_validator(self, rd_client, status_code, exception, match_str):
+#     """
 
-    To be combined with other tests once everything works correctly.
-    """
-   
-    # @pytest.mark.parametrize(
-    #     "status_code, exception, match_str",
-    #     [
-    #         (200, None, None),
-    #         (403, ValueError, "API Error: 403"),
-    #         (404, ValueError, "API Error: 404"),
-    #         (500, ValueError, "API Error: 500"),
-    #     ],
-    # )
-    # def test__response_validator(self, rd_client, status_code, exception, match_str):
-    #     """
+#     """
+#     mock_response = Mock()
+#     mock_response.status_code = status_code
+#     if exception:
+#         with pytest.raises(exception, match=match_str):
+#             rd_client._response_validator(mock_response)
+#     else:
+#         assert rd_client._response_validator(mock_response) is None
 
-    #     """
-    #     mock_response = Mock()
-    #     mock_response.status_code = status_code
-    #     if exception:
-    #         with pytest.raises(exception, match=match_str):
-    #             rd_client._response_validator(mock_response)
-    #     else:
-    #         assert rd_client._response_validator(mock_response) is None
+
+class TestExtractBenchmarkCount:
 
     @pytest.mark.parametrize("fixture_name", ["response_one_data", "response_two_data"])
     def test_extract_benchmark_count(self, request, rd_client, fixture_name):
@@ -234,6 +230,9 @@ class TestDev:
         ):
             rd_client._extract_benchmark_count(data)
 
+
+class TestCalculateMaxPages:
+
     def test_calculate_max_pages_response_one(self, rd_client, response_one_data):
         benchmark_rd_count = response_one_data["count"]
         assert rd_client._calculate_max_pages(benchmark_rd_count) == 2
@@ -257,6 +256,9 @@ class TestDev:
         ):
             rd_client._calculate_max_pages(benchmark_rd_count)
 
+
+class TestDataValidator:
+
     def test_data_validator_result_true(self, rd_client, response_one_data):
         assert rd_client._data_validator(response_one_data, 26) == None
 
@@ -273,6 +275,9 @@ class TestDev:
             match=f"Count changed during process. Benchmark count: {benchmark_rd_count}. New count: {new_count}.",
         ):
             rd_client._data_validator(response_one_data, benchmark_rd_count)
+
+
+class TestsIndividualRdValidator:
 
     @pytest.mark.parametrize("fixture_name", ["response_one_data", "response_two_data"])
     def test__individual_rd_validator(self, request, rd_client, fixture_name):
@@ -302,22 +307,32 @@ class TestDev:
         with pytest.raises(ValueError, match=match_str):
             rd_client._individual_rd_validator(rds)
 
-    def test__individual_rd_validator_manual_ids_fail_empty(self, rd_client):
-        # TODO: Finish
-        rds = [{"_id": ""}, {"_id": 456}, {"_id": 789}]
-        with pytest.raises(
-            ValueError, match="Invalid raindrop item found in current collection."
-        ):
-            rd_client._individual_rd_validator(rds)
+    # def test__individual_rd_validator_manual_ids_fail_empty(self, rd_client):
+    #     #TODO: There are two tests commented out here. They test 
+          #TODO         a) if the id is blank
+          #TODO         b) if the id is 9 digits
+          
+          #TODO  Currently the individual_rd_validator does NOT check for this.
+          
+          #TODO  We need to decide to either:
+          #TODO       1) Build in the check and raise error, but are these errors "enough"
+          #TODO       2) Log it as a warning only
+          #TODO       3) Discard completely
+    #     rds = [{"_id": ""}, {"_id": 456}, {"_id": 789}]
+    #     with pytest.raises(
+    
+    #         rd_client._individual_rd_validator(rds)
 
-    def test__individual_rd_validator_manual_ids_not_9_digits(self, rd_client):
-        # TODO: Finish
-        rds = [{"_id": ""}, {"_id": 456}, {"_id": 789}]
-        with pytest.raises(
-            ValueError, match="Invalid raindrop item found in current collection."
-        ):
-            rd_client._individual_rd_validator(rds)
+    # def test__individual_rd_validator_manual_ids_not_9_digits(self, rd_client):
+    #     # TODO: Finish
+    #     rds = 
+    #     with pytest.raises(
+    #         ValueError, match="Invalid raindrop item found in current collection."
+    #     ):
+    #         rd_client._individual_rd_validator(rds)
 
+
+class TestCumulativeRdsValidator:
 
     @pytest.mark.parametrize(
         "benchmark_count, exception, match_str",

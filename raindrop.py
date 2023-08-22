@@ -628,9 +628,15 @@ class RaindropClient_dev:
         """
         if any(not isinstance(rd.get("_id"), int) for rd in rds):
             raise ValueError("Invalid raindrop item found in current collection: _id is not of type int.")
-        # TODO: Finish, logger line added at top but needs to a child logger
-        # of the main page logger (I think)
-        # AND FIGURE OUT THE TESTS!
+        # TODO:     Finish, logger line added at top but needs to a child logger
+        
+        # TODO      There are also additional tests written in tests/unit/test_rd_client.py
+        # TODO      They test for 
+        # TODO              a) the 9 digits (so we need that to test if logged)
+        # TODO              b) if a rd _id is blank
+        
+        # TODO      Do we want to fail on these, log these or ignore these?
+        
         for rd in rds:
             if len(str(rd.get("_id"))) != 9:
                 logging.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 digits.")
