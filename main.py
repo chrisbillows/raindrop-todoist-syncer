@@ -4,9 +4,10 @@ from raindrop import RaindropClient, RaindropsProcessor
 from todoist import TodoistTaskCreator
 import logging
 
-logging.basicConfig(
-    filename="app.log", filemode="a", format="%(name)s - %(levelname)s - %(message)s"
-)
+import logging_config
+
+logging_config.configure_logging()
+logger = logging.getLogger(__name__)
 
 
 def main():

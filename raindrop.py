@@ -14,8 +14,7 @@ from requests import Request, Response
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential 
 
 load_dotenv()
-
-logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 
 class Raindrop:
