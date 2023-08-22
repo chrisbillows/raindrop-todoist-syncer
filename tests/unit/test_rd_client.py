@@ -38,26 +38,25 @@ class TestInit:
         assert str(list(headers.values())[0]).startswith("Bearer") == True
 
 
-# class TestGetAllRaindrops:
+class TestGetAllRaindrops:
 
-#     def test_get_all_raindrops_len(self, mock_requests_get, rd_client):
-#         result = rd_client.get_all_raindrops()
-#         assert len(result) == 26
+    def test_get_all_raindrops_len(self, mock_requests_get, rd_client):
+        result = rd_client.get_all_raindrops()
+        assert len(result) == 26
 
-#     def test_get_all_raindrops_len(self, mock_requests_get, rd_client):
-#         rd_client = RaindropClient()
-#         result = rd_client.get_all_raindrops()
-#         assert type(result) == list
+    def test_get_all_raindrops_type(self, mock_requests_get, rd_client):
+        result = rd_client.get_all_raindrops()
+        assert type(result) == list
 
-#     def test_get_all_raindrops_ids(self, mock_requests_get, rd_client):
-#         expected_ids = [
-#             628161680, 628161679, 628161678, 628161677, 628161676, 628161675, 628161674,
-#             628161673, 628161672, 628161671, 628161670, 628161669, 628161668, 628161667,
-#             628161666, 628161665, 628161664, 628161663, 628161662, 628161661, 628161660,
-#             628161659, 628161658, 628161657, 628161656, 628161655]
-#         result = rd_client.get_all_raindrops()
-#         ids = [x['_id'] for x in result]
-#         assert ids == expected_ids
+    def test_get_all_raindrops_ids(self, mock_requests_get, rd_client):
+        expected_ids = [
+            628161680, 628161679, 628161678, 628161677, 628161676, 628161675, 628161674,
+            628161673, 628161672, 628161671, 628161670, 628161669, 628161668, 628161667,
+            628161666, 628161665, 628161664, 628161663, 628161662, 628161661, 628161660,
+            628161659, 628161658, 628161657, 628161656, 628161655]
+        result = rd_client.get_all_raindrops()
+        ids = [x['_id'] for x in result]
+        assert ids == expected_ids
 
 
 class TestCoreApiCall:
@@ -179,8 +178,6 @@ class TestMakeApiCall:
         else:
             assert rd_client._make_api_call(0) == mock_response
             assert mock_get.call_count == call_count
-    
-    
 
 
 class TestDev:
