@@ -1,6 +1,6 @@
 import traceback
 import time
-from raindrop import RaindropClient, RaindropClient_dev, RaindropsProcessor
+from raindrop import RaindropClient, RaindropsProcessor
 from todoist import TodoistTaskCreator
 import logging
 
@@ -17,8 +17,7 @@ def main():
     - For each processed task, create a task in Todoist.
     """
 
-    # raindrop_client = RaindropClient()
-    raindrop_client = RaindropClient_dev()
+    raindrop_client = RaindropClient()
     all_raindrops = raindrop_client.get_all_raindrops()
 
     raindrops_processor = RaindropsProcessor(all_raindrops)

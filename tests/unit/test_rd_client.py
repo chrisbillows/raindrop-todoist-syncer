@@ -6,20 +6,17 @@ import pytest
 from requests import HTTPError
 import tenacity
 
-# from raindrop import RaindropClient
-from raindrop import RaindropClient_dev
+from raindrop import RaindropClient
 from tests.conftest import response_one_data, response_two_data
 
 
 @pytest.fixture
 def rd_client():
-    # return RaindropClient()
-    return RaindropClient_dev()
+    return RaindropClient()
 
 
 class TestInit:
     def test_api_url(self, rd_client):
-        # assert rd_client.API_URL == "https://api.raindrop.io/rest/v1"
         assert rd_client.BASE_URL == "https://api.raindrop.io/rest/v1"
 
     def test_oauth_token(self, rd_client):
@@ -29,7 +26,6 @@ class TestInit:
         assert rd_client.headers != None
 
     def test_header_structure_key_is_authorization(self, rd_client):
-        # headers = rd_client._make_headers()
         headers = rd_client.headers
         assert list(headers.keys())[0] == "Authorization"
 
@@ -178,28 +174,6 @@ class TestMakeApiCall:
         else:
             assert rd_client._make_api_call(0) == mock_response
             assert mock_get.call_count == call_count
-
-
-# @pytest.mark.parametrize(
-#     "status_code, exception, match_str",
-#     [
-#         (200, None, None),
-#         (403, ValueError, "API Error: 403"),
-#         (404, ValueError, "API Error: 404"),
-#         (500, ValueError, "API Error: 500"),
-#     ],
-# )
-# def test__response_validator(self, rd_client, status_code, exception, match_str):
-#     """
-
-#     """
-#     mock_response = Mock()
-#     mock_response.status_code = status_code
-#     if exception:
-#         with pytest.raises(exception, match=match_str):
-#             rd_client._response_validator(mock_response)
-#     else:
-#         assert rd_client._response_validator(mock_response) is None
 
 
 class TestExtractBenchmarkCount:
