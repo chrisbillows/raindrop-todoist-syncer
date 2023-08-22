@@ -4,7 +4,7 @@ import pytest
 import tempfile
 import os
 
-from raindrop import RaindropGetNewOauth
+from raindrop import RaindropOauthHandler
 
 
 @pytest.fixture
@@ -12,7 +12,7 @@ def raindrop_oauth():
     """
     Used by the following series of test classes which test the RoamApiInterface
     """
-    return RaindropGetNewOauth()
+    return RaindropOauthHandler()
 
 
 class TestOauthInit:
@@ -81,7 +81,7 @@ class TestUserPasteValidAuthCodeUrl:
 
     def test_user_paste_valid_auth_code_url_invalid_then_valid_input(self, raindrop_oauth):
         with patch('builtins.input', side_effect=['invalid_url', 'http://localhost/?code=aa4c0bc8-0e19-4615-a032-bd3379829ca7']):
-            raindrop = RaindropGetNewOauth()
+            raindrop = RaindropOauthHandler()
             result = raindrop_oauth._user_paste_valid_auth_code_url()
             assert result == 'http://localhost/?code=aa4c0bc8-0e19-4615-a032-bd3379829ca7'
  

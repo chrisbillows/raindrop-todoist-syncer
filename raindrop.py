@@ -533,7 +533,7 @@ class RaindropClient_dev:
                 benchmark_count = self._extract_benchmark_count(data)
                 target_pages = self._calculate_max_pages(benchmark_count)
             self._data_validator(data, benchmark_count)
-            current_rds = data.get("items", [])
+            current_rds = data.get("items", []) 
             self._individual_rd_validator(current_rds)
             cumulative_rds.extend(current_rds)
             page += 1
@@ -684,7 +684,7 @@ class UserCancelledError(Exception):
     pass
 
 
-class RaindropGetNewOauth:
+class RaindropOauthHandler:
     """
     Class with one none private method to generate a new oauth token and write it the
     .env file.
@@ -775,7 +775,7 @@ class RaindropGetNewOauth:
             self._response_validator(response)
             oauth_token = self._extract_oauth_token(response)
             self._write_token_to_env(oauth_token)
-            # TODO: Add check to see if refresh token changes and
+            # TODO: Add check to see if refresh token has changed and
             # write to .env if so.
             return f"Success! Oauth {oauth_token} written to .env."
 
