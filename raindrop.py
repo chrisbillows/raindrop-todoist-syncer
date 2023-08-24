@@ -80,52 +80,111 @@ class Raindrop:
 
 class RaindropsProcessor:
     """
-    A class to process the API response from the Raindrops "by category" endpoint.
+    A class to process a list of all a user's Raindrops,
 
-    Attributes
-    ----------
-    all_raindrops_api_response : dict
-        The API response containing all Raindrops.
+    Class Attributes:
+    all_raindrops_api_response :  The list of raindrops (rds) collected from multiple API
+                                  calls by RaindropClient.
     """
-
-    def __init__(self, all_raindrops_api_response: Dict[str, Any]):
+    def __init__(self, all_rds: Dict[str, Any]):
         """
-        Parameters
-        ----------
-        all_raindrops_api_response : dict
-            The API response containing all Raindrops.
+        Initalise an instance of the Raindrops Process, taking all_rds as state.
+        
+        Parameters:
+            all_rds : list of all a users raindrops(rds).
+            
         """
-        self.all_raindrops_api_reponse = all_raindrops_api_response
+        self.all_rds = all_rds
 
     def process_favourites(self) -> List[Raindrop]:
         """
-        Process a Raindrop API response, extract the favourites, remove previously
-        processed favourites, and convert the new favourites into Raindrop objects.
+        Process favourited rds from a list of rds.
+        
+        This is the primary method for extracting newly favourited (unprocessed) rds 
+        from a list of rds. 
+        
+        It takes a list of rds and extracts favourited rds. Compares this with the 
+        favourites the system has already processed, producing a list of newly  
+        favourited/unprocessed rds. Converts these to Raindrops objects for passing to 
+        Todoist.
+        
+        TODO: Currently updates the database.  This should not happen until AFTER tasks
+        creation is a success. That is when an fav rd is "processed".
+        
+        Returns:
+        -------
+        raindrop_objects_for_todoist:  List of newly favourited rds as Raindrop objects 
+                                       ready to be sent to Todoist.
+        """
+        fav_rds = self._extract_all_favourite_rds()
+        new_fav_rds = self._extract_new_favs(fav_rds)
+        rd_objects = self._convert_to_rd_objects(new_fav_rds)
+        logger.info(f"{len(rd_objects)} Raindrop objects created for todoist")
+        # TODO: This function updates the db - BEFORE the todoist tasks are successfully created. 
+        self._update_previously_favourited(rd_objects)
+        return rd_objects
+    
+    def _extract_all_favourite_rds(self) -> List[Dict]:
+        """
+        Finds all favourited Raindrops in an Raindrop API response. Designed to work
+        with collection_id endpoint, but likely to work with others.
+
+        Favourite status is indicated by "important": True.
+
+        BEWARE:  It seems to be possible for a Raindrops not to have an "important" key.
 
         Returns
         -------
-        List[Raindrop]
-            List of newly favourited Raindrop objects ready to be sent to Todoist.
+        List[Dict]
+            List of all Raindrop JSONs that are favorited.
         """
+        fav_rds = []
+        for raindrop in self.all_rds:
+            if raindrop.get("important") == True:
+                fav_rds.append(raindrop)
+        logger.info(f"Includes {len(fav_rds)} favourites.")
+        # logger.debug (f"Favourites: {fav_rds}")
+        return fav_rds
+    
+    def _extract_new_favs(self, fav_rds: List[Dict]):
+        """
+        Takes a list of favourited Raindrop objects and compares them to the list of
+        previously processed favourites.
 
-        all_favourited_raindrops: List[Dict] = self._extract_all_favourited_raindrops()
-        logger.info(f"Includes {len(all_favourited_raindrops)} favourites")
-        # logger.debug(f"Favourites: {all_favourited_raindrops}")
+        Returns a list of newly favourited Raindrop objects, if any.
 
-        newly_favourited_raindrops = self._remove_raindrops_previously_favourited(
-            all_favourited_raindrops
-        )
+        Parameters:
+            fav_rds         : List of all Raindrop JSONs that are favorited.
 
-        raindrop_objects_for_todoist = self._convert_favourites_to_raindrop_objects(
-            newly_favourited_raindrops
-        )
-        logger.info(
-            f"{len(raindrop_objects_for_todoist)} Raindrop objects created for todoist"
-        )
+        Returns:
+            unprocessed_rds : List of Raindrop JSONs that are newly favorited.
+        """
+        db_manager = DatabaseManager()
+        processed_rds = db_manager.get_latest_database()["Processed Raindrops"]
+        if processed_rds:
+            processed_ids = {rd["id"] for rd in processed_rds}
+            unprocessed_rds = [rd for rd in fav_rds if rd["_id"] not in processed_ids]
+        else:
+            unprocessed_rds = fav_rds
+        logger.info(f"{len(processed_rds)} previously favourited")
+        logger.info(f"Newly favourited raindrops: {unprocessed_rds}")
+        return unprocessed_rds
+    
+    def _convert_to_rd_objects(self, unprocessed_rds: List[Dict]) -> List[Raindrop]:
+        """
+        Convert a list of newly favorited Raindrop JSONs to Raindrop objects ready for
+        passing to Todoist.
 
-        self._update_previously_favourited(raindrop_objects_for_todoist)
+        Parameters:
+            unprocessed_rds : List of Raindrop JSONs that are newly favorited.
 
-        return raindrop_objects_for_todoist
+        Returns:
+            rd_objects      : List of rd objects converted from the unprocessed rds.
+        """
+        rd_objects = []
+        for raindrop_json in unprocessed_rds:
+            rd_objects.append(Raindrop(raindrop_json))
+        return rd_objects
 
     def _update_previously_favourited(
         self, raindrop_objects_for_todoist: List[Raindrop]
@@ -145,100 +204,9 @@ class RaindropsProcessor:
             Returns True after updating the list of previously favorited Raindrop
             objects.
         """
-
         db_manager = DatabaseManager()
         db_manager.update_database(raindrop_objects_for_todoist)
-
         return True
-
-    def _convert_favourites_to_raindrop_objects(
-        self, newly_favourited_raindrops: List[Dict]
-    ):
-        """
-        Convert a list of newly favorited Raindrop JSONs to Raindrop objects ready for
-        passing to Todoist.
-
-        Parameters
-        ----------
-        newly_favourited_raindrops : List[Dict]
-            List of Raindrop JSONs that are newly favorited.
-
-        Returns
-        -------
-        List[Raindrop]
-            List of Raindrop objects converted from the newly favorited Raindrop JSONs.
-        """
-
-        raindrop_objects_for_todoist = []
-
-        for raindrop_json in newly_favourited_raindrops:
-            raindrop_objects_for_todoist.append(Raindrop(raindrop_json))
-
-        return raindrop_objects_for_todoist
-
-    def _remove_raindrops_previously_favourited(
-        self, all_favourited_raindrops: List[Dict]
-    ):
-        """
-        Takes a list of favourited Raindrop objects and compares them to the list of
-        previously processed favourites.
-
-        Returns a list of newly favourited Raindrop objects, if any.
-
-        Parameters
-        ----------
-        all_favourited_raindrops : List[Dict]
-            List of all Raindrop JSONs that are favorited.
-
-        Returns
-        -------
-        List[Dict]
-            List of Raindrop JSONs that are newly favorited.
-        """
-
-        db_manager = DatabaseManager()
-
-        latest_db = db_manager.get_latest_database()
-        already_processed_raindrops = latest_db["Processed Raindrops"]
-        logger.info(f"{len(already_processed_raindrops)} previously favourited")
-
-        if already_processed_raindrops:
-            already_processed_ids = {rd["id"] for rd in already_processed_raindrops}
-
-            new_favourited_raindrops = [
-                raindrop
-                for raindrop in all_favourited_raindrops
-                if raindrop["_id"] not in already_processed_ids
-            ]
-
-        else:
-            new_favourited_raindrops = all_favourited_raindrops
-
-        logger.info(f"Newly favourited raindrops: {new_favourited_raindrops}")
-        return new_favourited_raindrops
-
-    def _extract_all_favourited_raindrops(self) -> List[Dict]:
-        """
-        Finds all favourited Raindrops in an Raindrop API response. Designed to work
-        with collection_id endpoint, but likely to work with others.
-
-        Favourite status is indicated by "important": True.
-
-        BEWARE:  It seems to be possible for a Raindrops not to have an "important" key.
-
-        Returns
-        -------
-        List[Dict]
-            List of all Raindrop JSONs that are favorited.
-        """
-
-        all_favourited_raindrops = []
-
-        for raindrop in self.all_raindrops_api_reponse:
-            if raindrop.get("important") == True:
-                all_favourited_raindrops.append(raindrop)
-
-        return all_favourited_raindrops
 
 
 class DatabaseManager:
