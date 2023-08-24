@@ -4,7 +4,8 @@ from loguru import logger
 
 class InterceptHandler(logging.Handler):
     """
-    Class to re-route logs created by third party modules to loguru.
+    Class to intercept and re-route logs created by third party modules to loguru. Will
+    also intercept any logs created by logging.{level}.
     """
     def emit(self, record):
         try:
