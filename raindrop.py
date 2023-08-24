@@ -110,7 +110,7 @@ class RaindropsProcessor:
 
         all_favourited_raindrops: List[Dict] = self._extract_all_favourited_raindrops()
         logger.info(f"Includes {len(all_favourited_raindrops)} favourites")
-        logger.debug(f"Favourites: {all_favourited_raindrops}")
+        # logger.debug(f"Favourites: {all_favourited_raindrops}")
 
         newly_favourited_raindrops = self._remove_raindrops_previously_favourited(
             all_favourited_raindrops
@@ -451,8 +451,10 @@ class RaindropClient:
             current_rds = data.get("items", []) 
             self._individual_rd_validator(current_rds)
             cumulative_rds.extend(current_rds)
+            logger.debug(f"Length of culmative rds: {len(cumulative_rds)}")
             page += 1
             if page >= target_pages:
+                logger.debug(f"Page({page}) equals target pages({target_pages}).")
                 break
         self._cumulative_rds_validator(cumulative_rds, current_rds, benchmark_count)
         return cumulative_rds
@@ -475,8 +477,9 @@ class RaindropClient:
     retry=retry_if_exception_type(requests.exceptions.RequestException)
     )
     def _make_api_call(self, page: int) -> Response:
-        return self._core_api_call(page)
-
+        response = self._core_api_call(page)
+        logger.debug(f"API calls remaining before reset: {response.headers['x-ratelimit-remaining']}/{response.headers['x-ratelimit-limit']}")
+        return response
 
     def _response_validator(self, response: Response) -> None:
         """
@@ -498,6 +501,7 @@ class RaindropClient:
             response [response] : the full API requests.response object
         """
         count = data.get("count")
+        logger.debug(f"Benchmark count value: {count}")
         if count is None:
             if "count" in data:
                 raise ValueError("The 'count' key was found in the response data, but its value was None.")
@@ -511,6 +515,7 @@ class RaindropClient:
         the total number of pages to be extracted at RAINDROPS_PER_PAGE)
         """
         max_pages, remainder = divmod(benchmark_rd_count, self.RAINDROPS_PER_PAGE)
+        logger.debug(f"Max pages, remainder: {max_pages, remainder}")
         if remainder:
             max_pages += 1
         if max_pages > self.MAX_ALLOWED_PAGES:
@@ -522,6 +527,7 @@ class RaindropClient:
             raise ValueError("API Result False")
 
         new_count = data.get("count")
+        logger.debug(f"Count in current response: {new_count} (vs. {benchmark_count})")
         if new_count != benchmark_count:
             raise ValueError(
                 f"Count changed during process. Benchmark count: {benchmark_count}. New count: {new_count}."
@@ -555,6 +561,8 @@ class RaindropClient:
         for rd in rds:
             if len(str(rd.get("_id"))) != 9:
                 logger.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 digits.")
+        logger.debug(f"Current rds (validated):{len(rds)}")        
+        
 
     def _cumulative_rds_validator(
         self,
