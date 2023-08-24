@@ -109,7 +109,8 @@ class RaindropsProcessor:
         """
 
         all_favourited_raindrops: List[Dict] = self._extract_all_favourited_raindrops()
-        print(f"Includes {len(all_favourited_raindrops)} favourites")
+        logger.info(f"Includes {len(all_favourited_raindrops)} favourites")
+        logger.debug(f"Favourites: {all_favourited_raindrops}")
 
         newly_favourited_raindrops = self._remove_raindrops_previously_favourited(
             all_favourited_raindrops
@@ -118,7 +119,7 @@ class RaindropsProcessor:
         raindrop_objects_for_todoist = self._convert_favourites_to_raindrop_objects(
             newly_favourited_raindrops
         )
-        print(
+        logger.info(
             f"{len(raindrop_objects_for_todoist)} Raindrop objects created for todoist"
         )
 
@@ -199,7 +200,7 @@ class RaindropsProcessor:
 
         latest_db = db_manager.get_latest_database()
         already_processed_raindrops = latest_db["Processed Raindrops"]
-        print(f"{len(already_processed_raindrops)} previously favourited")
+        logger.info(f"{len(already_processed_raindrops)} previously favourited")
 
         if already_processed_raindrops:
             already_processed_ids = {rd["id"] for rd in already_processed_raindrops}
@@ -213,7 +214,7 @@ class RaindropsProcessor:
         else:
             new_favourited_raindrops = all_favourited_raindrops
 
-        print(f"Newly favourited raindrops: {new_favourited_raindrops}")
+        logger.info(f"Newly favourited raindrops: {new_favourited_raindrops}")
         return new_favourited_raindrops
 
     def _extract_all_favourited_raindrops(self) -> List[Dict]:
@@ -298,10 +299,10 @@ class DatabaseManager:
         db: Dict[str, List[Dict[str, Any]]] = self.get_latest_database()
 
         previous_rds: List = db["Processed Raindrops"]
-        print(f"Previous db length {len(previous_rds)}")
+        logger.info(f"Previous db length {len(previous_rds)}")
 
         db["Processed Raindrops"] = previous_rds + rds_to_add
-        print(f"New db length {len(db['Processed Raindrops'])}")
+        logger.info(f"New db length {len(db['Processed Raindrops'])}")
 
         file_number = len(os.listdir(self.database_directory)) + 1
 
@@ -314,11 +315,11 @@ class DatabaseManager:
 
         with open(new_database_file_name, "w") as f:
             json.dump(db, f, indent=4)
-        print(f"New db file created: {new_database_file_name}")
+        logger.info(f"New db file created: {new_database_file_name}")
 
         with open(self.metafile_path, "w") as metafile:
             metafile.write(new_database_file_name)
-        print(f"Metafile updated")
+        logger.info(f"Metafile updated")
 
         return True
 
@@ -680,7 +681,7 @@ class RaindropOauthHandler:
                 return f"Success! Oauth {oauth_token} written to .env."
         except UserCancelledError:
                 # TODO : Figure out how this works
-                print("OAuth process cancelled by the user.")
+                logger.warning("OAuth process cancelled by the user.")
                 return "Oauth failed."
             
     def refresh_token_process_runner(self) -> Optional[int]:
@@ -713,7 +714,7 @@ class RaindropOauthHandler:
         bool
             Always returns True after opening the web page.
         """
-        print(
+        logger.info(
             "NEXT: A browser window will take you to raindrop.io. "
             'You need to click "Agree". You will then be redirected to an new URL that '
             "contains the code. Copy this url and paste into the terminal where prompted."
@@ -747,7 +748,7 @@ class RaindropOauthHandler:
             elif code_url == "q":
                 raise UserCancelledError("User cancelled the OAuth process.")
             else:
-                print(
+                logger.warning(
                     "Invalid URL. The full format to paste should look like: "
                     "http://localhost/?code=aa1a1aa1-1a11-1111-a111-aa1111111aa1"
                     "\nPlease make sure it is in the correct format and re-try."
@@ -818,7 +819,7 @@ class RaindropOauthHandler:
     def _extract_oauth_token(self, oauth_response):
         data = oauth_response.json()
         access_token = data.get("access_token")
-        print(f"Your access token is {access_token}")
+        logger.info(f"Your access token is {access_token}")
         return access_token
 
     def _write_token_to_env(self, oauth_token):

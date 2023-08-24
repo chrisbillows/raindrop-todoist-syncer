@@ -7,7 +7,7 @@ def configure_logging():
     logger.add(
         sys.stdout,
         format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
-        level="INFO",
+        level="DEBUG",
     )
     
     logger.add(
@@ -15,7 +15,6 @@ def configure_logging():
         rotation="500 MB", 
         format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
         level="DEBUG",
-        serialize=True
     )
         
     logger.add(

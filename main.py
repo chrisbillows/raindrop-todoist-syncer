@@ -20,11 +20,9 @@ def main():
     raindrop_client = RaindropClient()
     all_raindrops = raindrop_client.get_all_raindrops()
     logger.info(f"Collected {len(all_raindrops)} total bookmarks.")
-    
     raindrops_processor = RaindropsProcessor(all_raindrops)
     tasks_to_create = raindrops_processor.process_favourites()
     logger.info(f"Found {len(tasks_to_create)} tasks to create.")
-
     for task in tasks_to_create:
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
@@ -48,7 +46,7 @@ def run():
             runs = int(runs)
             break
         except ValueError:
-            print(f"{runs} is not a valid integer. Please try again.")
+            logger.warning(f"{runs} is not a valid integer. Please try again.")
 
     while True:
         try:
@@ -56,7 +54,7 @@ def run():
             wait_time = int(wait_time)
             break
         except ValueError:
-            print(f"{wait_time} is not a valid integer. Please try again.")
+            logger.warning(f"{wait_time} is not a valid integer. Please try again.")
 
     logger.info(f"User selected {runs} runs and {wait_time} wait_time.")
     completed_runs = 0
@@ -76,7 +74,7 @@ def run():
                 f"{traceback.format_exc()}\n"
             )
             if completed_runs < runs:
-                print(f"ERROR. CODE WILL RE-TRY IN {wait_time} AGAIN. {runs - completed_runs} RUN ATTEMPTS REMAIN.")
+                logger.info(f"ERROR. CODE WILL RE-TRY IN {wait_time} AGAIN. {runs - completed_runs} RUN ATTEMPTS REMAIN.")
                 time.sleep(wait_time)
 
 

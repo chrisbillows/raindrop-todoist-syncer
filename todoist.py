@@ -75,8 +75,8 @@ class TodoistTaskCreator:
 
             self._add_link_as_comment(task.id)
 
-        except Exception as error:
-            print(error)
+        except Exception as e:
+            logger.error(e)
 
     def _add_link_as_comment(self, task_id):
         """
@@ -96,5 +96,5 @@ class TodoistTaskCreator:
 
         try:
             comment = self.api.add_comment(task_id=task_id, content=self.website_link)
-        except Exception as error:
-            print(error)
+        except Exception as e:
+            logger.error(e)
