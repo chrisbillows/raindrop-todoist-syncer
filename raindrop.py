@@ -378,21 +378,19 @@ class DatabaseManager:
 
 class RaindropClient:
     """
-    Handles interactions with the Raindrop.io API.
+    A class to handle interactions with the Raindrop.io API.
 
-    DO NOT USE - currently in development (refactor RaindropClient).
-
-    The API returns paginated responses of (default) 25 raindrops(rds). This could be
-    increased to 50 (source: https://developer.raindrop.io/v1/raindrops/multiple) but
+    The API returns paginated responses of 25 raindrops(rds). 25 is the default. It can
+    be increased to 50 (source: https://developer.raindrop.io/v1/raindrops/multiple) but
     was unreliable in limited testing.
 
-    attributes:
+    Attributes:
         BASE_URL (str)           : API uri
         RAINDROPS_PER_PAGE (int) : total rds per paginated page
         MAX_ALLOWED_PAGES (int)  : arbitrary fallback to prevent infinte loops etc. 200
                                    pages @ 25 rds per page = 5,000 rds
 
-    example:
+    Example:
     >>> raindrop_client = RaindropClient()
     >>> all_raindrops = raindrop_client.get_all_raindrops()
     """
@@ -404,7 +402,7 @@ class RaindropClient:
         """
         Initializes an instance of Raindrop Client.
 
-        instance vars:
+        Instance variables:
             raindrop_oauth_token (str) : Oauth token extracted from .env
             headers (dict)             : HTTP request header
         """
@@ -414,28 +412,28 @@ class RaindropClient:
 
     def get_all_raindrops(self) -> List[Dict[str, Any]]:
         """
-        Gets all rds from the API "{collection_id}" endpoint.
+        Retrieve all raindrops from the Raindrop.io API.
 
-        The primary class method.  It structures and makes API requests. It extracts
-        validation data. It validates the responses, the rds themselves, and the final
-        concatenated response payload. If data inconsistency is suggested, the
-        process raises an error and halts.
-
-        Structured to allow further validation checks etc. to be easily added.
-
-        Rds are served in pages (default 25).
-        Endpoint info: https://developer.raindrop.io/v1/raindrops/multiple.
-
-        NOTE: collection_id is defaulted to 0 which requests all collections. Individual
-        collections can be called if required in the future.
+        This is the primary method for fetching and validating raindrops from the API. 
+        It paginates through the API responses and performs several validation checks 
+        to ensure the data is consistent.
+        
+        Note: 
+            The `collection_id` defaults to 0, fetching all collections. You can specify 
+            other collection IDs if needed.   
 
         Returns:
-            List[Dict[str, Any]]: A list of dictionaries where each dictionary
-            represents a single raindrop. Returns an empty list if no raindrops are
-            found.
-
+            List        : A list of dictionaries where each dictionary represents a 
+                          single raindrop. Returns an empty list if no raindrops are
+                          found.
         Raises:
-            ValueError: On various conditions. TODO: Complete list.
+            ValueError  : Raised at lower levels, see validator methods in particular.
+            
+        Also:
+            API Endpoint Documentation: https://developer.raindrop.io/v1/raindrops/multiple.
+            Rds are served in pages (default 25).
+            Methods structured this way to allow further validation checks etc. to be 
+            easily added.
         """
         logger.info("Get all raindrops called")
         cumulative_rds = []
@@ -460,6 +458,15 @@ class RaindropClient:
         return cumulative_rds
 
     def _core_api_call(self, page: int) -> Response:
+        """
+        Makes the API call.
+        
+        Parameters:
+            page     : A page to request from the full paginated list. 
+        
+        Returns:
+            response : The API response
+        """
         collection_id = 0
         params = {"perpage": self.RAINDROPS_PER_PAGE, "page": page}
         response = requests.get(
@@ -477,28 +484,49 @@ class RaindropClient:
     retry=retry_if_exception_type(requests.exceptions.RequestException)
     )
     def _make_api_call(self, page: int) -> Response:
+        """
+        A retry logic wrapper for the core API caller.
+        
+        The retry logic makes three calls with increasing waits. If the headers contain 
+        rate limit status - this is logged. NOTE: 200 responses should contain headers, 
+        but this is not currently enforced. 
+               
+        Parameters:
+            page     : A page to request from the full paginated list. 
+        
+        Returns:
+            response : The API response
+        """
         response = self._core_api_call(page)
-        logger.debug(f"API calls remaining before reset: {response.headers['x-ratelimit-remaining']}/{response.headers['x-ratelimit-limit']}")
+        if 'x-ratelimit-remaining' in response.headers and 'x-ratelimit-limit' in response.headers:
+            logger.debug(f"API calls remaining before reset: {response.headers['x-ratelimit-remaining']}/{response.headers['x-ratelimit-limit']}")
+        else:
+            logger.warning(f"API headers does not include rate limit status.")        
         return response
 
     def _response_validator(self, response: Response) -> None:
         """
-        --DEPRECARED--  Replaced with raise_for_status() in _make_api_call. Kept to 
-        faciliate any additional response validation required in future.
+        --DEPRECATED-- Validation for the response status.
+        
+        Now replaced with raise_for_status() in _make_api_call. Kept to faciliate any 
+        additional response validation required in future.
         """
         pass
 
     def _extract_benchmark_count(self, data: Dict[str, Any]) -> int:
         """
-        Creates a variable benchmark_rd_count for the total rds on the server.
+        Extract and store the "benchmark" total of the user's rds on the server.
 
-        Every Raindrop.io collections endpoint response has a field 'count'. This method
-        extracts this value into the variable benchmark_rd_count
-
-        Extracts response_json['count'] from the first
-
-        parameters:
-            response [response] : the full API requests.response object
+        This method captures the benchmark from the first API call. This total could        
+        could change if the user adds or removes rds during the collection process. Or 
+        with an error.
+        
+        Parameters:
+            data       : The JSON output from the response i.e. response.json() 
+            
+        Raises:
+            ValueError : If no 'count' field is found, if the value of 'count' is None
+                         or the value is negative.
         """
         count = data.get("count")
         logger.debug(f"Benchmark count value: {count}")
@@ -507,12 +535,27 @@ class RaindropClient:
                 raise ValueError("The 'count' key was found in the response data, but its value was None.")
             else:
                 raise ValueError("The 'count' key was not found in the response data.")
+        if count < 0:
+            raise ValueError("The 'count' key was found in the response data, but it's value was negative.")
         return count
 
     def _calculate_max_pages(self, benchmark_rd_count: int) -> int:
         """
-        Placeholder: Calculates how many api calls are required to get all results (i.e.
-        the total number of pages to be extracted at RAINDROPS_PER_PAGE)
+        Calculates how many api calls are required to collect all rds.
+        
+        This takes the benchmark_rd_count (the total rds expected) and divides it by
+        the constant RAINDROPS_PER_PAGE. This is passed back to `get_all_raindrops` as 
+        `target_pages` which sets the number of calls to make to the API.
+        
+        NOTE: This should not allow for any infinite loops. Divmod works correctly for 
+        0, 1, etc. Negative benchmark counts raise an error. MAX_ALLOWED_PAGES caps 
+        calls even if raindrop.io were to pass a huge benchmark count.
+        
+        Parameters:
+            benchmark_rd_count  : the users total rds on the raindrop.io server
+            
+        Returns:
+            max_pages:          : the total number of pages required to call
         """
         max_pages, remainder = divmod(benchmark_rd_count, self.RAINDROPS_PER_PAGE)
         logger.debug(f"Max pages, remainder: {max_pages, remainder}")
@@ -523,6 +566,19 @@ class RaindropClient:
         return max_pages
 
     def _data_validator(self, data: Dict[str, Any], benchmark_count: int) -> None:
+        """
+        Validate the json output from a Raindrop api response.
+        
+        Takes the full JSON and checks:
+            - the 'count' in the current response matches the 'benchmark_count' (the
+              'count' in the first API response in the current operation).
+                
+        Parameters:
+            data       : The JSON output from the response i.e. response.json()
+           
+        Raises:
+            ValueError : If the current 'count' doesn't match the 'benchmark' count.
+        """
         if data.get("result") is not True:
             raise ValueError("API Result False")
 
@@ -533,37 +589,30 @@ class RaindropClient:
                 f"Count changed during process. Benchmark count: {benchmark_count}. New count: {new_count}."
             )
 
-    # def _individual_rd_validator(self, rds: List[Dict[str, Any]]) -> None:
-    #     """
-    #     Validate each individual rd. Basically, if ANY rd doesn't have an rd this will
-    #     raise and abort the process. Overkill?
-    #     """
-    #     if any(rd.get("_id") is None for rd in rds):
-    #         raise ValueError("Invalid raindrop item found in current collection.")
-
     def _individual_rd_validator(self, rds: List[Dict[str, Any]]) -> None:
         """
-        Validate each individual rd. If any rd doesn't have an _id of type int, 
-        this will raise a ValueError. If the _id length is not 9 digits, 
-        it will log a warning but continue processing.
+        Validate individual rds returned by the Raindrop API.
+        
+        Takes a list of rds (typically of per page length) and checks:
+            - "_id" is not len(9) : Logs a warning 
+            - "_id" is None       : Raises a ValueError
+            - "_id" is not an int : Raises a ValueError
+        
+        TODO: Monitor. This may be overkill. The API docs don't specify these 
+        TODO: requirements, but logically they should apply. 
         """
-        if any(not isinstance(rd.get("_id"), int) for rd in rds):
-            raise ValueError("Invalid raindrop item found in current collection: _id is not of type int.")
-        # TODO:     Finish, logger line added at top but needs to a child logger
-        
-        # TODO      There are also additional tests written in tests/unit/test_rd_client.py
-        # TODO      They test for 
-        # TODO              a) the 9 digits (so we need that to test if logged)
-        # TODO              b) if a rd _id is blank
-        
-        # TODO      Do we want to fail on these, log these or ignore these?
-        
         for rd in rds:
             if len(str(rd.get("_id"))) != 9:
-                logger.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 digits.")
-        logger.debug(f"Current rds (validated):{len(rds)}")        
+                logger.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 chars.")
         
-
+        if any(rd.get("_id") is None for rd in rds):
+            raise ValueError(f"Invalid raindrop item found in current collection: _id is None.\nRaindrop: {rd}")    
+        
+        if any(not isinstance(rd.get("_id"), int) for rd in rds):
+            raise ValueError(f"Invalid raindrop item found in current collection: _id is not of type int.\nRaindrop: {rd}")
+                
+        logger.debug(f"Current rds (validated): {len(rds)}")        
+        
     def _cumulative_rds_validator(
         self,
         cumulative_rds: List[Dict[str, Any]],
@@ -577,9 +626,7 @@ class RaindropClient:
         boarding Noah's Ark. 
         
         Current checks:
-            - the total number of collected rds matches the expected. (The 'count' which
-              is extracted from the first API call and checked on each subdequent API
-              call).
+            - the total number of collected rds matches the benchmark total.
             - checks the rds were collected in the correct order, e.g. by page, 25, 25,
               3, and not 25, 3, 25.
                 

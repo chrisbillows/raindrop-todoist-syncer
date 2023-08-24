@@ -161,6 +161,7 @@ class TestMakeApiCall:
         """
         mock_response = Mock()
         mock_response.status_code = status_code
+        mock_response.headers = {}
         if status_code != 200:
             mock_response.raise_for_status.side_effect = HTTPError(
                 f"API Error: {status_code}"
@@ -194,6 +195,13 @@ class TestExtractBenchmarkCount:
         with pytest.raises(
             ValueError,
             match="The 'count' key was found in the response data, but its value was None.",
+        ):
+            rd_client._extract_benchmark_count(data)
+
+    def test_extract_benchmark_negative_count(self, rd_client):
+        data = {"count": -300}
+        with pytest.raises(
+            ValueError, match="The 'count' key was found in the response data, but it's value was negative."
         ):
             rd_client._extract_benchmark_count(data)
 

@@ -36,9 +36,11 @@ def mock_requests_get(monkeypatch, response_one_data, response_two_data):
         if params == {"perpage": 25, "page": 0}:
             mock_response.json.return_value = response_one_data
             mock_response.status_code = 200
+            mock_response.headers = {'x-ratelimit-remaining': 119, 'x-ratelimit-limit': 120} 
         elif params == {"perpage": 25, "page": 1}:
             mock_response.json.return_value = response_two_data
             mock_response.status_code = 200
+            mock_response.headers = {'x-ratelimit-remaining': 118, 'x-ratelimit-limit': 120} 
         else:
             mock_response.status_code = 404
             mock_response.raise_for_status.side_effect = HTTPError("404 Client Error")
