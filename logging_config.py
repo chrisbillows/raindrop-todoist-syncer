@@ -1,18 +1,28 @@
-import logging
-from pythonjsonlogger import jsonlogger
+from loguru import logger
+import sys
 
 def configure_logging():
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    
-    log_format = '%(asctime)s %(levelname)s %(name)s %(message)s'
-    formatter = jsonlogger.JsonFormatter(log_format)
+    logger.remove(0)  # Remove loguru's default logger
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
+    logger.add(
+        sys.stdout,
+        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+        level="INFO",
+    )
     
-    file_handler = logging.FileHandler("application.log")
-    file_handler.setFormatter(formatter)
-
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+    logger.add(
+        "log.log", 
+        rotation="500 MB", 
+        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+        level="DEBUG",
+        serialize=True
+    )
+        
+    logger.add(
+        "log_serialized.log", 
+        rotation="500 MB", 
+        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+        level="DEBUG",
+        serialize=True
+    )
+    

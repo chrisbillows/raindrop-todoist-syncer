@@ -1,13 +1,13 @@
-import traceback
 import time
+import traceback
+
+from loguru import logger
 from raindrop import RaindropClient, RaindropsProcessor
 from todoist import TodoistTaskCreator
-import logging
 
-import logging_config
+from logging_config import configure_logging
 
-logging_config.configure_logging()
-logger = logging.getLogger(__name__)
+configure_logging()
 
 
 def main():
@@ -17,17 +17,18 @@ def main():
     - Process these raindrops.
     - For each processed task, create a task in Todoist.
     """
-
     raindrop_client = RaindropClient()
     all_raindrops = raindrop_client.get_all_raindrops()
-
+    logger.info(f"Collected {len(all_raindrops)} total bookmarks.")
+    
     raindrops_processor = RaindropsProcessor(all_raindrops)
     tasks_to_create = raindrops_processor.process_favourites()
+    logger.info(f"Found {len(tasks_to_create)} tasks to create.")
 
     for task in tasks_to_create:
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
-        logging.info(f"Created task: {task.title}")
+        logger.info(f"Created task: {task.title}")
 
 
 def run():
@@ -57,26 +58,25 @@ def run():
         except ValueError:
             print(f"{wait_time} is not a valid integer. Please try again.")
 
-    done = 0
-    while done < runs:
-        done += 1
-        print(f"RUN {done}".center(50, "-"))
-        print("-" * 50)
-        print()
+    logger.info(f"User selected {runs} runs and {wait_time} wait_time.")
+    completed_runs = 0
+    while completed_runs < runs:
+        completed_runs += 1
+        start = time.time()
+        logger.info(f"Run {completed_runs}/{runs} started.")
         try:
             main()
+            end_time = time.time() - start
+            logger.info(f"Run {completed_runs}/{runs} completed in {end_time:.2f} seconds")
             time.sleep(wait_time)
 
         except Exception as e:
-            print("ERROR. CODE WILL TRY AGAIN IF RUNS REMAINING. ELSE DEBUG WITH LOG.")
-            now = time.localtime()
-            logging.error(
+            logger.error(
                 f"{e}\n"
-                f"Run {done} of {runs} | Interval {wait_time}\n"
-                f"Run time: {time.strftime('%Y-%m-%d %H:%M:%S', now)}\n"
                 f"{traceback.format_exc()}\n"
             )
-            if done < runs:
+            if completed_runs < runs:
+                print(f"ERROR. CODE WILL RE-TRY IN {wait_time} AGAIN. {runs - completed_runs} RUN ATTEMPTS REMAIN.")
                 time.sleep(wait_time)
 
 

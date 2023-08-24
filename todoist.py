@@ -1,14 +1,12 @@
-import logging
 import os
 
 from dotenv import load_dotenv
+from loguru import logger
 from todoist_api_python.api import TodoistAPI
 
 from raindrop import Raindrop
 
 load_dotenv()
-logger = logging.getLogger(__name__)
-
 
 class TodoistTaskCreator:
     """

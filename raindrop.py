@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 import json
-import logging
 import os
 import re
 from typing import Any, Dict, List, Optional
@@ -9,13 +8,12 @@ import webbrowser
 
 from dotenv import load_dotenv
 import ipdb
+from loguru import logger
 import requests
 from requests import Request, Response
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential 
 
 load_dotenv()
-logger = logging.getLogger(__name__)
-
 
 class Raindrop:
     """
@@ -411,6 +409,7 @@ class RaindropClient:
         """
         self.raindrop_oauth_token = os.getenv("RAINDROP_OAUTH_TOKEN")
         self.headers = {"Authorization": f"Bearer {self.raindrop_oauth_token}"}
+        logger.info("Raindrop Client initalised")
 
     def get_all_raindrops(self) -> List[Dict[str, Any]]:
         """
@@ -437,6 +436,7 @@ class RaindropClient:
         Raises:
             ValueError: On various conditions. TODO: Complete list.
         """
+        logger.info("Get all raindrops called")
         cumulative_rds = []
         page = 0
         while True:
@@ -553,7 +553,7 @@ class RaindropClient:
         
         for rd in rds:
             if len(str(rd.get("_id"))) != 9:
-                logging.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 digits.")
+                logger.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 digits.")
 
     def _cumulative_rds_validator(
         self,
