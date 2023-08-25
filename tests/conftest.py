@@ -11,20 +11,14 @@ raindrop.
 Gives a total count of 26 raindrops requiring two API calls (pg 0 & pg 1)
 """
 
-# with open("tests/unit/response_one.json", "r") as f:
-#     response_one_data = json.load(f)
-
-# with open("tests/unit/response_two.json", "r") as f:
-#     response_two_data = json.load(f)
-
 @pytest.fixture
 def response_one_data():
-    with open("tests/unit/response_one.json", "r") as f:
+    with open("tests/unit/rd_api_response_one.json", "r") as f:
         return json.load(f)
 
 @pytest.fixture
 def response_two_data():
-    with open("tests/unit/response_two.json", "r") as f:
+    with open("tests/unit/rd_api_response_two.json", "r") as f:
         return json.load(f)
 
 @pytest.fixture
