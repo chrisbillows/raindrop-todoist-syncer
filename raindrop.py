@@ -43,6 +43,10 @@ class Raindrop:
 
     def __init__(self, raindrop_json: Dict) -> None:
         """
+        # TODO: Add error handling. Raindrop class will crash in event of a missing 
+        # TODO  field. (rd_processor has a skipped failing test in the event of a
+        # TODO  raindrop missing a field).
+        
         Instantiate a Raindrop object from an API output JSON for a single Raindrop.
 
         Parameters
@@ -50,7 +54,6 @@ class Raindrop:
         raindrop_json : dict
             The JSON object output by the Raindrop API, representing a single Raindrop.
         """
-
         self.id = raindrop_json["_id"]
         self.created_time = raindrop_json["created"]
         self.parsed_time = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
@@ -423,7 +426,7 @@ class RaindropClient:
             logger.debug(f"Length of culmative rds: {len(cumulative_rds)}")
             page += 1
             if page >= target_pages:
-                logger.debug(f"Page({page}) equals target pages({target_pages}).")
+                logger.debug(f"Page({page}) equals target pages({target_pages})")
                 break
         self._cumulative_rds_validator(cumulative_rds, current_rds, benchmark_count)
         return cumulative_rds

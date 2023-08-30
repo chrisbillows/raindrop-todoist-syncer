@@ -221,5 +221,16 @@ class TestConvertToRdObjects:
         rd_objects = rdp._convert_to_rd_objects(fav)
         assert rd_objects == []
     
-    def test_basic_init(self):
-        pass
+    # TODO - Raindrop class has no error handling for 
+    @pytest.mark.skip(reason="Known issue: Raindrop class will crash in event of a missing field.")
+    def test_id_field_missing(self):
+        fav = [{
+            "created": "1955-11-05T01:24:00.111Z",
+            "parsed_time": "1955-11-05T01:24:00.111Z",
+            "title": "Marty! You gotta come back with me!",
+            "note": "Back where?",
+            "link": "www.backtothefuture!.com",
+        }]
+        rdp = RaindropsProcessor(fav)
+        rd_objects = rdp._convert_to_rd_objects(fav)
+        assert rd_objects == []
