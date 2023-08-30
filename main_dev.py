@@ -89,6 +89,7 @@ if __name__ == "__main__":
         parser.add_argument("--runs", type=int, help="Number of times to run", default=1)
         parser.add_argument("--interval", type=int, help="Interval between runs in seconds", default=60)
         args = parser.parse_args()
+        # checks the environment variable - ensure this is set when setting up the cron job or else will always default to terminal.
         run_env = os.environ.get('MY_APP_ENV', 'terminal')  
         if run_env == 'cron':
             logger.info("Run via cron job")
