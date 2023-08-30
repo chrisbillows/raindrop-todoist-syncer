@@ -27,9 +27,9 @@ def runner(runs: int=1, interval: int=0) -> None:
             start = time.time()
             main()
             end_time = time.time() - start
-            logger.info("Run %s/%s completed in %s.2f} seconds", i+1, runs, end_time)
+            logger.info("Run %s/%s completed in %.2f seconds", i+1, runs, end_time)
             time.sleep(interval)
-        # TODO: Make custom exception for ValueError
+        # TODO: Make custom exception for ValueError exceptions
         except (ValueError, HTTPError, ExistingTokenError, MissingRefreshTokenError, UserCancelledError) as e:
             logger.error(f"{e} | {traceback.format_exc()}\n")
             if i - 1 > 0:
