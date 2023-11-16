@@ -50,8 +50,8 @@ class TestMainFunction:
     def test_newly_favourited_raindrops_exctractor(self, MockDatabaseManager):
         mock_db_return_value = {
             "Processed Raindrops": [
-                {"_id": 1, "Title": "Some Title"},
-                {"_id": 2, "Title": "Some other Title"},
+                {"id": 1, "title": "Some Title"},
+                {"id": 2, "title": "Some other Title"},
             ]
         }
         MockDatabaseManager.return_value.get_latest_database.return_value = mock_db_return_value
@@ -106,31 +106,31 @@ class TestFetchTrackedFavs:
     def test_fetch_tracked_favs(self, MockDatabaseManager):
         mock_db_return_value = {
             "Processed Raindrops": [
-                {"_id": 1, "Title": "Some Title"},
-                {"_id": 2, "Title": "Some other Title"},
+                {"id": 1, "Title": "Some Title"},
+                {"id": 2, "Title": "Some other Title"},
             ]
         }
         MockDatabaseManager.return_value.get_latest_database.return_value = mock_db_return_value
         rdp = RaindropsProcessor([])
         tracked_favs = rdp._fetch_tracked_favs()
-        tracked_fav_ids = {rd['_id'] for rd in tracked_favs}
+        tracked_fav_ids = {rd['id'] for rd in tracked_favs}
         assert tracked_fav_ids == {1, 2}
 
 class TestExtractUntrackedFavs:
     
     def test_extract_untracked_dummy_id_not_tracked(self, rd_processor, dummy_all_favs):
-        tracked_favs = [{"_id": 123456789}]
+        tracked_favs = [{"id": 123456789}]
         untracked_favs = rd_processor._extract_untracked_favs(dummy_all_favs, tracked_favs)
         print(untracked_favs)
         assert untracked_favs[0]["_id"] == 628161667
 
     def test_extract_untracked_favs_dummy_seen_before(self, rd_processor, dummy_all_favs):
-        tracked_favs = [{"_id": 628161667}]
+        tracked_favs = [{"id": 628161667}]
         untracked_favs = rd_processor._extract_untracked_favs(dummy_all_favs, tracked_favs)
         assert untracked_favs == []
 
     def test_extract_untracked_favs_three_new_three_seen(self):
-        tracked_favs = [{"_id": 123}, {"_id": 789}, {"_id": 131415}]
+        tracked_favs = [{"id": 123}, {"id": 789}, {"id": 131415}]
         all_favs = [{"_id": 123, "title": "Title 1"}, {"_id": 456, "title": "Title 2"},
                           {"_id": 789, "title": "Title 3"}, {"_id": 101112, "title": "Title 4"},
                           {"_id": 131415, "title": "Title 5"}, {"_id": 161718, "title": "Title 6"}
@@ -141,7 +141,7 @@ class TestExtractUntrackedFavs:
         assert untracked_favs_ids == {456, 101112, 161718}
 
     def test_extract_untracked_favs_three_seen(self):
-        tracked_favs = [{"_id": 123}, {"_id": 456}, {"_id": 789}]
+        tracked_favs = [{"id": 123}, {"id": 456}, {"id": 789}]
         all_favs = [{"_id": 123, "title": "Title 1"}, {"_id": 456, "title": "Title 2"},
                     {"_id": 789, "title": "Title 3"}]
         rdp = RaindropsProcessor(all_favs)
