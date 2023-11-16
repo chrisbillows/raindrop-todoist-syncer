@@ -123,8 +123,9 @@ class RaindropsProcessor:
         tracked_favs = self._fetch_tracked_favs()
         untracked_favs = self._extract_untracked_favs(all_favs, tracked_favs)
         rd_objects = self._convert_to_rd_objects(untracked_favs)
-        # TODO: This function updates the db - BEFORE the todoist tasks are successfully created. 
-        # self._update_previously_favourited(rd_objects)
+        # TODO: This function updates the db - BEFORE the todoist tasks are successfully created.
+        # TODO: Keep for now, or the code will not function!! 
+        self._update_previously_favourited(rd_objects)
         return rd_objects
     
     def _extract_all_fav_rds(self) -> List[Dict]:
@@ -212,6 +213,7 @@ class RaindropsProcessor:
         # flow.
         db_manager = DatabaseManager()
         db_manager.update_database(raindrop_objects_for_todoist)
+        logger.info(f"Updated database with {len(raindrop_objects_for_todoist)} new favs.")
         return True
 
 
