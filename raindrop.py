@@ -168,7 +168,7 @@ class RaindropsProcessor:
         Returns:
             unprocessed_rds : List of Raindrop JSONs that are newly favorited.
         """
-        tracked_fav_ids = {rd["_id"] for rd in tracked_favs}
+        tracked_fav_ids = {rd["id"] for rd in tracked_favs}
         untracked_favs = [rd for rd in all_favs if rd["_id"] not in tracked_fav_ids]
         logger.info(f"Untracked favourites found: {untracked_favs}")
         return untracked_favs
