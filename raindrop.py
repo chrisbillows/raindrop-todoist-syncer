@@ -238,18 +238,9 @@ class DatabaseManager:
     """
 
     def __init__(self):
-        self.database_directory = (
-            "/Users/chrisbillows/Documents/CODE/MY_GITHUB_REPOS/"
-            "raindrop-todoist-syncer/database"
-        )
-        self.metafile_directory = (
-            "/Users/chrisbillows/Documents/CODE/MY_GITHUB_REPOS/"
-            "raindrop-todoist-syncer/metafile"
-        )
-        self.metafile_path = (
-            "/Users/chrisbillows/Documents/CODE/MY_GITHUB_REPOS/"
-            "raindrop-todoist-syncer/metafile/metafile.txt"
-        )
+        self.database_directory = "database"
+        self.metafile_directory = "metafile"
+        self.metafile_path = "metafile/metafile.txt"
 
     def update_database(self, new_favourited_raindrop_objects: List[Raindrop]) -> bool:
         """
