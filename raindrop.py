@@ -727,6 +727,8 @@ class RaindropOauthHandler:
             self._write_token_to_env(oauth_token)
             # TODO: Add check to see if refresh token has changed and
             # write to .env if so.
+            # TODO: Currently this function doesn't delete the old token!
+            logger.warning("***MANUALLY REMOVE OLD TOKEN!***")
             return f"Success! Oauth {oauth_token} written to .env."
 
     def _open_authorization_code_url(self) -> bool:
