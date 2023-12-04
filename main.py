@@ -1,3 +1,4 @@
+import datetime
 import time
 import traceback
 
@@ -60,23 +61,42 @@ def run():
     completed_runs = 0
     while completed_runs < runs:
         completed_runs += 1
-        start = time.time()
+        start = datetime.now()
         logger.info(f"Run {completed_runs}/{runs} started.")
         try:
             main()
-            end_time = time.time() - start
-            logger.info(f"Run {completed_runs}/{runs} completed in {end_time:.2f} seconds")
+            end_time = datetime.now() - start
+            logger.info(
+                f"Run {completed_runs}/{runs} completed in {end_time:.2f} seconds"
+            )
             time.sleep(wait_time)
 
         except Exception as e:
-            logger.error(
-                f"{e}\n"
-                f"{traceback.format_exc()}\n"
-            )
+            logger.error(f"{e}\n" f"{traceback.format_exc()}\n")
             if completed_runs < runs:
-                logger.info(f"ERROR. CODE WILL RE-TRY IN {wait_time} AGAIN. {runs - completed_runs} RUN ATTEMPTS REMAIN.")
+                logger.info(
+                    f"ERROR. CODE WILL RE-TRY IN {wait_time} AGAIN. {runs - completed_runs} RUN ATTEMPTS REMAIN."
+                )
                 time.sleep(wait_time)
 
 
 if __name__ == "__main__":
-    run()
+    #! run commented out for plist
+    # TODO replace with argparse optionality
+    # run()
+    start = datetime.datetime.now()
+    logger.info(f"Run started at {start.strftime('%Y-%m-%d %H:%M:%S')}")
+    try:
+        main()
+        end = datetime.datetime.now()
+        duration = (end - start).total_seconds()
+        logger.info(
+            f"Run completed at {end.strftime('%Y-%m-%d %H:%M:%S')} | Run time {duration:.2f} seconds"
+        )
+    except Exception as e:
+        end = datetime.datetime.now()
+        duration = (end - start).total_seconds()
+        logger.error(f"{e}\n{traceback.format_exc()}\n")
+        logger.info(
+            f"Run terminated at {end.strftime('%Y-%m-%d %H:%M:%S')} | Run time to failure {duration:.2f} seconds"
+        )
