@@ -153,7 +153,7 @@ class RaindropsProcessor:
     def _fetch_tracked_favs(self):
         db_manager = DatabaseManager()
         tracked_favs = db_manager.get_latest_database()["Processed Raindrops"]
-        logger.info(f"A total of {len(tracked_favs)} favourited rds previously tracked")
+        logger.info(f"db holds {len(tracked_favs)} favourited rds previously tracked")
         return tracked_favs
     
     def _extract_untracked_favs(self, all_favs: List[Dict], tracked_favs: List[Dict]):
@@ -171,6 +171,7 @@ class RaindropsProcessor:
         """
         tracked_fav_ids = {rd["id"] for rd in tracked_favs}
         untracked_favs = [rd for rd in all_favs if rd["_id"] not in tracked_fav_ids]
+        logger.info(f"Total untracked favourites found: {len(untracked_favs)}")
         logger.info(f"Untracked favourites found: {untracked_favs}")
         return untracked_favs
     

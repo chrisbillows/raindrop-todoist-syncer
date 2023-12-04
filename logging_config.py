@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from loguru import logger
 
@@ -18,6 +19,9 @@ class InterceptHandler(logging.Handler):
 
 def configure_logging():
     logger.remove(0)  # Remove loguru's default logger
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    
     
     # Intercept third party logs 
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
@@ -25,7 +29,7 @@ def configure_logging():
     
     # Configure seperate file handling if req'd e.g. for monitoring third party modules
     # for debugging notifications I'm unaware of
-    file_handler = logging.FileHandler('builtin_logging.log')
+    file_handler = logging.FileHandler('logs/builtin_logging.log')
     file_handler.setLevel(logging.DEBUG)
     logging.root.addHandler(file_handler)
     
@@ -33,19 +37,19 @@ def configure_logging():
     logger.add(
         sys.stdout,
         format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
-        level="DEBUG",
+        level="INFO",
     )
     
     logger.add(
-        "log.log", 
-        rotation="500 MB", 
+        "logs/log.log", 
+        rotation="5 MB", 
         format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
         level="DEBUG",
     )
         
     logger.add(
-        "log_serialized.log", 
-        rotation="500 MB", 
+        "logs/log_serialized.log", 
+        rotation="5 MB", 
         format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
         level="DEBUG",
         serialize=True
