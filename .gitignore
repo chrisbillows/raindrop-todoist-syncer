@@ -15,3 +15,4 @@ metafile/
 *.log
 tests/unit/rd_api_full_dot_json_.json
 tests/unit/rd_api_single_rd.json
+local.raindrop-todoist-syncer.plist
