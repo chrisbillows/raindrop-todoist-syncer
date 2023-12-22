@@ -377,6 +377,9 @@ class RaindropClient:
         self.raindrop_oauth_token = os.getenv("RAINDROP_OAUTH_TOKEN")
         self.headers = {"Authorization": f"Bearer {self.raindrop_oauth_token}"}
         logger.info("Raindrop Client initalised")
+        
+    def valid_token(self):
+        pass
 
     def get_all_raindrops(self) -> List[Dict[str, Any]]:
         """

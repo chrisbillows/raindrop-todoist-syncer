@@ -3,7 +3,7 @@ import time
 import traceback
 
 from loguru import logger
-from raindrop import RaindropClient, RaindropsProcessor
+from raindrop import RaindropClient, RaindropOauthHandler, RaindropsProcessor
 from todoist import TodoistTaskCreator
 
 from logging_config import configure_logging
@@ -19,6 +19,9 @@ def main():
     - For each processed task, create a task in Todoist.
     """
     raindrop_client = RaindropClient()
+    raindrop_oauth = RaindropOauthHandler()
+    if not raindrop_client.valid_token():
+        raindrop_oauth.refresh_token_process_runner()    
     all_raindrops = raindrop_client.get_all_raindrops()
     logger.info(f"Collected {len(all_raindrops)} total bookmarks.")
     raindrops_processor = RaindropsProcessor(all_raindrops)
