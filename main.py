@@ -14,6 +14,7 @@ configure_logging()
 def main():
     """
     Main function that does the following steps:
+    - Checks for a stale token and refreshes if necessary.
     - Get all raindrops from the RaindropClient.
     - Process these raindrops.
     - For each processed task, create a task in Todoist.
