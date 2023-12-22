@@ -18,8 +18,10 @@ def mock_raindrops_data():
 def mock_raindrop_client(mock_raindrops_data, monkeypatch):
     def mock_get_all_raindrops(self):
         return mock_raindrops_data
+    def mock_valid_token(self):
+        return True
     monkeypatch.setattr(RaindropClient, "get_all_raindrops", mock_get_all_raindrops)
-
+    monkeypatch.setattr(RaindropClient, "stale_token", mock_valid_token)
 
 @pytest.fixture
 def mock_raindrops_processor(monkeypatch):
@@ -46,27 +48,27 @@ class TestMain:
     def test_working_test(self):
         assert 1 == 1
 
-    # def test_test_setup(
-    #     self,
-    #     mock_raindrop_client,
-    #     mock_raindrops_processor,
-    #     mock_todoist_creator,
-    #     caplog,
-    # ):
-    #     """
-    #     Run-through to test mocks and monkey patches work correctly.
-    #     main has no return hence x = main() - if main runs it will return None
+    def test_test_setup(
+        self,
+        mock_raindrop_client,
+        mock_raindrops_processor,
+        mock_todoist_creator,
+        caplog,
+    ):
+        """
+        Run-through to test mocks and monkey patches work correctly.
+        main has no return hence x = main() - if main runs it will return None
 
-    #     There are three "outputs" from main:
-    #     a) all_raindrops
-    #     b) tasks_to_create
-    #     c) task_creator
+        There are three "outputs" from main:
+        a) all_raindrops
+        b) tasks_to_create
+        c) task_creator
 
-    #     I had hoped just to mock all_raindrops and task_creator - but tasks to create
-    #     writes to the db at the moment!
-    #     """
-    #     x = main()
-    #     assert x == None
+        I had hoped just to mock all_raindrops and task_creator - but tasks to create
+        writes to the db at the moment!
+        """
+        x = main()
+        assert x == None
 
     def test_invalid_token(
         self,
@@ -76,8 +78,8 @@ class TestMain:
         caplog,
     ):
         with patch("raindrop.RaindropOauthHandler.refresh_token_process_runner") as mock_refresh_token_runner, patch(
-            "raindrop.RaindropClient.valid_token",
-            return_value = False
+            "raindrop.RaindropClient.stale_token",
+            return_value = True
         ) as mock_valid_token:
             main()
             mock_refresh_token_runner.assert_called_once()
@@ -90,8 +92,8 @@ class TestMain:
         caplog,
     ):
         with patch("raindrop.RaindropOauthHandler.refresh_token_process_runner") as mock_refresh_token_runner, patch(
-            "raindrop.RaindropClient.valid_token",
-            return_value = True
+            "raindrop.RaindropClient.stale_token",
+            return_value = False
         ) as mock_valid_token:
             main()
             mock_refresh_token_runner.assert_not_called()
