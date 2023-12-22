@@ -4,6 +4,7 @@ from urllib import response
 
 import pytest
 from requests import HTTPError
+import requests
 import tenacity
 
 from raindrop import RaindropClient
@@ -33,6 +34,26 @@ class TestInit:
         headers = rd_client.headers
         assert str(list(headers.values())[0]).startswith("Bearer") == True
 
+class TestStaleToken:
+    
+    def test_200_response(self, mocker, rd_client):
+        with patch("raindrop.RaindropClient._core_api_call") as mock_call:  
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_call.return_value = mock_response
+            result = rd_client.stale_token()
+            assert result == False
+    
+    def test_401_response(self, rd_client):
+        with patch("raindrop.RaindropClient._core_api_call", side_effect=requests.exceptions.HTTPError(response=Mock(status_code=401))):
+            result = rd_client.stale_token()
+            assert result == True
+            
+    def test_404_response(self, rd_client):
+        with patch("raindrop.RaindropClient._core_api_call", side_effect=requests.exceptions.HTTPError(response=Mock(status_code=404))):
+            with pytest.raises(HTTPError):
+                rd_client.stale_token()
+       
 
 class TestGetAllRaindrops:
 

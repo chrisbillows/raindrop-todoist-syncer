@@ -11,7 +11,8 @@ import ipdb
 from loguru import logger
 import requests
 from requests import Request, Response
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential 
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from traitlets import Bool 
 
 load_dotenv()
 
@@ -378,9 +379,29 @@ class RaindropClient:
         self.headers = {"Authorization": f"Bearer {self.raindrop_oauth_token}"}
         logger.info("Raindrop Client initalised")
         
-    def valid_token(self):
-        pass
-
+    def stale_token(self) -> Bool:
+        """
+        Checks the current Oauth token is valid by calling the Raindrop API.
+        
+        If the initial call passes - the token is valid.  Otherwise, core API call 
+        raises for status.  Valid token catches this error, extracts the 
+        response from the error object and checks for a 401 status code.  401 returns 
+        false - meaning the API has rejected the token and it needs to be refreshed.
+        
+        Any other errors are re-raised for higher level handling.
+        
+        Returns:
+            Bool        : True if the token is valid, false if the token is invalid.
+        """
+        try:
+            self._core_api_call(page=0)
+            return False
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 401:
+                return True
+            else:
+                raise
+                    
     def get_all_raindrops(self) -> List[Dict[str, Any]]:
         """
         Retrieve all raindrops from the Raindrop.io API.
