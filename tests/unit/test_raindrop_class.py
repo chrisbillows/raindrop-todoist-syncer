@@ -21,7 +21,7 @@ def rd_raw_api_response():
     requests_obj = mock.Mock()
     requests_obj.status_code = 200
     requests_obj.text = "This is some status code text."
-    with open('tests/unit/rd_api_full_dot_json_.json', "r") as f:
+    with open('tests/mock_data/rd_api_full_dot_json_.json', "r") as f:
         content = json.load(f)
         requests_obj.json = mock.Mock(return_value=content)
     return requests_obj
@@ -35,7 +35,7 @@ def rd_extracted_single_raindrop_dict():
     raindrops that have been processed with json.load. For testing purposes, 
     this fixture loads the content of a single raindrop saved as JSON from a file.
     """
-    with open('tests/unit/rd_api_single_rd.json', "r") as f:
+    with open('tests/mock_data/rd_api_single_rd.json', "r") as f:
         content = json.load(f)
     return content
 

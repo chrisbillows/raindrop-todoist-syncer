@@ -16,7 +16,7 @@ def list_of_rd_objects():
     """
     Create a list of three Raindrop objects.
     """
-    with open("tests/unit/cumulative_rd_list.json", "r") as f:
+    with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
         rds = json.load(f)
     rd_sample = rds[2:5]
     rdp = RaindropsProcessor(rd_sample)

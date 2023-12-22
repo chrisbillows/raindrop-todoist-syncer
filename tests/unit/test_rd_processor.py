@@ -14,7 +14,7 @@ def rd_processor():
     method of the RaindropsClient. i.e. this is the expected data the driver method of 
     RaindropsProcessor works with.
     """
-    with open("tests/unit/cumulative_rd_list.json", "r") as f:
+    with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
         cumulative_rds = json.load(f)
     return RaindropsProcessor(cumulative_rds)
 
@@ -33,7 +33,7 @@ def dummy_all_favs(rd_processor):
 class TestRaindropProcessorInit:
     
     def test_basic_init(self, rd_processor):
-        with open("tests/unit/cumulative_rd_list.json", "r") as f:
+        with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
             cumulative_rds = json.load(f)
         assert rd_processor.all_rds == cumulative_rds
 
@@ -55,7 +55,7 @@ class TestMainFunction:
             ]
         }
         MockDatabaseManager.return_value.get_latest_database.return_value = mock_db_return_value
-        with open("tests/unit/cumulative_rd_list.json", "r") as f:
+        with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
             all_rds = json.load(f)
         rd_processor = RaindropsProcessor(all_rds)
         rd_objects = rd_processor.newly_favourited_raindrops_extractor()
@@ -162,7 +162,7 @@ class TestConvertToRdObjects:
 
     @pytest.fixture
     def dummy_mock_fav(self):
-        with open("tests/unit/cumulative_rd_list.json", "r") as f:
+        with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
             all_rds = json.load(f)
         fav = [rd for rd in all_rds if rd.get("important") == True]
         return RaindropsProcessor([])._convert_to_rd_objects(fav)
