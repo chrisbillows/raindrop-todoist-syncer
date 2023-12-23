@@ -168,12 +168,8 @@ class TestValidateApiResponse:
     #     mock_response.json.return_value = {"access_token": "I am your access token"}
     #     assert raindrop_oauth._extract_oauth_token(mock_response) == "I am your access token"
 
-class TestWriteToEnv:
-    
-    def test_write_token_to_env(self, raindrop_oauth):
-        """
-
-        """
+@pytest.fixture
+def write_to_blank_env(raindrop_oauth):
         with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp:
             temp.write("Existing content\n")
             temp_file = temp.name
@@ -181,7 +177,67 @@ class TestWriteToEnv:
         raindrop_oauth._write_token_to_env("test_token")
         with open(temp_file, "r") as f:
             lines = f.readlines()
-        assert lines[-1] == "RAINDROP_OAUTH_TOKEN='test_token'\n"
         os.remove(temp_file)
-
+        return lines            
         
+@pytest.fixture
+def write_to_complete_env(raindrop_oauth):
+        with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp:
+            temp.write("".join
+                       (
+                           [
+                "TODOIST_API_KEY = 'c691d501580e381be70d1a97f5k6624d5939b142'\n",
+                "RAINDROP_CLIENT_ID = '6491cb52xvt44917d70b2d7a'\n",
+                "RAINDROP_CLIENT_SECRET = '22914d01-5c7b-49a5-c928-a229ed013c66'\n",
+                "RAINDROP_REFRESH_TOKEN = 'b8791s45-e83f-4699-al48-39693177h296'\n",
+                "RAINDROP_OAUTH_TOKEN='8bde7733-b4de-4fb5-92ab-2709434a504e'\n"
+                    ]
+                )                
+            )
+            temp_file = temp.name
+        raindrop_oauth.env_file = temp_file
+        raindrop_oauth._write_token_to_env("test_token")
+        with open(temp_file, "r") as f:
+            lines = f.readlines()
+        os.remove(temp_file)
+        return lines 
+        
+class TestWriteToEnv:
+    """
+    TODO:  In progress rewriting these tests before starting to rewrite 
+    RaindropOauthHandler._write_token_to_env per issue #3.
+    """
+    def test_check_token_no_prev_oauth(self, raindrop_oauth, write_to_blank_env):
+        """
+        TODO: This currently passes with the defective code - as the defect is that
+        the previous tokens are never removed. Here - there are no previous tokens.
+        """
+        for line in write_to_blank_env: 
+            if line.startswith("RAINDROP_OAUTH_TOKEN"):
+                expected = line
+                break
+        assert  expected == "RAINDROP_OAUTH_TOKEN='test_token'\n"
+        
+    def test_number_of_tokens_no_prev_oauth(self, raindrop_oauth, write_to_blank_env):
+        expected_lines = 0
+        for line in write_to_blank_env:
+            if line.startswith("RAINDROP_OAUTH_TOKEN"):
+                expected_lines += 1
+        assert expected_lines == 1
+        
+    def test_check_token_full_env(self, raindrop_oauth, write_to_complete_env):
+        """
+        TODO: Fails here as it finds the FIRST result - whereas the defective code adds
+        """
+        for line in write_to_complete_env: 
+            if line.startswith("RAINDROP_OAUTH_TOKEN"):
+                expected = line
+                break
+        assert  expected == "RAINDROP_OAUTH_TOKEN='8bde7733-b4de-4fb5-92ab-2709434a504e'\n"
+        
+    def test_number_of_tokens_full_env(self, raindrop_oauth, write_to_complete_env):
+        expected_lines = 0
+        for line in write_to_complete_env:
+            if line.startswith("RAINDROP_OAUTH_TOKEN"):
+                expected_lines += 1
+        assert expected_lines == 1
