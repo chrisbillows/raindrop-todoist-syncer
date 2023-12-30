@@ -746,8 +746,26 @@ class RaindropOauthHandler:
         print("You wrote this before you understood what was happening - needs revising")
         raise(BadProgrammerError)
                     
-    def refresh_token_process_runner(self) -> Optional[int]:
-        """
+    def refresh_token_process_runner(self) -> bool:
+        """Runs the process to refresh a stale oauth token.
+        
+        This method uses a Raindrop Oauth2 refresh to generate a new valid oauth2 token.
+        It first checks a refresh token is present. It then creates a valid request and
+        makes the request. It validates the response object then extract the new oauth
+        token from the response.  It then create a new .env file body using the current
+        .env body and overwriting the old oauth token.  This new .env body is validated
+        then overwrites the old .env file.
+        
+        Raises
+        ------
+        MissingRefreshTokenError
+            If no refresh token is present. This can be used to prevent the refresh 
+            process running and divert to a "authorization code" type of oauth request.
+        
+        Returns
+        -------
+        True    
+            Code should error if the entire operation does not complete.
         """
         if not os.getenv("RAINDROP_REFRESH_TOKEN"):
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
@@ -757,12 +775,11 @@ class RaindropOauthHandler:
             response = self._make_request(body)
             self._response_validator(response)
             oauth_token = self._extract_oauth_token(response)
-            self._write_new_body_to_env(oauth_token)
-            # TODO: Add check to see if refresh token has changed and
-            # write to .env if so.
-            # TODO: Currently this function doesn't delete the old token!
-            logger.warning("***MANUALLY REMOVE OLD TOKEN!***")
-            return f"Success! Oauth {oauth_token} written to .env."
+            new_env_body = self._create_updated_env_body(oauth_token)
+            validated_new_body = self._new_env_validator(new_env_body)
+            self._write_new_body_to_env(validated_new_body)
+            logger.info("Success! Oauth token refreshed. Oauth {oauth_token} written to .env.")
+            return True
 
     def _open_authorization_code_url(self) -> bool:
         """
