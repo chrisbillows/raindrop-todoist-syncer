@@ -129,6 +129,14 @@ def response_object_200():
     mock_response.text = "Success"
     mock_response.json.return_value = {"access_token": "I am your access token"}    
     return mock_response
+
+class TestMakeRequest:
+    """
+    Only unit testable part would be construction of post request body - and it's so
+    simple as to be meaningless.
+    """
+    pass
+
         
 class TestValidateApiResponse:
     
