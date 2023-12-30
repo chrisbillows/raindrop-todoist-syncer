@@ -661,6 +661,9 @@ class EnvDataOverwriteError(Exception):
 class OauthTokenNotWrittenError(Exception):
     pass
 
+class BadProgrammerError(Exception):
+    pass
+
 
 class RaindropOauthHandler:
     """
@@ -711,7 +714,7 @@ class RaindropOauthHandler:
         self.RAINDROP_REFRESH_TOKEN = os.getenv("RAINDROP_REFRESH_TOKEN")
             
     def new_token_process_runner(self) -> Optional[int]:
-        """
+        """DO NOT USE - has errors.
         Main "driver" method that orchestrates the entire oauth process and is
         responsible for calling all other methods in the class.
 
@@ -721,26 +724,28 @@ class RaindropOauthHandler:
 
         Returns the new auth code.
         """
-        try:
-            if os.getenv("RAINDROP_OAUTH_TOKEN"):
-                raise ExistingTokenError(self.TOKEN_EXISTS_ERROR)
-            else:
-                self._open_authorization_code_url()
-                auth_code_url = self._user_paste_valid_auth_code_url()
-                auth_code = self._parse_authorization_code_url(auth_code_url)
-                headers = self.HEADERS
-                body = self._new_token_create_body(auth_code)
-                response = self._make_request(body)
-                self._response_validator(response)
-                oauth_token = self._extract_oauth_token(response)
-                # TODO : Add writing the refersh token to .env
-                self._write_new_body_to_env(oauth_token)
-                return f"Success! Oauth {oauth_token} written to .env."
-        except UserCancelledError:
-                # TODO : Figure out how this works
-                logger.warning("OAuth process cancelled by the user.")
-                return "Oauth failed."
-            
+        # try:
+        #     if os.getenv("RAINDROP_OAUTH_TOKEN"):
+        #         raise ExistingTokenError(self.TOKEN_EXISTS_ERROR)
+        #     else:
+        #         self._open_authorization_code_url()
+        #         auth_code_url = self._user_paste_valid_auth_code_url()
+        #         auth_code = self._parse_authorization_code_url(auth_code_url)
+        #         headers = self.HEADERS
+        #         body = self._new_token_create_body(auth_code)
+        #         response = self._make_request(body)
+        #         self._response_validator(response)
+        #         oauth_token = self._extract_oauth_token(response)
+        #         # TODO : Add writing the refersh token to .env
+        #         self._write_new_body_to_env(oauth_token)
+        #         return f"Success! Oauth {oauth_token} written to .env."
+        # except UserCancelledError:
+        #         # TODO : Figure out how this works
+        #         logger.warning("OAuth process cancelled by the user.")
+        #         return "Oauth failed."
+        print("You wrote this before you understood what was happening - needs revising")
+        raise(BadProgrammerError)
+                    
     def refresh_token_process_runner(self) -> Optional[int]:
         """
         """
