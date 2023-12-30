@@ -156,10 +156,7 @@ class TestValidateApiResponse:
         mock_response.json.return_value = {}
         with pytest.raises(ValueError, match="Response code 200 but no token in response."):
             raindrop_oauth._response_validator(mock_response)
-                
-    def test_extract_oauth_token(self, raindrop_oauth, response_object_200):
-        assert raindrop_oauth._extract_oauth_token(response_object_200) == "I am your access token"
-
+    
     # def test_check_200_response_success(self, raindrop_oauth):
     #     mock_response = mock.Mock()
     #     mock_response.status_code = 200
@@ -175,6 +172,12 @@ class TestValidateApiResponse:
     #     mock_response = mock.Mock()
     #     mock_response.json.return_value = {"access_token": "I am your access token"}
     #     assert raindrop_oauth._extract_oauth_token(mock_response) == "I am your access token"
+
+class TestExtractOauthToken:
+    
+    def test_extract_oauth_token(self, raindrop_oauth, response_object_200):
+        assert raindrop_oauth._extract_oauth_token(response_object_200) == "I am your access token"
+
     
 @pytest.fixture
 def placeholder_one_liner_env():
