@@ -4,6 +4,7 @@ import os
 import re
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, parse_qs
+import shutil
 import webbrowser
 
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ from loguru import logger
 import requests
 from requests import Request, Response
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-from traitlets import Bool 
+
 
 load_dotenv()
 
@@ -379,7 +380,7 @@ class RaindropClient:
         self.headers = {"Authorization": f"Bearer {self.raindrop_oauth_token}"}
         logger.info("Raindrop Client initalised")
         
-    def stale_token(self) -> Bool:
+    def stale_token(self) -> bool:
         """
         Checks the current Oauth token is valid by calling the Raindrop API.
         
@@ -651,6 +652,18 @@ class MissingRefreshTokenError(Exception):
 class UserCancelledError(Exception):
     pass
 
+class DuplicateOauthTokenError(Exception):
+    pass
+
+class EnvDataOverwriteError(Exception):
+    pass
+
+class OauthTokenNotWrittenError(Exception):
+    pass
+
+class BadProgrammerError(Exception):
+    pass
+
 
 class RaindropOauthHandler:
     """
@@ -701,7 +714,7 @@ class RaindropOauthHandler:
         self.RAINDROP_REFRESH_TOKEN = os.getenv("RAINDROP_REFRESH_TOKEN")
             
     def new_token_process_runner(self) -> Optional[int]:
-        """
+        """DO NOT USE - has errors.
         Main "driver" method that orchestrates the entire oauth process and is
         responsible for calling all other methods in the class.
 
@@ -711,28 +724,52 @@ class RaindropOauthHandler:
 
         Returns the new auth code.
         """
-        try:
-            if os.getenv("RAINDROP_OAUTH_TOKEN"):
-                raise ExistingTokenError(self.TOKEN_EXISTS_ERROR)
-            else:
-                self._open_authorization_code_url()
-                auth_code_url = self._user_paste_valid_auth_code_url()
-                auth_code = self._parse_authorization_code_url(auth_code_url)
-                headers = self.HEADERS
-                body = self._new_token_create_body(auth_code)
-                response = self._make_request(body)
-                self._response_validator(response)
-                oauth_token = self._extract_oauth_token(response)
-                # TODO : Add writing the refersh token to .env
-                self._write_token_to_env(oauth_token)
-                return f"Success! Oauth {oauth_token} written to .env."
-        except UserCancelledError:
-                # TODO : Figure out how this works
-                logger.warning("OAuth process cancelled by the user.")
-                return "Oauth failed."
-            
-    def refresh_token_process_runner(self) -> Optional[int]:
-        """
+        # try:
+        #     if os.getenv("RAINDROP_OAUTH_TOKEN"):
+        #         raise ExistingTokenError(self.TOKEN_EXISTS_ERROR)
+        #     else:
+        #         self._open_authorization_code_url()
+        #         auth_code_url = self._user_paste_valid_auth_code_url()
+        #         auth_code = self._parse_authorization_code_url(auth_code_url)
+        #         headers = self.HEADERS
+        #         body = self._new_token_create_body(auth_code)
+        #         response = self._make_request(body)
+        #         self._response_validator(response)
+        #         oauth_token = self._extract_oauth_token(response)
+        #         # TODO : Add writing the refersh token to .env
+        #         self._write_new_body_to_env(oauth_token)
+        #         return f"Success! Oauth {oauth_token} written to .env."
+        # except UserCancelledError:
+        #         # TODO : Figure out how this works
+        #         logger.warning("OAuth process cancelled by the user.")
+        #         return "Oauth failed."
+        print("You wrote this before you understood what was happening - needs revising")
+        raise(BadProgrammerError)
+
+    def refresh_token_process_runner(self) -> bool:
+        """Runs the process to refresh a stale oauth token.
+
+        This method uses a Raindrop Oauth2 refresh token to generate a new valid oauth2 
+        token. 
+        
+        1) Checks a refresh token is present. 
+        2) Creates a valid request (header/body) and makes the request. 
+        3) Validates the response object
+        4) Extracts the new oauth token from the response.  
+        5) Creates a new .env file body using the current .env body and overwriting the 
+            stale oauth token.  
+        6) Validates the new .env body then overwrites the old .env file.
+        
+        Raises
+        ------
+        MissingRefreshTokenError
+            If no refresh token is present. This can be used to prevent the refresh 
+            process running and divert to a "authorization code" oauth request.
+        
+        Returns
+        -------
+        True    
+            Code should raise an error if the entire operation doesn't complete.
         """
         if not os.getenv("RAINDROP_REFRESH_TOKEN"):
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
@@ -742,12 +779,11 @@ class RaindropOauthHandler:
             response = self._make_request(body)
             self._response_validator(response)
             oauth_token = self._extract_oauth_token(response)
-            self._write_token_to_env(oauth_token)
-            # TODO: Add check to see if refresh token has changed and
-            # write to .env if so.
-            # TODO: Currently this function doesn't delete the old token!
-            logger.warning("***MANUALLY REMOVE OLD TOKEN!***")
-            return f"Success! Oauth {oauth_token} written to .env."
+            new_env_body = self._create_updated_env_body(oauth_token)
+            validated_new_body = self._new_env_validator(new_env_body)
+            self._write_new_body_to_env(validated_new_body)
+            logger.info("Success! Oauth token refreshed. Oauth {oauth_token} written to .env.")
+            return True
 
     def _open_authorization_code_url(self) -> bool:
         """
@@ -845,7 +881,7 @@ class RaindropOauthHandler:
         }
         return body
  
-    def _make_request(self, body) -> Request:
+    def _make_request(self, body: Dict[str, str]) -> Request:
         """
         Makes the oauth request and returns a Request object.
         """
@@ -858,33 +894,145 @@ class RaindropOauthHandler:
         )
         return oauth_response
 
-    def _response_validator(self, response):
+    def _response_validator(self, response: Response) -> None:
+        """
+        Checks a Response object returned by the Raindrop API Oauth2 process is valid.
+        """
         if response.status_code != 200:
             raise ValueError(f"Response status code is not 200 (as required in the docs). Status code was {response.status_code} - {response.text}")
     
         if response.json().get("access_token") is None:
             raise ValueError(f"Response code 200 but no token in response. Full response {response.json()}")
         
-    def _extract_oauth_token(self, oauth_response):
+    def _extract_oauth_token(self, oauth_response: Response) -> str:
+        """
+        Extracts the oauth token from the response.json of a Response object.
+        """
         data = oauth_response.json()
         access_token = data.get("access_token")
         logger.info(f"Your access token is {access_token}")
         return access_token
-
-    def _write_token_to_env(self, oauth_token):
+    
+    def _create_updated_env_body(self, oauth_token: str) -> list:
+        """Recreates the existing .env body including a newly extracted oauth token.
+        
+        1) Uses the new oauth token to creates a full line, with correct .env format.
+        2) Reads the current .env into memory. 
+        3) Checks if a line already begins RAINDROP_OAUTH_TOKEN.  
+        4) If so, it targets that line and overwrites it with the new oauth line. 
+        5) If not, it adds the new_line to the end of the body.
+         
+        Parameters
+        ----------
+        oauth_token: str     
+            An extracted Raindrop oauth token from an oauth response. This response will
+            be the same for an oauth request of either grant_type (authorization_code or 
+            refresh_token).
+                     
+        Returns
+        -------
+        lines: list
+               The previous .env body as a list, with the new oauth token included 
+               (either overwriting the previous token, or inserted at the end.) 
         """
-        Write the new oauth token to the .env file.
+        new_line = f"RAINDROP_OAUTH_TOKEN = '{oauth_token}'\n"
+        target_line = None
+        
+        with open('.env', 'r') as file:
+            lines = file.readlines()
+        
+        for idx, line in enumerate(lines):
+            if line.startswith('RAINDROP_OAUTH_TOKEN'):
+                target_line = idx
+                break
+        
+        if target_line is not None:
+            lines[target_line] = new_line
+        else:
+            lines.append(new_line)
+            
+        return lines
 
-        Could be unstable if I have concurrent instances (unlikely but beware).
+    def _new_env_validator(self, new_body: list) -> list:
+        """Runs simple validation checks on a new .env body. 
+        
+        See inline comments for specific checks.
+                 
+        Known edge cases that will pass:
+        - where a line was inserted in error AND a line was deleted in error would pass.
+        - where a line is added in an overwrite situation 
+            (i.e. the fact it doesn't distinguish between an `overwrite` where lines 
+            stay the same vs. `no existing oauth` where lines increase by one).
+        - where an existing token is deleted 
+        
+        TODO: Raised issue #6. Using length to validate the body may not work. It may
+            be simpler to handle .env bodies with/without a previous oauth token 
+            seperately. Or to do a more involved check e.g. extract all tokens from the
+            old and new .envs into dicts and compare one-by-one.
+       
+        Parameters
+        -----------
+        new_body : list
+            The potential new body content for the .env file.
+        
+        Returns
+        -------
+        new_body : list
+            The now validated body content for the .env file.
+        
+        Raises:
+        -------
+        DuplicateOauthTokenError
+            If the new_body contains duplicate tokens.
+        EnvDataOverwriteError
+            If the new_body is longer or shorter than expected, suggesting a failure in
+            the new_body creation logic. 
         """
-        env_file = ".env"
-        token_key = "RAINDROP_OAUTH_TOKEN"
-        # TODO - this doesn't work unless the oauth is last?
-        with open(self.env_file, "a+") as f:
-            f.seek(0, 2)
-            if f.tell() > 0:
-                f.seek(f.tell() - 1)
-            if f.read(1) != "\n":
-                f.write("\n")
-            f.write(f"{token_key}='{oauth_token}'\n")
+        with open('.env', 'r') as file:
+            lines = file.readlines()
+            
+        # Check env has changed
+        if new_body == lines:
+            raise EnvDataOverwriteError
+        
+        # Check has changed by none (overwrite) or one line only.
+        length_difference = abs(len(new_body) - len(lines))
+        
+        if length_difference > 1:
+            raise EnvDataOverwriteError
+        
+        oauth_tokens = []
+        for line in new_body:
+            if line.startswith("RAINDROP_OAUTH"):
+                oauth_tokens.append(line)
+
+        # Checks an oauth token is present                
+        if len(oauth_tokens) == 0:
+            raise OauthTokenNotWrittenError
+        
+        # Checks no more than one oauth token is present
+        if len(oauth_tokens) > 1:
+            raise DuplicateOauthTokenError
+           
+        return new_body    
+            
+    def _write_new_body_to_env(self, validated_new_body: list) -> bool:
+        """Uses the new env_body to the overwrite the existing .env file.
+        
+        Backs up the existing .env to .env.backup. Then overwrites the .env file with
+        the updated and validated new body - including the new oauth code.
+        
+        Parameters:
+        -----------
+        validated_new_body: list
+            The newly updated, newly validated content for the .env.
+                                        
+        Returns:
+        --------
+        True: bool            
+            Will error if write fails. So I am reliably informed.
+        """
+        shutil.copy('.env', '.env.backup')
+        with open('.env', 'w') as file:
+            file.writelines(validated_new_body)        
         return True
