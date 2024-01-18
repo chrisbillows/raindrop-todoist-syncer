@@ -127,7 +127,7 @@ class RaindropsProcessor:
         rd_objects = self._convert_to_rd_objects(untracked_favs)
         # TODO: This function updates the db - BEFORE the todoist tasks are successfully created.
         # TODO: Keep for now, or the code will not function!! 
-        self._update_previously_favourited(rd_objects)
+        # self._update_previously_favourited(rd_objects)
         return rd_objects
     
     def _extract_all_fav_rds(self) -> List[Dict]:

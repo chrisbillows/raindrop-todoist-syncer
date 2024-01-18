@@ -34,7 +34,7 @@ def main():
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
         logger.info(f"Created task: {task.title}")
-
+    
 
 def run():
     """
