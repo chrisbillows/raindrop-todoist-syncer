@@ -24,15 +24,12 @@ def main():
     if raindrop_client.stale_token():
         raindrop_oauth.refresh_token_process_runner()    
     all_raindrops = raindrop_client.get_all_raindrops()
-    logger.info(f"Collected {len(all_raindrops)} total bookmarks.")
     raindrops_processor = RaindropsProcessor(all_raindrops)
     tasks_to_create = raindrops_processor.newly_favourited_raindrops_extractor()
-    logger.info(f"Found {len(tasks_to_create)} tasks to create.")
     for task in tasks_to_create:
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
-        logger.info(f"Created task: {task.title}")
-    
+            
 
 def run():
     """

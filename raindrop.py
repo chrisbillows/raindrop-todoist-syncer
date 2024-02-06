@@ -128,6 +128,7 @@ class RaindropsProcessor:
         # TODO: This function updates the db - BEFORE the todoist tasks are successfully created.
         # TODO: Keep for now, or the code will not function!! 
         # self._update_previously_favourited(rd_objects)
+        logger.info(f"Found {len(rd_objects)} tasks to create.")
         return rd_objects
     
     def _extract_all_fav_rds(self) -> List[Dict]:
@@ -453,6 +454,7 @@ class RaindropClient:
                 logger.debug(f"Page({page}) equals target pages({target_pages})")
                 break
         self._cumulative_rds_validator(cumulative_rds, current_rds, benchmark_count)
+        logger.info(f"Collected {len(cumulative_rds)} total bookmarks.")
         return cumulative_rds
 
     def _core_api_call(self, page: int) -> Response:
