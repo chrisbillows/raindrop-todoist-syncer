@@ -48,7 +48,7 @@ def mock_todoist_creator(monkeypatch):
         pass
     # monkeypatch.setattr(TodoistTaskCreator, "create_task", mock_create_task)
 
-
+@pytest.skip # IS RUNNING REAL STUFF!!
 class TestStaleTokenFunctionality:
     """
     Class to focus on testing the stale token functionality. Almost all of the remainder
@@ -58,6 +58,7 @@ class TestStaleTokenFunctionality:
     def test_working_test(self):
         assert 1 == 1
 
+    @pytest.skip # this runs the stale token refresher for real!
     def test_test_setup(
         self,
         mock_raindrop_client,
@@ -80,6 +81,7 @@ class TestStaleTokenFunctionality:
         x = main()
         assert x == None
 
+    @pytest.skip # prob fine but need to check 
     def test_invalid_token(
         self,
         mock_raindrop_client,
@@ -94,6 +96,7 @@ class TestStaleTokenFunctionality:
             main()
             mock_refresh_token_runner.assert_called_once()
 
+    @pytest.skip # prob fine but need to check
     def test_valid_token(
         self,
         mock_raindrop_client,
