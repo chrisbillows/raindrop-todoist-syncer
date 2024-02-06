@@ -266,7 +266,6 @@ class TestMainValidReturns:
         - `tasks_to_create` created for real
         - 
         """
-        # Arrange
         ## 1 - need a mock database
         ## 2 - need to be able "write" to the new database file
         ## 3 - mock API response with two new rds
@@ -276,15 +275,16 @@ class TestMainValidReturns:
         ### b) Make the API response out of ALL of rd_api_response
         
         # MockTodoistTaskCreator.return_value.create_task.return_value = None
+               
+        # Arrange
+        my_var = 2
 
-              
-        
         
         # Act
         ##actual = main()
         
         # Assert
-        assert now_formatted == 1
+        assert my_var == 1
         
     
     
