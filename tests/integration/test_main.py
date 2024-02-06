@@ -17,12 +17,10 @@ from tests.conftest import mock_requests_get
 # This returns a valid response object
 
 
-
 @pytest.fixture
 def mock_raindrops_data():
     with open("tests/mock_data/cumulative_rd_list.json") as f:
         return json.load(f)
-
 
 @pytest.fixture
 def mock_raindrop_client(mock_raindrops_data, monkeypatch):
@@ -43,7 +41,6 @@ def mock_raindrops_processor(monkeypatch):
         "newly_favourited_raindrops_extractor",
         mock_newly_favourited_raindrops_extractor,
     )
-
 
 @pytest.fixture
 def mock_todoist_creator(monkeypatch):
@@ -191,7 +188,7 @@ class TestMainValidReturns:
 
     @pytest.fixture
     def mock_database_env(self, monkeypatch, mocked_db_data):
-        """A fixture to mock database/metafile attribes in a DatabaseManager object.
+        """A fixture to mock database/metafile attributes in a DatabaseManager object.
         
         For dumb future me: pass this fixture as an argument to any test and 
         all DatabaseManager calls will be mocked to temp files. 
@@ -210,8 +207,7 @@ class TestMainValidReturns:
         of test.
         
         Teardown is performed by the shutil commands. (see notes below).
-            
-        
+       
         Parameters
         ----------
         monkeypatch
