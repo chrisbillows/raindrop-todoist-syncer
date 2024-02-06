@@ -382,17 +382,20 @@ class RaindropClient:
         
     def stale_token(self) -> bool:
         """
-        Checks the current Oauth token is valid by calling the Raindrop API.
+        Checks the current Oauth2 token is valid by calling the Raindrop API.
         
-        If the initial call passes - the token is valid.  Otherwise, core API call 
-        raises for status.  Valid token catches this error, extracts the 
-        response from the error object and checks for a 401 status code.  401 returns 
-        false - meaning the API has rejected the token and it needs to be refreshed.
+        If the API call succeeds - the token is valid and `stale_token` returns False.
+        If the call fails `_core_api_call` raises an error. `stale token` catches the 
+        error and looks for a 401 status_code. A 401 error indicates the token is stale 
+        and `stale_token` returns True.
         
-        Any other errors are re-raised for higher level handling.
-        
-        Returns:
-            Bool        : True if the token is valid, false if the token is invalid.
+        Any other errors are re-raised for higher level error handling. 
+         
+        Returns
+        -------
+        bool
+            False if the token is valid (i.e. `stale_token` is False, the token is not 
+            stale), True if the token is invalid (it's true the token is stale).
         """
         try:
             self._core_api_call(page=0)
