@@ -14,3 +14,4 @@ database/
 metafile/
 *.log
 local.raindrop-todoist-syncer.plist
+.env.backup
