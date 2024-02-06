@@ -22,8 +22,6 @@ def main():
     raindrop_client = RaindropClient()
     raindrop_oauth = RaindropOauthHandler()
     if raindrop_client.stale_token():
-        logger.warning("Oauth token is stale.")
-        logger.info("Attempting to refresh token.")
         raindrop_oauth.refresh_token_process_runner()    
     all_raindrops = raindrop_client.get_all_raindrops()
     logger.info(f"Collected {len(all_raindrops)} total bookmarks.")

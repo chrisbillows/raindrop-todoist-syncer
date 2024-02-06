@@ -399,9 +399,11 @@ class RaindropClient:
         """
         try:
             self._core_api_call(page=0)
+            logger.info("Oauth token is valid.")
             return False
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 401:
+                logger.warning("Oauth token is stale.")
                 return True
             else:
                 raise
@@ -774,6 +776,7 @@ class RaindropOauthHandler:
         True    
             Code should raise an error if the entire operation doesn't complete.
         """
+        logger.info("Attempting to refresh token.")
         if not os.getenv("RAINDROP_REFRESH_TOKEN"):
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
         else:
