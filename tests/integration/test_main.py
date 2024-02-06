@@ -48,7 +48,7 @@ def mock_todoist_creator(monkeypatch):
         pass
     # monkeypatch.setattr(TodoistTaskCreator, "create_task", mock_create_task)
 
-@pytest.skip # IS RUNNING REAL STUFF!!
+
 class TestStaleTokenFunctionality:
     """
     Class to focus on testing the stale token functionality. Almost all of the remainder
@@ -58,7 +58,7 @@ class TestStaleTokenFunctionality:
     def test_working_test(self):
         assert 1 == 1
 
-    @pytest.skip # this runs the stale token refresher for real!
+    @pytest.mark.skip(reason="this runs the stale token refresher for real!")
     def test_test_setup(
         self,
         mock_raindrop_client,
@@ -81,7 +81,7 @@ class TestStaleTokenFunctionality:
         x = main()
         assert x == None
 
-    @pytest.skip # prob fine but need to check 
+    @pytest.mark.skip(reason="this is prob fine but need to check") 
     def test_invalid_token(
         self,
         mock_raindrop_client,
@@ -96,7 +96,7 @@ class TestStaleTokenFunctionality:
             main()
             mock_refresh_token_runner.assert_called_once()
 
-    @pytest.skip # prob fine but need to check
+    @pytest.mark.skip(reason="this is also prob fine but need to check") 
     def test_valid_token(
         self,
         mock_raindrop_client,
@@ -112,21 +112,7 @@ class TestStaleTokenFunctionality:
             mock_refresh_token_runner.assert_not_called()
 
 
-class TestMainValidReturns:
-    """
-    Full integration tests with the minimum amount of mocking. Series of tests 
-    validating steps on the happy path.
-    
-    - Uses real.env and assumes a non-stale token
-        - mocks the api response & the database used
-           - api finds one new raindrop
-        - rds processed for real
-        - `tasks_to_create` created for real
-    
-    - Writes to mock database 
-     """
-        
-    def mock_db_data(self) -> dict[str, any]:
+def mock_db_data(self) -> dict[str, any]:
         """Creates the contents of a database file. 
         
         Can be used in memory (as if read from the file) or written to a file and 
@@ -159,123 +145,125 @@ class TestMainValidReturns:
         mock_db_data["Processed Raindrops"] = mock_db_content
         return mock_db_data
     
-    def create_mock_db_files(self, directory: str, filename: str, content: dict[str, list]) -> None:
-        """Creates a mock_db file and accompanying metafile.
-        
-        Parameters
-        ----------
-        directory: str
-            The path to the directory to save the mock_db file.
-        
-        filename: str
-            The name for the file e.g. the db file and metafile (which must be in a 
-            particular format).
-        
-        content: dict[str, list]
-            The content of the database. To be valid this should be in the format of
-            one k,v pair with a key of "Processed Raindrops" and the saved raindrop 
-            content as a list of dictionaries.
-        
-        Note
-        ----
-        This method could be used to create any file - but for ease of future me's
-        understanding, I've described it's specific use in `mock_database_env`.
-        """
-        
-        with open(os.path.join(directory, filename), 'w') as file:
-            file.write(content)
-            #! CHAT GPT says this will error a dict
-            #! prob getting this from my type annotations - which may be wrong! 
-            # json.dump(content, file)
-        return None
+def create_mock_db_files(self, directory: str, filename: str, content: dict[str, list]) -> None:
+    """Creates a mock_db file and accompanying metafile.
+    
+    Parameters
+    ----------
+    directory: str
+        The path to the directory to save the mock_db file.
+    
+    filename: str
+        The name for the file e.g. the db file and metafile (which must be in a 
+        particular format).
+    
+    content: dict[str, list]
+        The content of the database. To be valid this should be in the format of
+        one k,v pair with a key of "Processed Raindrops" and the saved raindrop 
+        content as a list of dictionaries.
+    
+    Note
+    ----
+    This method could be used to create any file - but for ease of future me's
+    understanding, I've described it's specific use in `mock_database_env`.
+    """
+    
+    with open(os.path.join(directory, filename), 'w') as file:
+        file.write(content)
+        #! CHAT GPT says this will error a dict
+        #! prob getting this from my type annotations - which may be wrong! 
+        # json.dump(content, file)
+    return None
 
-    @pytest.fixture
-    def mock_database_env(self, monkeypatch, mocked_db_data):
-        """A fixture to mock database/metafile attributes in a DatabaseManager object.
-        
-        For dumb future me: pass this fixture as an argument to any test and 
-        all DatabaseManager calls will be mocked to temp files. 
-        
-        The fixture creates temp directories for the db_file and meta_file. (The 
-        programme uses the meta_file to track the latest version of the db json).
-        
-        It uses `mock_db_data` to create the db content then calls 
-        `create_mock_db_files` to write that db content to the files - with the
-        expected file formatting and metadata content.
-        
-        `monkeypatch.setattr` uses pytest's monkeypatch to mock the DatabaseManager
-        attributes. 
-        
-        Yield is used to keep the method open, pending the required teardown at end
-        of test.
-        
-        Teardown is performed by the shutil commands. (see notes below).
-       
-        Parameters
-        ----------
-        monkeypatch
-            pytest generator that does some (as yet not understood) magic stuff.
-        
-        mocked_db_data: dict[str, list]
-            Mock db data of the type created by `mock_db_data` 
-               
-        Notes
-        -----
-        This fixture is better written as: 
-            `with tempfile.TemporaryDirectory() as db_dir...`
-        I used setattr for consistency across tests (see `mock_requests_get`). As part 
-        of an effort to limit myself to a smaller set of testing tools and learn them
-        properly first. (Rather than every test being so different that "Dec-23 you" 
-        found far too little knowledge consolidating.
-        """
-        db_dir = tempfile.mkdtemp()
-        meta_dir = tempfile.mkdtemp()
-        
-        now = datetime.now()
-        now_formatted = now.strftime("%Y%m%d_%H%M")
-        
-        db_file_name = f"001_processed_raindrops_{now_formatted}.json"
-        meta_file_content = f"{meta_dir}/{db_file_name}.json"
-        # Metafile content format:
-        #   database/2391_processed_raindrops_20231231_0729.json
-        
-        self.create_mock_db_files(db_dir, db_file_name, mocked_db_data)
-        self.create_mock_db_files(meta_dir, 'metafile.txt', meta_file_content)
+@pytest.fixture
+def mock_database_env(self, monkeypatch, mocked_db_data):
+    """A fixture to mock database/metafile attributes in a DatabaseManager object.
+    
+    For dumb future me: pass this fixture as an argument to any test and 
+    all DatabaseManager calls will be mocked to temp files. 
+    
+    The fixture creates temp directories for the db_file and meta_file. (The 
+    programme uses the meta_file to track the latest version of the db json).
+    
+    It uses `mock_db_data` to create the db content then calls 
+    `create_mock_db_files` to write that db content to the files - with the
+    expected file formatting and metadata content.
+    
+    `monkeypatch.setattr` uses pytest's monkeypatch to mock the DatabaseManager
+    attributes. 
+    
+    Yield is used to keep the method open, pending the required teardown at end
+    of test.
+    
+    Teardown is performed by the shutil commands. (see notes below).
+    
+    Parameters
+    ----------
+    monkeypatch
+        pytest generator that does some (as yet not understood) magic stuff.
+    
+    mocked_db_data: dict[str, list]
+        Mock db data of the type created by `mock_db_data` 
+            
+    Notes
+    -----
+    This fixture is better written as: 
+        `with tempfile.TemporaryDirectory() as db_dir...`
+    I used setattr for consistency across tests (see `mock_requests_get`). As part 
+    of an effort to limit myself to a smaller set of testing tools and learn them
+    properly first. (Rather than every test being so different that "Dec-23 you" 
+    found far too little knowledge consolidating.
+    """
+    db_dir = tempfile.mkdtemp()
+    meta_dir = tempfile.mkdtemp()
+    
+    now = datetime.now()
+    now_formatted = now.strftime("%Y%m%d_%H%M")
+    
+    db_file_name = f"001_processed_raindrops_{now_formatted}.json"
+    meta_file_content = f"{meta_dir}/{db_file_name}.json"
+    # Metafile content format:
+    #   database/2391_processed_raindrops_20231231_0729.json
+    
+    self.create_mock_db_files(db_dir, db_file_name, mocked_db_data)
+    self.create_mock_db_files(meta_dir, 'metafile.txt', meta_file_content)
 
-        monkeypatch.setattr(DatabaseManager, 'database_directory', db_dir)
-        monkeypatch.setattr(DatabaseManager, 'metafile_directory', meta_dir)
-        monkeypatch.setattr(DatabaseManager, 'metafile_path', os.path.join(meta_dir, 'metafile.txt'))
-         
-        yield
+    monkeypatch.setattr(DatabaseManager, 'database_directory', db_dir)
+    monkeypatch.setattr(DatabaseManager, 'metafile_directory', meta_dir)
+    monkeypatch.setattr(DatabaseManager, 'metafile_path', os.path.join(meta_dir, 'metafile.txt'))
         
-        shutil.rmtree(db_dir)
-        shutil.rmtree(meta_dir)
-        
-        #! NEXT - re-read this and check through, then run some bit by bit tests 
-        #! below.
-         
-    # @patch('todoist.TodoistTaskCreator')
-    #def test_valid_return(self, mock_requests_get):
+    yield
+    
+    shutil.rmtree(db_dir)
+    shutil.rmtree(meta_dir)
+
+
+class TestMainValid:
+    """
+    Full integration tests with the minimum amount of mocking. Series of tests 
+    validating steps on the happy path.
+    
+    DETAILS
+    --------
+    What does `main.main` do and how is mocking handled?
+    
+    1)  `main.main` confirms the Oauth token is not stale by making an API call using 
+        data in the .env file.
+    
+    - mocks the api response with --page one-- of our mock result
+           
+    
+    2) Fetches all raindrops from the raindrops api.
+    
+    - mock
+    
+    3) Extracts newly favourited raindrops.
+    4) Compares them with the database and extracts 'new' favourites.
+    5) Writes the new favourites to todoist.
+   
+    
+     """
     def test_valid_return(self):
-        """
-        - Uses real.env and assumes a non-stale token
-        - Uses mock_requests_get which is a valid response object
-        - mocks the api response & the database used
-           - api finds one new raindrop
-        - rds processed for real
-        - `tasks_to_create` created for real
-        - 
-        """
-        ## 1 - need a mock database
-        ## 2 - need to be able "write" to the new database file
-        ## 3 - mock API response with two new rds
-        ## 4 - monkeypatch the todoist_api call
-                
-        ### a) Make a database out of rd_api_response_one minus TWO rds
-        ### b) Make the API response out of ALL of rd_api_response
-        
-        # MockTodoistTaskCreator.return_value.create_task.return_value = None
-               
         # Arrange
         my_var = 2
 

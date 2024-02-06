@@ -29,7 +29,6 @@ def main():
     for task in tasks_to_create:
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
-            
 
 def run():
     """
