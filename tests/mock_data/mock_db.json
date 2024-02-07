@@ -7,14 +7,6 @@
             "title": "Hacker News", 
             "notes": "",
             "link": "https://news.ycombinator.com/news"
-        },
-        {
-            "id": 628161679,
-            "created_time": "2023-08-14T09:36:24.867Z",
-            "parsed_time": "2023-06-14T16:10:14.085+00:00",
-            "title": "The Times & The Sunday Times: breaking news & today's latest headlines", 
-            "notes": "",
-            "link": "https://www.thetimes.co.uk/"
         }
     ]
 }
