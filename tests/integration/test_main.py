@@ -123,7 +123,7 @@ class TestStaleTokenFunctionality:
 
 
 @pytest.fixture
-def mock_db_data() -> dict[str, any]:
+def DELETE_ME_mock_db_data() -> dict[str, any]:
     """Creates the contents of a database file.
 
     Can be used in memory (as if read from the file) or written to a file and
@@ -291,10 +291,31 @@ class TestMainValid:
         assert type(output) == list
         assert output[0]["title"] == "Hacker News"
 
-    def test_newly_favourited_rd_extractor(self, mock_requests_get, mock_db_data, tmp_path):
-        """
-        `newly_favourited_rd_extractor` is the main RaindropsProcessor() method.
-        #TODO: in progress. Working on. See issue for latest.
+    def test_newly_favourited_rd_extractor(self, mock_requests_get, mock_db, tmp_path):
+        """Calls `newly_favourited_rd_extractor` and extracts two untracked favourites.
+        
+        `newly_favourited_rd_extractor` is the main `RaindropsProcessor()` method.
+        
+        This test creates temp database and metadata files. The temp database uses the
+        data in the `mock_db` fixture. The temp files are created with pytest's 
+        `tmp_path` for automatic teardown.
+        
+        The test uses unittest patch to mock the hardcoded `__init__` values in a
+        `DatabaseManager` instance, redirecting to the temp db and metafile. All other 
+        `DatabaseManager` class methods function as normal.
+        
+        `output` is a mock of a processed API output. The source is `mock_requests_get`
+        and that combined api responses is processed by 
+        `RaindropClient.get_all_raindrops()`.
+        
+        The *Act* section of the test is the last two lines before the assert. An 
+        instance of `RaindropsProcessor` is instantiated with the dummy API response. 
+        `newly_favourited_raindrops_extractor` is run on the API response.
+        
+        Twenty six raindrops are passed. Three favourites are found and checked against
+        the `mock_db` loaded from the temp file, which contains one favourite.
+                
+        Two new and untracked favourites are returned (The Times and Amazon).
         """
         now = datetime.now().strftime("%Y%m%d_%H%M")
                 
@@ -303,7 +324,7 @@ class TestMainValid:
         db_file_name = f"001_processed_raindrops_{now}.json"
         db_dir.mkdir()
         with open(os.path.join(db_dir, db_file_name), "w") as f:
-            json.dump(mock_db_data, f)
+            json.dump(mock_db, f)
 
         # Create mock metafile
         meta_dir = tmp_path / "metafile"
@@ -323,17 +344,16 @@ class TestMainValid:
             ) as mock_init:
         
             rc = RaindropClient()
-            # Get mock API response of 26 raindrops
+            # Get mock API response of 26 raindrops / 3 favourites
             output = rc.get_all_raindrops()
             assert len(output) == 26
 
-            # Instantiate rp with the 26 raindrops
+            # Instantiate rp with the 26 raindrops / 3 favourites
+            # Process against db with 1 existing favourite
             rp = RaindropsProcessor(output)
+            new_favs_found = rp.newly_favourited_raindrops_extractor()
 
-            # Process 26 raindrops against 23 in mock database
-            new_rds_found = rp.newly_favourited_raindrops_extractor()
-
-            assert len(new_rds_found) == 0
+            assert len(new_favs_found) == 2
 
     # @pytest.mark.skip(message="Not finished yet")
     def test_happy_path(self, mock_requests_get):
