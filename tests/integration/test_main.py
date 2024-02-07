@@ -240,8 +240,9 @@ def mock_database_env(self, monkeypatch, mocked_db_data):
 
 class TestMainValid:
     """
-    Full integration tests with the minimum amount of mocking. Series of tests 
-    validating steps on the happy path.
+    Full happy path integration test with the minimum amount of mocking.
+    
+    Includes individual tests for each mock used for traceability and clarity. 
     
     DETAILS
     --------
@@ -250,29 +251,59 @@ class TestMainValid:
     1)  `main.main` confirms the Oauth token is not stale by making an API call using 
         data in the .env file.
     
-    - mocks the api response with --page one-- of our mock result
-           
+    - patched to return Oauth token is valid 
     
     2) Fetches all raindrops from the raindrops api.
     
-    - mock
-    
+    #TODO:
     3) Extracts newly favourited raindrops.
     4) Compares them with the database and extracts 'new' favourites.
     5) Writes the new favourites to todoist.
+    """
+    def test_stale_token_patch(self):
+        """Patches stale_token to directly return False.
+        
+        We use `mock_requests_get` in the full int test to include the testing of the
+        `stale_token` functionality.
+        """
+        rc = RaindropClient()
+        with patch('raindrop.RaindropClient.stale_token', return_value=7): 
+            stale_token = rc.stale_token()
+        assert stale_token == 7
+    
+    def test_stale_token_requests_patch(self, mock_requests_get):
+        """Uses `mock_requests_get` to monkeypatch `stale_token` uses the p1 of the
+        dummy data returned by `mock_requests_get`.  
+        
+        `stale_token` only requires the get request not to error - it doesn't even check
+        status_code - but `mock_requests_get` does return valid status_codes if req'd.
+        """    
+        rc = RaindropClient()
+        stale_token = rc.stale_token()
+        assert stale_token == False
+        
+    def test_get_all_rds(self, mock_requests_get):
+        """Uses `mock_requests_get` to monkeypatch `requests.get`.
+        
+        Only the `.get` itself is mocked. Two valid pages of API response are returned
+        and validated.  `output` is list of 26 raindrops.
+        """
+        rc = RaindropClient()
+        output = rc.get_all_raindrops()
+        assert len(output) == 26
+        assert type(output) == list
+        assert output[0]['title'] == "Hacker News"
+    
+    # @pytest.mark.skip(message="Not finished yet")
+    def test_happy_path(self, mock_requests_get):
+        """
+        #TODO: in progress
+        Currently illustrates `mock_requests_get` successfully monkeypatching
+        `requests.get` in two seperate function calls.
+        """
+        rc = RaindropClient()
+        stale_token = rc.stale_token()
+        output = rc.get_all_raindrops()
+        assert stale_token == False
+        assert len(output) == 26
    
-    
-     """
-    def test_valid_return(self):
-        # Arrange
-        my_var = 2
-
-        
-        # Act
-        ##actual = main()
-        
-        # Assert
-        assert my_var == 1
-        
-    
-    
