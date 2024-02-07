@@ -51,3 +51,8 @@ def mock_requests_get_no_status(monkeypatch):
         return mock_response
 
     monkeypatch.setattr("requests.get", _mocked_requests_get_no_status)
+
+@pytest.fixture
+def mock_db():
+    with open("tests/mock_data/mock_db.json", "r") as f:
+        return json.load(f)
