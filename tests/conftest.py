@@ -4,6 +4,10 @@ from unittest.mock import Mock
 import pytest
 from requests import HTTPError
 
+from raindrop import Raindrop
+
+
+# ------------------------------- mock_requests_get-------------------------------------
 """
 response_one and response_two created using _dummy_collections/dummy_twenty_six in
 raindrop.
@@ -52,7 +56,30 @@ def mock_requests_get_no_status(monkeypatch):
 
     monkeypatch.setattr("requests.get", _mocked_requests_get_no_status)
 
+
+# ------------------------------- mock_db ----------------------------------------------
+
 @pytest.fixture
 def mock_db():
     with open("tests/mock_data/mock_db.json", "r") as f:
         return json.load(f)
+
+# --------------------------- raindrop object ------------------------------------------
+
+@pytest.fixture
+def rd_extracted_single_raindrop_dict():
+    """
+    Returns a dictionary representation of a single raindrop. 
+    In actual usage, this structure is typically extracted from a list of 
+    raindrops that have been processed with json.load. For testing purposes, 
+    this fixture loads the content of a single raindrop saved as JSON from a file.
+    """
+    with open('tests/mock_data/rd_api_single_rd.json', "r") as f:
+        content = json.load(f)
+    return content
+
+
+@pytest.fixture
+def raindrop_object(rd_extracted_single_raindrop_dict):
+   return Raindrop(rd_extracted_single_raindrop_dict)
+
