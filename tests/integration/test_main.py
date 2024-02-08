@@ -233,17 +233,23 @@ class TestMainValid:
     --------
     What does `main.main` do and how is mocking handled?
 
-    1)  `main.main` confirms the Oauth token is not stale by making an API call using
+    1)  It confirms the Oauth token is not stale by making an API call using
         data in the .env file.
 
-    - patched to return Oauth token is valid
+    See: `test_stale_token_requests_patch` (`test_stale_token_patch` is an alternative)
+    
+    2)  It fetches all raindrops from the raindrops api.
 
-    2) Fetches all raindrops from the raindrops api.
-
-    #TODO:
-    3) Extracts newly favourited raindrops.
-    4) Compares them with the database and extracts 'new' favourites.
-    5) Writes the new favourites to todoist.
+    See: `test_get_all_rds` 
+    
+    3)  It extracts newly favourited raindrops. And it compares them with the database 
+        and extracts 'new' favourites.
+    
+    See: `test_newly_favourited_rd_extractor`
+    
+    4) Writes the new favourites to todoist.
+    
+    See: 
     """
 
     def test_stale_token_patch(self):
