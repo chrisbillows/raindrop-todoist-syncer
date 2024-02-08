@@ -342,8 +342,15 @@ class TestMainValid:
                 }
                 )
             ) as mock_init:
-        
+
+            # Uses RaindropClient() to extract data from the mock API files rather than 
+            # just loading the data directly because:
+            #   a) use the consolidated two pages of API response provided by 
+            #      `mock_requests_get`
+            #   b) ensures exact formatting correct e.g. dict that starts with 
+            #      "Raindrops processed" vs. just the list of dicts etc.
             rc = RaindropClient()
+            
             # Get mock API response of 26 raindrops / 3 favourites
             output = rc.get_all_raindrops()
             assert len(output) == 26
