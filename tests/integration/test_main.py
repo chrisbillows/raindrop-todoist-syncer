@@ -237,19 +237,19 @@ class TestMainValid:
         data in the .env file.
 
     See: `test_stale_token_requests_patch` (`test_stale_token_patch` is an alternative)
-    
+
     2)  It fetches all raindrops from the raindrops api.
 
-    See: `test_get_all_rds` 
-    
-    3)  It extracts newly favourited raindrops. And it compares them with the database 
+    See: `test_get_all_rds`
+
+    3)  It extracts newly favourited raindrops. And it compares them with the database
         and extracts 'new' favourites.
-    
+
     See: `test_newly_favourited_rd_extractor`
-    
+
     4) Writes the new favourites to todoist.
-    
-    See: 
+
+    See:
     """
 
     def test_stale_token_patch(self):
@@ -299,32 +299,32 @@ class TestMainValid:
 
     def test_newly_favourited_rd_extractor(self, mock_requests_get, mock_db, tmp_path):
         """Calls `newly_favourited_rd_extractor` and extracts two untracked favourites.
-        
+
         `newly_favourited_rd_extractor` is the main `RaindropsProcessor()` method.
-        
+
         This test creates temp database and metadata files. The temp database uses the
-        data in the `mock_db` fixture. The temp files are created with pytest's 
+        data in the `mock_db` fixture. The temp files are created with pytest's
         `tmp_path` for automatic teardown.
-        
+
         The test uses unittest patch to mock the hardcoded `__init__` values in a
-        `DatabaseManager` instance, redirecting to the temp db and metafile. All other 
+        `DatabaseManager` instance, redirecting to the temp db and metafile. All other
         `DatabaseManager` class methods function as normal.
-        
+
         `output` is a mock of a processed API output. The source is `mock_requests_get`
-        and that combined api responses is processed by 
+        and that combined api responses is processed by
         `RaindropClient.get_all_raindrops()`.
-        
-        The *Act* section of the test is the last two lines before the assert. An 
-        instance of `RaindropsProcessor` is instantiated with the dummy API response. 
+
+        The *Act* section of the test is the last two lines before the assert. An
+        instance of `RaindropsProcessor` is instantiated with the dummy API response.
         `newly_favourited_raindrops_extractor` is run on the API response.
-        
+
         Twenty six raindrops are passed. Three favourites are found and checked against
         the `mock_db` loaded from the temp file, which contains one favourite.
-                
+
         Two new and untracked favourites are returned (The Times and Amazon).
         """
         now = datetime.now().strftime("%Y%m%d_%H%M")
-                
+
         # Create mock db
         db_dir = tmp_path / "database"
         db_file_name = f"001_processed_raindrops_{now}.json"
@@ -334,29 +334,30 @@ class TestMainValid:
 
         # Create mock metafile
         meta_dir = tmp_path / "metafile"
-        meta_file_content = f"{db_dir}/{db_file_name}"  #e.g. "database/2391_processed_raindrops_20231231_0729.json"
+        meta_file_content = f"{db_dir}/{db_file_name}"  # e.g. "database/2391_processed_raindrops_20231231_0729.json"
         meta_dir.mkdir()
         with open(os.path.join(meta_dir, "metafile.txt"), "w") as f:
             f.write(meta_file_content)
 
         with patch.object(
-            DatabaseManager, '__init__', lambda self: self.__dict__.update(
+            DatabaseManager,
+            "__init__",
+            lambda self: self.__dict__.update(
                 {
-            "database_directory": str(db_dir),
-            "metafile_directory": str(meta_dir),
-            "metafile_path": os.path.join(meta_dir, 'metafile.txt')
+                    "database_directory": str(db_dir),
+                    "metafile_directory": str(meta_dir),
+                    "metafile_path": os.path.join(meta_dir, "metafile.txt"),
                 }
-                )
-            ) as mock_init:
-
-            # Uses RaindropClient() to extract data from the mock API files rather than 
+            ),
+        ) as mock_init:
+            # Uses RaindropClient() to extract data from the mock API files rather than
             # just loading the data directly because:
-            #   a) use the consolidated two pages of API response provided by 
+            #   a) use the consolidated two pages of API response provided by
             #      `mock_requests_get`
-            #   b) ensures exact formatting correct e.g. dict that starts with 
+            #   b) ensures exact formatting correct e.g. dict that starts with
             #      "Raindrops processed" vs. just the list of dicts etc.
             rc = RaindropClient()
-            
+
             # Get mock API response of 26 raindrops / 3 favourites
             output = rc.get_all_raindrops()
             assert len(output) == 26
@@ -367,6 +368,46 @@ class TestMainValid:
             new_favs_found = rp.newly_favourited_raindrops_extractor()
 
             assert len(new_favs_found) == 2
+
+    def test_task_creation(self, raindrop_object):
+        """
+
+        Takes a Raindrop object to represent a new untracked task.
+
+        """
+        # mock raindrop
+        untracked_raindrop_object_mock = raindrop_object
+
+        # mock of TodoistAPI response required by `_add_link_as_comment`
+        mock_task_response_object = Mock()
+        mock_task_response_object.id = "dummy_id"
+        mock_task_response_object.title = "**Dummy Title**"
+
+        # patch todoist API methods - not my TodoistTaskCreator class methods.
+        with patch(
+            "todoist_api_python.api.TodoistAPI.add_task",
+            return_value=mock_task_response_object,
+        ) as mock_add_task, patch(
+            "todoist_api_python.api.TodoistAPI.add_comment"
+        ) as mock_add_comment:
+
+            # create task
+            task_creator = TodoistTaskCreator(untracked_raindrop_object_mock)
+            task_creator.create_task()
+        
+            ## assertions
+            mock_add_task.assert_called()  # This just checks the method was called
+            called_args, called_kwargs = mock_add_task.call_args
+            
+            # Can use ``assert_called_once_with` but kept individual for future ref
+            assert called_kwargs.get('content') == '**Welcome to Python.org**'
+            assert called_kwargs.get('project_id') == '2314091414'
+            assert called_kwargs.get('description') == ''
+            assert called_kwargs.get('due_string') == 'today'
+            assert called_kwargs.get('due_lang') == 'en'
+            assert called_kwargs.get('priority') == 1
+            assert called_kwargs.get('labels') == ['Raindrop']
+        
 
     # @pytest.mark.skip(message="Not finished yet")
     def test_happy_path(self, mock_requests_get):
