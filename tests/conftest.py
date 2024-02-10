@@ -60,7 +60,26 @@ def mock_requests_get_no_status(monkeypatch):
 # ------------------------------- mock_db ----------------------------------------------
 
 @pytest.fixture
-def mock_db():
+def mock_db_contents() -> dict:
+    """Returns content of a valid JSON database imported as a python dictionary.
+    
+    The dictionary contains one tracked Raindrop object - the processed version of a 
+    raindrop extracted from a Raindrop.io response.
+    
+    The dictionary contains: 
+    
+    k: "Processed Raindrops" v: [<list of one Raindrop>]. 
+    
+    The Raindrop contains six k, v pairs including:
+    
+    k: "title", v: "Hacker News", 
+    k:"id", v: "28161680"
+    k: "link", v: "https://news.ycombinator.com/news"
+        
+    Returns
+    -------
+    A python dictionary of a valid dictionary containing one tracked raindrop.
+    """
     with open("tests/mock_data/mock_db.json", "r") as f:
         return json.load(f)
 
