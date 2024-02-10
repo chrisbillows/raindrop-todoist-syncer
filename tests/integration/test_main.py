@@ -417,15 +417,91 @@ class TestMainValid:
             assert called_kwargs.get('labels') == ['Raindrop']
         
 
-    # @pytest.mark.skip(message="Not finished yet")
-    def test_happy_path(self, mock_requests_get):
-        """
-        #TODO: in progress
-        Currently illustrates `mock_requests_get` successfully monkeypatching
-        `requests.get` in two seperate function calls.
-        """
-        rc = RaindropClient()
-        stale_token = rc.stale_token()
-        output = rc.get_all_raindrops()
-        assert stale_token == False
-        assert len(output) == 26
+    def test_main_happy_path_unabridged(self, mock_requests_get, mock_db, tmp_path):
+            """Integration test for main, with main handled line by line.
+            
+                      
+            
+            
+            """
+            
+            now = datetime.now().strftime("%Y%m%d_%H%M")
+
+            # Create mock db
+            db_dir = tmp_path / "database"
+            db_file_name = f"001_processed_raindrops_{now}.json"
+            db_dir.mkdir()
+            with open(os.path.join(db_dir, db_file_name), "w") as f:
+                json.dump(mock_db, f)
+
+            # Create mock metafile
+            meta_dir = tmp_path / "metafile"
+            meta_file_content = f"{db_dir}/{db_file_name}"  # e.g. "database/2391_processed_raindrops_20231231_0729.json"
+            meta_dir.mkdir()
+            with open(os.path.join(meta_dir, "metafile.txt"), "w") as f:
+                f.write(meta_file_content)
+
+            # mock of TodoistAPI response required by `_add_link_as_comment`
+            # every task created will have the same id/title
+            mock_task_response_object = Mock()
+            mock_task_response_object.id = "dummy_id"
+            mock_task_response_object.title = "**Dummy Title**"
+
+            # patch 1) TodoistAPI.add_task
+            # patch 2) TodoistAPI.add_comment
+            # patch 3) DatabaseManager.__init__.database_directory etc. 
+            with patch(
+                "todoist_api_python.api.TodoistAPI.add_task",
+                return_value=mock_task_response_object,
+            ) as mock_add_task, patch(
+                "todoist_api_python.api.TodoistAPI.add_comment"
+            ) as mock_add_comment, patch.object(
+                DatabaseManager,
+                "__init__",
+                lambda self: self.__dict__.update(
+                    {
+                        "database_directory": str(db_dir),
+                        "metafile_directory": str(meta_dir),
+                        "metafile_path": os.path.join(meta_dir, "metafile.txt"),
+                    }
+                ),
+            ) as mock_init:
+                raindrop_client = RaindropClient()
+                
+                # mock_requests_get monkeypatches `requests.get` with valid data.
+                # a) stale token returns False
+                # b) `all raindrops` is a list
+                if raindrop_client.stale_token():
+                    print("oh shit")
+                all_raindrops = raindrop_client.get_all_raindrops()
+                
+                # assert mock_requests_get monkeypatch is working
+                assert raindrop_client.stale_token() == False
+                assert len(all_raindrops) == 26
+                
+                # with `patch.object` redirects hardcoded `__init__` values in a
+                # `DatabaseManager` instance, redirecting to the temp db and metafile.                  
+                raindrops_processor = RaindropsProcessor(all_raindrops)
+                tasks_to_create = raindrops_processor.newly_favourited_raindrops_extractor()
+
+                # assert patch.object is working
+                assert len(tasks_to_create) == 2
+            
+                for task in tasks_to_create:
+                    task_creator = TodoistTaskCreator(task)
+                    task_creator.create_task()
+                
+                
+                # assert `add_task` was called twice
+                assert len(mock_add_task.call_args_list) == 2
+                
+                # assert content of calls
+                x_args, x_kwargs = mock_add_task.call_args_list[0]
+                y_args, y_kwargs = mock_add_task.call_args_list[1]
+                
+                assert x_kwargs['project_id'] == "2314091414"
+                assert x_kwargs['content'] == "**The Times & The Sunday Times: breaking news & today's latest headlines**"
+                assert y_kwargs['content'] == "**Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more**"               
+                
+
+                
