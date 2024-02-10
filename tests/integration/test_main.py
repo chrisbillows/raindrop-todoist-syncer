@@ -370,10 +370,18 @@ class TestMainValid:
             assert len(new_favs_found) == 2
 
     def test_task_creation(self, raindrop_object):
-        """
+        """Creates a mock task from a Raindrop using `TodoistTaskCreator.create_task().`
 
-        Takes a Raindrop object to represent a new untracked task.
-
+        `main.py` creates a list of untracked Raindrops called `tasks_to_create`. A for 
+        `TodoistTaskCreator.create_task().` then creates a task for each untracked
+        Raindrop via a for loop in `main.py`.
+        
+        This test uses the mock Raindrop fixture `raindrop_object` as `tasks_to_create`.
+        The test then mocks the Todoist API methods `add_task` and `add_comment` and 
+        patches those methods when instantiating a TodoistTaskCreator object.
+       
+        The test asserts that the mock methods were correctly called with the data from 
+        the mock Raindrop `raindrop_object`.
         """
         # mock raindrop
         untracked_raindrop_object_mock = raindrop_object
@@ -395,7 +403,7 @@ class TestMainValid:
             task_creator = TodoistTaskCreator(untracked_raindrop_object_mock)
             task_creator.create_task()
         
-            ## assertions
+            # assertions
             mock_add_task.assert_called()  # This just checks the method was called
             called_args, called_kwargs = mock_add_task.call_args
             
