@@ -297,7 +297,7 @@ class TestMainValid:
         assert type(output) == list
         assert output[0]["title"] == "Hacker News"
 
-    def test_newly_favourited_rd_extractor(self, mock_requests_get, mock_db, tmp_path):
+    def test_newly_favourited_rd_extractor(self, mock_requests_get, mock_db_contents, tmp_path):
         """Calls `newly_favourited_rd_extractor` and extracts two untracked favourites.
 
         `newly_favourited_rd_extractor` is the main `RaindropsProcessor()` method.
@@ -330,7 +330,7 @@ class TestMainValid:
         db_file_name = f"001_processed_raindrops_{now}.json"
         db_dir.mkdir()
         with open(os.path.join(db_dir, db_file_name), "w") as f:
-            json.dump(mock_db, f)
+            json.dump(mock_db_contents, f)
 
         # Create mock metafile
         meta_dir = tmp_path / "metafile"
@@ -417,12 +417,17 @@ class TestMainValid:
             assert called_kwargs.get('labels') == ['Raindrop']
         
 
-    def test_main_happy_path_unabridged(self, mock_requests_get, mock_db, tmp_path):
-            """Integration test for main, with main handled line by line.
+    def test_main_happy_path_unabridged(self, mock_requests_get, mock_db_contents, tmp_path):
+            """Integration test for main, with the main imported by hand, copying over
+            it's individual calls, line by line. 
             
-                      
+            This skeletal approach brought together the mocks created function call by
+            function call in this test class.
             
+            It is kept to aid future deicphering.  
             
+            See `test_main_happy_path` for the full integration test and an extensive
+            docstring.
             """
             
             now = datetime.now().strftime("%Y%m%d_%H%M")
@@ -432,7 +437,7 @@ class TestMainValid:
             db_file_name = f"001_processed_raindrops_{now}.json"
             db_dir.mkdir()
             with open(os.path.join(db_dir, db_file_name), "w") as f:
-                json.dump(mock_db, f)
+                json.dump(mock_db_contents, f)
 
             # Create mock metafile
             meta_dir = tmp_path / "metafile"
@@ -502,6 +507,108 @@ class TestMainValid:
                 assert x_kwargs['project_id'] == "2314091414"
                 assert x_kwargs['content'] == "**The Times & The Sunday Times: breaking news & today's latest headlines**"
                 assert y_kwargs['content'] == "**Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more**"               
-                
 
+
+    def test_main_happy_path(self, mock_requests_get, mock_db_contents, tmp_path):
+        """Integration test for main.
+        
+        This tests consolidates together the mocks built up for individual parts of the
+        main function in `TestMainValid`.
+        
+        The fixture `mock_requests_get` uses monkeypatch to mock any `requests.get` 
+        call made in the entire test. `mock_requests_get` returns two pages of 
+        valid Raindrop.io API response containing a total of 26 raindrops.  Three of 
+        those raindrops are favourited (k: "important", v: "true").
+        
+        Of those three favourites, one ("Hacker News") already exists in the 
+        `mock_db_contents` fixture. 
+        
+        Therefore the test should produce two newly favourite raindrops: "The Times" 
+        and "Amazon"        
+        
+        The test itself initially arranges:
+        
+        a) a mock database json file: a tmp file in a tmp directory, using pytests's 
+           `tmp_path` for automatic teardown. The database is written from the 
+           `mock_db_contents` fixture which reads in "tests/mock_data/mock_db.json".
+           
+           `mock_db_contents` contains one processed Raindrop: Hacker News. (This 
+           favourite exists in the Raindrop.io API response provided by 
+           `mock_requests.get`).
+        
+        b) a mock temp file to provide the location of the "mock_db.json".
+        
+        c) a Mock Todoist.Task API response (which is required by `add_link_as_comment`)
+        
+        The test then calls `main.py` using a `with` context managing applying unittest
+        patches to:
+               
+        1) `TodoistAPI.add_task`: a patch for the API call which returns the Mock 
+           Todoist Task object.
                 
+        2) `TodoistAPI.add_comment`: A patch for the API call. No return is specified.
+                
+        3) `DatabaseManager.__init__`: A patch for the `__init__`` method of any 
+            instance of `DatabaseManager`.  The patch overwrites the location the
+            real location of the database directory, metafile directory and metafile. 
+            They are replaced with paths to their temp equivalents.
+              
+        Assertions
+        ----------
+        The assertions utilise  `call_args_list` to assert that multiple calls to
+        the mocked Todoist.API.create_task endpoint were made correctly.
+        """
+        
+        now = datetime.now().strftime("%Y%m%d_%H%M")
+
+        # Create mock db
+        db_dir = tmp_path / "database"
+        db_file_name = f"001_processed_raindrops_{now}.json"
+        db_dir.mkdir()
+        with open(os.path.join(db_dir, db_file_name), "w") as f:
+            json.dump(mock_db_contents, f)
+
+        # Create mock metafile
+        meta_dir = tmp_path / "metafile"
+        meta_file_content = f"{db_dir}/{db_file_name}"  # e.g. "database/2391_processed_raindrops_20231231_0729.json"
+        meta_dir.mkdir()
+        with open(os.path.join(meta_dir, "metafile.txt"), "w") as f:
+            f.write(meta_file_content)
+
+        # mock of TodoistAPI response required by `_add_link_as_comment`
+        # every task created will have the same id/title
+        mock_task_response_object = Mock()
+        mock_task_response_object.id = "dummy_id"
+        mock_task_response_object.title = "**Dummy Title**"
+
+        # patch 1) TodoistAPI.add_task
+        # patch 2) TodoistAPI.add_comment
+        # patch 3) DatabaseManager.__init__.database_directory etc. 
+        with patch(
+            "todoist_api_python.api.TodoistAPI.add_task",
+            return_value=mock_task_response_object,
+        ) as mock_add_task, patch(
+            "todoist_api_python.api.TodoistAPI.add_comment"
+        ) as mock_add_comment, patch.object(
+            DatabaseManager,
+            "__init__",
+            lambda self: self.__dict__.update(
+                {
+                    "database_directory": str(db_dir),
+                    "metafile_directory": str(meta_dir),
+                    "metafile_path": os.path.join(meta_dir, "metafile.txt"),
+                }
+            ),
+        ) as mock_init:
+                main()
+        
+                # assert `add_task` was called twice
+                assert len(mock_add_task.call_args_list) == 2
+                
+                # assert content of calls
+                x_args, x_kwargs = mock_add_task.call_args_list[0]
+                y_args, y_kwargs = mock_add_task.call_args_list[1]
+                
+                assert x_kwargs['project_id'] == "2314091414"
+                assert x_kwargs['content'] == "**The Times & The Sunday Times: breaking news & today's latest headlines**"
+                assert y_kwargs['content'] == "**Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more**"               
