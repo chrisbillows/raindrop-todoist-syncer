@@ -415,7 +415,75 @@ class TestMainValid:
             assert called_kwargs.get('due_lang') == 'en'
             assert called_kwargs.get('priority') == 1
             assert called_kwargs.get('labels') == ['Raindrop']
+            
+    def test_database_write(self, mock_db_contents, raindrop_object, tmp_path):
+        """Writes a Raindrop object to an existing database.
         
+        `main.py` creates a list of untracked Raindrops called `tasks_to_create`.  
+        `TodoistTaskCreator.create_task().` creates a task for each untracked
+        Raindrop via a for loop in `main.py`. The loop then updates the database with 
+        the new Raindrop.
+                
+        This test creates temp database and metadata files. The temp database uses the
+        data in the `mock_db` fixture. The temp files are created with pytest's
+        `tmp_path` for automatic teardown.
+
+        The test uses unittest patch to mock the hardcoded `__init__` values in a
+        `DatabaseManager` instance, redirecting to the temp db and metafile. All other
+        `DatabaseManager` class methods function as normal. 
+        
+        This test uses the single mock Raindrop `raindrop_object` as `tasks_to_create`.
+                
+        The test then makes assertions against a) the original database b) the newly
+        updated database.
+        
+        The database should being containing one Raindrop and end containg two 
+        Raindrops.         
+        """
+        now = datetime.now().strftime("%Y%m%d_%H%M")
+        
+        # Create mock db
+        db_dir = tmp_path / "database"
+        db_file_name = f"001_processed_raindrops_{now}.json"
+        db_dir.mkdir()
+        with open(os.path.join(db_dir, db_file_name), "w") as f:
+            json.dump(mock_db_contents, f)
+
+        # Create mock metafile
+        meta_dir = tmp_path / "metafile"
+        meta_file_content = f"{db_dir}/{db_file_name}"  # e.g. "database/2391_processed_raindrops_20231231_0729.json"
+        meta_dir.mkdir()
+        with open(os.path.join(meta_dir, "metafile.txt"), "w") as f:
+            f.write(meta_file_content)
+
+        task = raindrop_object
+        
+        with patch.object(
+                DatabaseManager,
+                "__init__",
+                lambda self: self.__dict__.update(
+                    {
+                        "database_directory": str(db_dir),
+                        "metafile_directory": str(meta_dir),
+                        "metafile_path": os.path.join(meta_dir, "metafile.txt"),
+                    }
+                ),
+            ) as mock_init:
+    
+            dbm = DatabaseManager()
+            current_rds = dbm.get_latest_database()["Processed Raindrops"]
+            
+            dbm.update_database([task])
+            updated_rds = dbm.get_latest_database()["Processed Raindrops"]
+            
+            print(current_rds)
+            print(updated_rds)
+                                      
+            assert raindrop_object.title == "Welcome to Python.org"
+            assert current_rds[0]['title'] == "Hacker News"
+            assert updated_rds[0]['title'] == "Hacker News"
+            assert updated_rds[1]['title'] == "Welcome to Python.org"
+            assert len(updated_rds) == len(current_rds) + 1
 
     def test_main_happy_path_unabridged(self, mock_requests_get, mock_db_contents, tmp_path):
             """Integration test for main, with the main imported by hand, copying over
@@ -429,7 +497,6 @@ class TestMainValid:
             See `test_main_happy_path` for the full integration test and an extensive
             docstring.
             """
-            
             now = datetime.now().strftime("%Y%m%d_%H%M")
 
             # Create mock db
