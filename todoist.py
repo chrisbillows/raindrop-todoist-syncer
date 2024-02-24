@@ -75,7 +75,7 @@ class TodoistTaskCreator:
             )
 
             self._add_link_as_comment(task.id)
-            logger.info(f"Created task: {task.title}")
+            logger.info(f"Created task: {task.content}")
 
         except Exception as e:
             logger.error(e)
