@@ -1,43 +1,37 @@
 {
-  "_id": 621872658,
-  "broken": false,
-  "cache": {
-    "created": "2023-08-06T19:57:10.000Z",
-    "size": 182846,
-    "status": "ready"
-  },
-  "collection": { "$id": 31352328, "$ref": "collections", "oid": 31352328 },
-  "collectionId": 31352328,
-  "cover": "https://opengraph.githubassets.com/e1bbb2f1946ae6b1b3182a2a7e226114ffff058910f8426d1aad736dff6b513d/tadashi-aikawa/shukuchi",
-  "created": "2023-08-06T19:56:44.948Z",
+  "_id": 628161672,
+  "link": "https://www.python.org/",
+  "title": "Welcome to Python.org",
+  "excerpt": "The official home of the Python Programming Language",
+  "note": "",
+  "type": "link",
+  "user": { "$ref": "users", "$id": 645158 },
+  "cover": "https://www.python.org/static/opengraph-icon-200x200.png",
+  "media": [
+    {
+      "type": "image",
+      "link": "https://www.python.org/static/opengraph-icon-200x200.png"
+    }
+  ],
+  "tags": [],
+  "removed": false,
+  "collection": { "$ref": "collections", "$id": 36697540, "oid": 36697540 },
+  "highlights": [],
+  "created": "2023-08-14T09:36:24.856Z",
+  "lastUpdate": "2023-08-14T09:36:24.856Z",
+  "domain": "python.org",
   "creatorRef": {
     "_id": 645158,
     "avatar": "",
-    "email": "",
-    "name": "christopherbillows"
+    "name": "christopherbillows",
+    "email": ""
   },
-  "domain": "github.com",
-  "excerpt": "Shukuchi is an Obsidian plugin that enables you to teleport to links (URL or internal link). - tadashi-aikawa/shukuchi: Shukuchi is an Obsidian plugin that enables you to teleport to links (URL or ...",
-  "highlights": [],
-  "important": false,
-  "lastUpdate": "2023-08-06T19:56:46.806Z",
-  "link": "https://github.com/tadashi-aikawa/shukuchi",
-  "media": [
-    {
-      "link": "https://opengraph.githubassets.com/e1bbb2f1946ae6b1b3182a2a7e226114ffff058910f8426d1aad736dff6b513d/tadashi-aikawa/shukuchi",
-      "type": "image"
-    },
-    {
-      "link": "https://raw.githubusercontent.com/tadashi-aikawa/shukuchi/master/resources/direction-of-possible-teleportation.png",
-      "type": "image"
-    }
-  ],
-  "note": "",
-  "reminder": { "date": null },
-  "removed": false,
-  "sort": 621872658,
-  "tags": [],
-  "title": "tadashi-aikawa/shukuchi: Shukuchi is an Obsidian plugin that enables you to teleport to links (URL or internal link).",
-  "type": "link",
-  "user": { "$id": 645158, "$ref": "users" }
+  "sort": 628161672,
+  "cache": {
+    "status": "ready",
+    "size": 297859,
+    "created": "2023-08-14T09:37:50.337Z"
+  },
+  "broken": false,
+  "collectionId": 36697540
 }

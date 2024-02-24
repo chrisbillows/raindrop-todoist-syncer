@@ -125,9 +125,7 @@ class RaindropsProcessor:
         tracked_favs = self._fetch_tracked_favs()
         untracked_favs = self._extract_untracked_favs(all_favs, tracked_favs)
         rd_objects = self._convert_to_rd_objects(untracked_favs)
-        # TODO: This function updates the db - BEFORE the todoist tasks are successfully created.
-        # TODO: Keep for now, or the code will not function!! 
-        self._update_previously_favourited(rd_objects)
+        logger.info(f"Found {len(rd_objects)} tasks to create.")
         return rd_objects
     
     def _extract_all_fav_rds(self) -> List[Dict]:
@@ -193,31 +191,6 @@ class RaindropsProcessor:
             rd_objects.append(Raindrop(raindrop_json))
         logger.info(f"{len(rd_objects)} Raindrop object(s) created.")
         return rd_objects
-
-    def _update_previously_favourited(
-        self, raindrop_objects_for_todoist: List[Raindrop]
-    ) -> bool:
-        """
-        Update the list of previously favorited Raindrop objects.
-
-        Parameters
-        ----------
-        raindrop_objects_for_todoist : List[Raindrop]
-            List of Raindrop objects that have been favorited and are set to be sent to
-            Todoist.
-
-        Returns
-        -------
-        bool
-            Returns True after updating the list of previously favorited Raindrop
-            objects.
-        """
-        # TODO - this is the functionality that needs to be moved latter in the process
-        # flow.
-        db_manager = DatabaseManager()
-        db_manager.update_database(raindrop_objects_for_todoist)
-        logger.info(f"Updated database with {len(raindrop_objects_for_todoist)} new favs.")
-        return True
 
 
 class DatabaseManager:
@@ -382,23 +355,28 @@ class RaindropClient:
         
     def stale_token(self) -> bool:
         """
-        Checks the current Oauth token is valid by calling the Raindrop API.
+        Checks the current Oauth2 token is valid by calling the Raindrop API.
         
-        If the initial call passes - the token is valid.  Otherwise, core API call 
-        raises for status.  Valid token catches this error, extracts the 
-        response from the error object and checks for a 401 status code.  401 returns 
-        false - meaning the API has rejected the token and it needs to be refreshed.
+        If the API call succeeds - the token is valid and `stale_token` returns False.
+        If the call fails `_core_api_call` raises an error. `stale token` catches the 
+        error and looks for a 401 status_code. A 401 error indicates the token is stale 
+        and `stale_token` returns True.
         
-        Any other errors are re-raised for higher level handling.
-        
-        Returns:
-            Bool        : True if the token is valid, false if the token is invalid.
+        Any other errors are re-raised for higher level error handling. 
+         
+        Returns
+        -------
+        bool
+            False if the token is valid (i.e. `stale_token` is False, the token is not 
+            stale), True if the token is invalid (it's true the token is stale).
         """
         try:
             self._core_api_call(page=0)
+            logger.info("Oauth token is valid.")
             return False
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 401:
+                logger.warning("Oauth token is stale.")
                 return True
             else:
                 raise
@@ -448,6 +426,7 @@ class RaindropClient:
                 logger.debug(f"Page({page}) equals target pages({target_pages})")
                 break
         self._cumulative_rds_validator(cumulative_rds, current_rds, benchmark_count)
+        logger.info(f"Collected {len(cumulative_rds)} total bookmarks.")
         return cumulative_rds
 
     def _core_api_call(self, page: int) -> Response:
@@ -771,6 +750,7 @@ class RaindropOauthHandler:
         True    
             Code should raise an error if the entire operation doesn't complete.
         """
+        logger.info("Attempting to refresh token.")
         if not os.getenv("RAINDROP_REFRESH_TOKEN"):
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
         else:

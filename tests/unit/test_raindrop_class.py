@@ -2,8 +2,6 @@ from unittest import mock
 import json
 import pytest
 
-from raindrop import Raindrop
-
 
 # @pytest.fixture
 # def raindrop_body():
@@ -25,25 +23,6 @@ def rd_raw_api_response():
         content = json.load(f)
         requests_obj.json = mock.Mock(return_value=content)
     return requests_obj
-   
-
-@pytest.fixture
-def rd_extracted_single_raindrop_dict():
-    """
-    Returns a dictionary representation of a single raindrop. 
-    In actual usage, this structure is typically extracted from a list of 
-    raindrops that have been processed with json.load. For testing purposes, 
-    this fixture loads the content of a single raindrop saved as JSON from a file.
-    """
-    with open('tests/mock_data/rd_api_single_rd.json', "r") as f:
-        content = json.load(f)
-    return content
-
-
-@pytest.fixture
-def raindrop_object(rd_extracted_single_raindrop_dict):
-   return Raindrop(rd_extracted_single_raindrop_dict)
-
 
 class TestInit:
     """
