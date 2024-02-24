@@ -125,9 +125,6 @@ class RaindropsProcessor:
         tracked_favs = self._fetch_tracked_favs()
         untracked_favs = self._extract_untracked_favs(all_favs, tracked_favs)
         rd_objects = self._convert_to_rd_objects(untracked_favs)
-        # TODO: This function updates the db - BEFORE the todoist tasks are successfully created.
-        # TODO: Keep for now, or the code will not function!! 
-        # self._update_previously_favourited(rd_objects)
         logger.info(f"Found {len(rd_objects)} tasks to create.")
         return rd_objects
     
@@ -194,31 +191,6 @@ class RaindropsProcessor:
             rd_objects.append(Raindrop(raindrop_json))
         logger.info(f"{len(rd_objects)} Raindrop object(s) created.")
         return rd_objects
-
-    def _update_previously_favourited(
-        self, raindrop_objects_for_todoist: List[Raindrop]
-    ) -> bool:
-        """
-        Update the list of previously favorited Raindrop objects.
-
-        Parameters
-        ----------
-        raindrop_objects_for_todoist : List[Raindrop]
-            List of Raindrop objects that have been favorited and are set to be sent to
-            Todoist.
-
-        Returns
-        -------
-        bool
-            Returns True after updating the list of previously favorited Raindrop
-            objects.
-        """
-        # TODO - this is the functionality that needs to be moved latter in the process
-        # flow.
-        db_manager = DatabaseManager()
-        db_manager.update_database(raindrop_objects_for_todoist)
-        logger.info(f"Updated database with {len(raindrop_objects_for_todoist)} new favs.")
-        return True
 
 
 class DatabaseManager:
