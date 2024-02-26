@@ -65,7 +65,7 @@ class TodoistTaskCreator:
 
         try:
             task = self.api.add_task(
-                content=f"**{self.task_title}**",
+                content=f"{self.task_title}",
                 project_id=self.MAIN_WORK_PROJECT,
                 description=f"{self.task_description}",
                 due_string="today",
