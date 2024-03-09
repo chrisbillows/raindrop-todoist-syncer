@@ -97,7 +97,7 @@ class TodoistTaskCreator:
         """
 
         try:
-            comment = self.api.add_comment(task_id=task_id, content=self.website_link)
+            self.api.add_comment(task_id=task_id, content=self.website_link)
         except Exception as e:
             logger.error(e)
 
@@ -148,7 +148,7 @@ class TodoistTaskCreatorDev:
         task_content = single_rd_obj.title
         task_description = single_rd_obj.notes
         try:
-            task = self.api.add_task(
+            self.api.add_task(
                 content=f"**{task_content}**",
                 project_id=self.MAIN_WORK_PROJECT,
                 description=f"{task_description}",
@@ -174,7 +174,7 @@ class TodoistTaskCreatorDev:
             The id of the task
         """
         try:
-            comment = self.api.add_comment(task_id=task_id, content=self.website_link)
+            self.api.add_comment(task_id=task_id, content=self.website_link)
         except Exception as e:
             logger.error(e)
 

@@ -1,6 +1,5 @@
 import random
 from unittest.mock import patch, Mock
-from urllib import response
 
 import pytest
 from requests import HTTPError
@@ -8,7 +7,6 @@ import requests
 import tenacity
 
 from raindrop import RaindropClient
-from tests.conftest import response_one_data, response_two_data
 
 
 @pytest.fixture
@@ -21,10 +19,10 @@ class TestInit:
         assert rd_client.BASE_URL == "https://api.raindrop.io/rest/v1"
 
     def test_oauth_token(self, rd_client):
-        assert rd_client.raindrop_oauth_token != None
+        assert rd_client.raindrop_oauth_token is not None
 
     def test_headers(self, rd_client):
-        assert rd_client.headers != None
+        assert rd_client.headers is not None
 
     def test_header_structure_key_is_authorization(self, rd_client):
         headers = rd_client.headers
@@ -32,7 +30,7 @@ class TestInit:
 
     def test_header_structure__value_starts_bearer(self, rd_client):
         headers = rd_client.headers
-        assert str(list(headers.values())[0]).startswith("Bearer") == True
+        assert str(list(headers.values())[0]).startswith("Bearer")
 
 class TestStaleToken:
     
@@ -42,12 +40,12 @@ class TestStaleToken:
             mock_response.status_code = 200
             mock_call.return_value = mock_response
             result = rd_client.stale_token()
-            assert result == False
+            assert not result
     
     def test_401_response(self, rd_client):
         with patch("raindrop.RaindropClient._core_api_call", side_effect=requests.exceptions.HTTPError(response=Mock(status_code=401))):
             result = rd_client.stale_token()
-            assert result == True
+            assert result
             
     def test_404_response(self, rd_client):
         with patch("raindrop.RaindropClient._core_api_call", side_effect=requests.exceptions.HTTPError(response=Mock(status_code=404))):
@@ -63,7 +61,7 @@ class TestGetAllRaindrops:
 
     def test_get_all_raindrops_type(self, mock_requests_get, rd_client):
         result = rd_client.get_all_raindrops()
-        assert type(result) == list
+        assert isinstance(result, list)
 
     def test_get_all_raindrops_ids(self, mock_requests_get, rd_client):
         expected_ids = [
@@ -263,7 +261,7 @@ class TestCalculateMaxPages:
 class TestDataValidator:
 
     def test_data_validator_result_true(self, rd_client, response_one_data):
-        assert rd_client._data_validator(response_one_data, 26) == None
+        assert rd_client._data_validator(response_one_data, 26) is None
 
     def test_data_validator_result_false(self, rd_client):
         data = {"result": False}

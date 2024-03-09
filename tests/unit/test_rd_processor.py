@@ -1,5 +1,4 @@
 import json
-from unittest import mock
 from unittest.mock import patch
 
 import pytest
@@ -26,7 +25,7 @@ def dummy_all_favs(rd_processor):
     favourited rds in the dummy data - which, with the current data set, is one 
     favourited rd.
     """
-    all_favs = [rd for rd in rd_processor.all_rds if rd.get("important") == True]
+    all_favs = [rd for rd in rd_processor.all_rds if rd.get("important")]
     return all_favs
 
 
@@ -164,25 +163,25 @@ class TestConvertToRdObjects:
     def dummy_mock_fav(self):
         with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
             all_rds = json.load(f)
-        fav = [rd for rd in all_rds if rd.get("important") == True]
+        fav = [rd for rd in all_rds if rd.get("important")]
         return RaindropsProcessor([])._convert_to_rd_objects(fav)
         
-    def test_is_instance_of_Raindrop(self, dummy_mock_fav):
+    def test_is_instance_of_raindrop_dummy(self, dummy_mock_fav):
         assert isinstance(dummy_mock_fav[0], Raindrop)
 
-    def test_has_correct_title(self, dummy_mock_fav):
+    def test_has_correct_title_dummy(self, dummy_mock_fav):
         assert dummy_mock_fav[0].title == "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more"
 
-    def test_has_correct_id(self, dummy_mock_fav):
+    def test_has_correct_id_dummy(self, dummy_mock_fav):
         assert dummy_mock_fav[0].id == 628161667
 
-    def test_has_correct_created_date(self, dummy_mock_fav):
+    def test_has_correct_created_date_dummy(self, dummy_mock_fav):
         assert dummy_mock_fav[0].created_time == "2023-08-14T09:36:24.851Z"
 
-    def test_has_correct_note(self, dummy_mock_fav):
+    def test_has_correct_note_dummy(self, dummy_mock_fav):
         assert dummy_mock_fav[0].notes == "Test note"
         
-    def test_has_correct_link(self, dummy_mock_fav):
+    def test_has_correct_link_dummy(self, dummy_mock_fav):
         assert dummy_mock_fav[0].link == "https://www.amazon.co.uk/"      
            
     @pytest.fixture
@@ -197,22 +196,22 @@ class TestConvertToRdObjects:
         }]
         return RaindropsProcessor(fav)._convert_to_rd_objects(fav)
 
-    def test_is_instance_of_Raindrop(self, marty_mock_fav):
+    def test_is_instance_of_raindrop_marty(self, marty_mock_fav):
         assert isinstance(marty_mock_fav[0], Raindrop)
 
-    def test_has_correct_title(self, marty_mock_fav):
+    def test_has_correct_title_marty(self, marty_mock_fav):
         assert marty_mock_fav[0].title == "Marty! You gotta come back with me!"
 
-    def test_has_correct_id(self, marty_mock_fav):
+    def test_has_correct_id_marty(self, marty_mock_fav):
         assert marty_mock_fav[0].id == 123
 
-    def test_has_correct_created_date(self, marty_mock_fav):
+    def test_has_correct_created_date_marty(self, marty_mock_fav):
         assert marty_mock_fav[0].created_time == "1955-11-05T01:24:00.111Z"
 
-    def test_has_correct_note(self, marty_mock_fav):
+    def test_has_correct_note_marty(self, marty_mock_fav):
         assert marty_mock_fav[0].notes == "Back where?"
         
-    def test_has_correct_link(self, marty_mock_fav):
+    def test_has_correct_link_marty(self, marty_mock_fav):
         assert marty_mock_fav[0].link == "www.backtothefuture!.com"
     
     def test_empty_list(self):

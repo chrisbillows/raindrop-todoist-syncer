@@ -8,7 +8,6 @@ import shutil
 import webbrowser
 
 from dotenv import load_dotenv
-import ipdb
 from loguru import logger
 import requests
 from requests import Request, Response
@@ -144,7 +143,7 @@ class RaindropsProcessor:
         """
         fav_rds = []
         for raindrop in self.all_rds:
-            if raindrop.get("important") == True:
+            if raindrop.get("important"):
                 fav_rds.append(raindrop)
         logger.info(f"Includes {len(fav_rds)} favourites.")
         # logger.debug (f"Favourites: {fav_rds}")
@@ -262,7 +261,7 @@ class DatabaseManager:
 
         with open(self.metafile_path, "w") as metafile:
             metafile.write(new_database_file_name)
-        logger.info(f"Metafile updated")
+        logger.info("Metafile updated")
 
         return True
 
@@ -473,7 +472,7 @@ class RaindropClient:
         if 'x-ratelimit-remaining' in response.headers and 'x-ratelimit-limit' in response.headers:
             logger.debug(f"API calls remaining before reset: {response.headers['x-ratelimit-remaining']}/{response.headers['x-ratelimit-limit']}")
         else:
-            logger.warning(f"API headers does not include rate limit status.")        
+            logger.warning("API headers does not include rate limit status.")        
         return response
 
     def _response_validator(self, response: Response) -> None:
@@ -754,8 +753,8 @@ class RaindropOauthHandler:
         if not os.getenv("RAINDROP_REFRESH_TOKEN"):
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
         else:
-            headers = self.HEADERS
-            body = self._refresh_token_create_body()
+            headers = self.HEADERS # noqa: F841
+            body = self._refresh_token_create_body() 
             response = self._make_request(body)
             self._response_validator(response)
             oauth_token = self._extract_oauth_token(response)

@@ -2,7 +2,6 @@ from unittest.mock import Mock, patch, mock_open
 import pytest
 
 from raindrop import RaindropOauthHandler
-import raindrop
 
 @pytest.fixture
 def raindrop_oauth():

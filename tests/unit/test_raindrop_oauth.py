@@ -1,8 +1,6 @@
 from unittest import mock
 from unittest.mock import patch, mock_open
 import pytest
-import tempfile
-import os
 
 from raindrop import DuplicateOauthTokenError, EnvDataOverwriteError, OauthTokenNotWrittenError, RaindropOauthHandler
 
@@ -18,7 +16,7 @@ def raindrop_oauth():
 class TestOauthInit:
            
     def test_rd_client_id_not_none(self, raindrop_oauth):
-        assert raindrop_oauth.RAINDROP_CLIENT_ID != None
+        assert raindrop_oauth.RAINDROP_CLIENT_ID is not None
         
     def test_client_id_familiar_length(self, raindrop_oauth):
         """
@@ -30,10 +28,10 @@ class TestOauthInit:
         """
         Client ID may not always be alnum
         """
-        assert raindrop_oauth.RAINDROP_CLIENT_ID.isalnum() == True
+        assert raindrop_oauth.RAINDROP_CLIENT_ID.isalnum()
     
     def test_rd_client_secret_not_none(self, raindrop_oauth):
-        assert raindrop_oauth.RAINDROP_CLIENT_SECRET != None
+        assert raindrop_oauth.RAINDROP_CLIENT_SECRET is not None
 
     def test_rd_client_secret_familiar_length(self, raindrop_oauth):
         assert len(raindrop_oauth.RAINDROP_CLIENT_SECRET) == 36
@@ -50,7 +48,7 @@ class TestOauthInit:
                 r'[0-9a-f]{12}\Z', re.I)
             return bool(uuid_regex.match(value))
 
-        assert is_uuid(raindrop_oauth.RAINDROP_CLIENT_SECRET) == True
+        assert is_uuid(raindrop_oauth.RAINDROP_CLIENT_SECRET)
 
     def test_redirect_uri_correct(self, raindrop_oauth):
         assert raindrop_oauth.REDIRECT_URI == "http://localhost"
@@ -81,7 +79,6 @@ class TestUserPasteValidAuthCodeUrl:
 
     def test_user_paste_valid_auth_code_url_invalid_then_valid_input(self, raindrop_oauth):
         with patch('builtins.input', side_effect=['invalid_url', 'http://localhost/?code=aa4c0bc8-0e19-4615-a032-bd3379829ca7']):
-            raindrop = RaindropOauthHandler()
             result = raindrop_oauth._user_paste_valid_auth_code_url()
             assert result == 'http://localhost/?code=aa4c0bc8-0e19-4615-a032-bd3379829ca7'
  
@@ -141,7 +138,7 @@ class TestMakeRequest:
 class TestValidateApiResponse:
     
     def test_check_200_response_success(self, raindrop_oauth, response_object_200):
-        assert raindrop_oauth._response_validator(response_object_200) == None
+        assert raindrop_oauth._response_validator(response_object_200) is None
     
     def test_check_200_response_failure(self, raindrop_oauth):
         mock_response = mock.Mock()
