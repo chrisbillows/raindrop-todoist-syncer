@@ -3,3 +3,6 @@
 
 # Run ruff format
 275b4aec2941f6f16490b5272c95d0a0ad23728e
+
+# Run pre-commit on all files
+41cb6f918ce3ba567f2dcb9006d8a911a486ced7
