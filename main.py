@@ -3,7 +3,12 @@ import time
 import traceback
 
 from loguru import logger
-from raindrop import DatabaseManager, RaindropClient, RaindropOauthHandler, RaindropsProcessor
+from raindrop import (
+    DatabaseManager,
+    RaindropClient,
+    RaindropOauthHandler,
+    RaindropsProcessor,
+)
 from todoist import TodoistTaskCreator
 
 from logging_config import configure_logging
@@ -22,9 +27,9 @@ def main():
     raindrop_client = RaindropClient()
     raindrop_oauth = RaindropOauthHandler()
     dbm = DatabaseManager()
-    
+
     if raindrop_client.stale_token():
-        raindrop_oauth.refresh_token_process_runner()    
+        raindrop_oauth.refresh_token_process_runner()
     all_raindrops = raindrop_client.get_all_raindrops()
     raindrops_processor = RaindropsProcessor(all_raindrops)
     tasks_to_create = raindrops_processor.newly_favourited_raindrops_extractor()
@@ -32,7 +37,8 @@ def main():
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
         dbm.update_database([task])
-        
+
+
 def run():
     """
     Function that runs the main function and handles exceptions. Asks the user for:

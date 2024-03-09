@@ -9,6 +9,7 @@ from raindrop import Raindrop
 
 load_dotenv()
 
+
 class TodoistTaskCreator:
     """
     A class to create Todoist tasks from a Raindrop object.
@@ -101,6 +102,7 @@ class TodoistTaskCreator:
         except Exception as e:
             logger.error(e)
 
+
 class TodoistTaskCreatorDev:
     """
     A class to create Todoist tasks from a Raindrop object.
@@ -127,19 +129,19 @@ class TodoistTaskCreatorDev:
     _add_link_as_comment(task_id: str):
         Adds the Raindrops website link as a comment to the task.
     """
+
     MAIN_WORK_PROJECT = "2314091414"
     TODOIST_API_KEY = os.getenv("TODOIST_API_KEY")
 
     def __init__(self) -> None:
-        """
-        """
+        """ """
         self.api = TodoistAPI(self.TODOIST_API_KEY)
 
     def create_tasks(self, raindrops: List[Raindrop]) -> None:
         for rd in raindrops:
             self.create_task(rd)
             self._add_link_as_comment(rd["_id"])
-            logger.info("Task created %s", rd['title'])            
+            logger.info("Task created %s", rd["title"])
 
     def create_task(self, single_rd_obj: Raindrop):
         """
@@ -160,7 +162,6 @@ class TodoistTaskCreatorDev:
         # TODO: This needs to be improved.
         except Exception as e:
             logger.error(e)
-        
 
     def _add_link_as_comment(self, task_id):
         """
@@ -177,4 +178,3 @@ class TodoistTaskCreatorDev:
             self.api.add_comment(task_id=task_id, content=self.website_link)
         except Exception as e:
             logger.error(e)
-

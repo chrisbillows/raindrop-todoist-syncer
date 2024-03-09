@@ -32,29 +32,34 @@ class TestInit:
         headers = rd_client.headers
         assert str(list(headers.values())[0]).startswith("Bearer")
 
+
 class TestStaleToken:
-    
     def test_200_response(self, mocker, rd_client):
-        with patch("raindrop.RaindropClient._core_api_call") as mock_call:  
+        with patch("raindrop.RaindropClient._core_api_call") as mock_call:
             mock_response = Mock()
             mock_response.status_code = 200
             mock_call.return_value = mock_response
             result = rd_client.stale_token()
             assert not result
-    
+
     def test_401_response(self, rd_client):
-        with patch("raindrop.RaindropClient._core_api_call", side_effect=requests.exceptions.HTTPError(response=Mock(status_code=401))):
+        with patch(
+            "raindrop.RaindropClient._core_api_call",
+            side_effect=requests.exceptions.HTTPError(response=Mock(status_code=401)),
+        ):
             result = rd_client.stale_token()
             assert result
-            
+
     def test_404_response(self, rd_client):
-        with patch("raindrop.RaindropClient._core_api_call", side_effect=requests.exceptions.HTTPError(response=Mock(status_code=404))):
+        with patch(
+            "raindrop.RaindropClient._core_api_call",
+            side_effect=requests.exceptions.HTTPError(response=Mock(status_code=404)),
+        ):
             with pytest.raises(HTTPError):
                 rd_client.stale_token()
-       
+
 
 class TestGetAllRaindrops:
-
     def test_get_all_raindrops_len(self, mock_requests_get, rd_client):
         result = rd_client.get_all_raindrops()
         assert len(result) == 26
@@ -65,12 +70,35 @@ class TestGetAllRaindrops:
 
     def test_get_all_raindrops_ids(self, mock_requests_get, rd_client):
         expected_ids = [
-            628161680, 628161679, 628161678, 628161677, 628161676, 628161675, 628161674,
-            628161673, 628161672, 628161671, 628161670, 628161669, 628161668, 628161667,
-            628161666, 628161665, 628161664, 628161663, 628161662, 628161661, 628161660,
-            628161659, 628161658, 628161657, 628161656, 628161655]
+            628161680,
+            628161679,
+            628161678,
+            628161677,
+            628161676,
+            628161675,
+            628161674,
+            628161673,
+            628161672,
+            628161671,
+            628161670,
+            628161669,
+            628161668,
+            628161667,
+            628161666,
+            628161665,
+            628161664,
+            628161663,
+            628161662,
+            628161661,
+            628161660,
+            628161659,
+            628161658,
+            628161657,
+            628161656,
+            628161655,
+        ]
         result = rd_client.get_all_raindrops()
-        ids = [x['_id'] for x in result]
+        ids = [x["_id"] for x in result]
         assert ids == expected_ids
 
 
@@ -78,6 +106,7 @@ class TestCoreApiCall:
     """
     Tests for the core API call, without tenacity's retries, waits etc.
     """
+
     @pytest.mark.parametrize("page", [0, 1])
     def test__core_api_call_cached_responses_not_none(
         self, mock_requests_get, rd_client, page
@@ -97,23 +126,22 @@ class TestCoreApiCall:
     ):
         with pytest.raises(HTTPError):
             rd_client._core_api_call(10).status_code
-          
-    
+
     @pytest.mark.parametrize(
-    "page, key_path, expected_value",
-    [
-        (0, ["result"], True),
-        (1, ["result"], True),
-        (0, ["items", 0, "creatorRef", "name"], "christopherbillows"),
-        (1, ["items", 0, "creatorRef", "name"], "christopherbillows"),
-        (0, ["count"], 26),
-        (1, ["count"], 26),
-        (0, ["collectionId"], 36697540),
-        (1, ["collectionId"], 36697540),
-    ],
+        "page, key_path, expected_value",
+        [
+            (0, ["result"], True),
+            (1, ["result"], True),
+            (0, ["items", 0, "creatorRef", "name"], "christopherbillows"),
+            (1, ["items", 0, "creatorRef", "name"], "christopherbillows"),
+            (0, ["count"], 26),
+            (1, ["count"], 26),
+            (0, ["collectionId"], 36697540),
+            (1, ["collectionId"], 36697540),
+        ],
     )
-    def test_core_call_cached_responses(self, 
-    mock_requests_get, rd_client, page, key_path, expected_value
+    def test_core_call_cached_responses(
+        self, mock_requests_get, rd_client, page, key_path, expected_value
     ):
         response = rd_client._core_api_call(page)
         json_data = response.json()
@@ -142,31 +170,31 @@ class TestMakeApiCall:
         assert response_status == 200
 
     @pytest.mark.parametrize(
-    "page, key_path, expected_value",
-    [
-        (0, ["result"], True),
-        (1, ["result"], True),
-        (0, ["items", 0, "creatorRef", "name"], "christopherbillows"),
-        (1, ["items", 0, "creatorRef", "name"], "christopherbillows"),
-        (0, ["count"], 26),
-        (1, ["count"], 26),
-        (0, ["collectionId"], 36697540),
-        (1, ["collectionId"], 36697540),
-    ],
+        "page, key_path, expected_value",
+        [
+            (0, ["result"], True),
+            (1, ["result"], True),
+            (0, ["items", 0, "creatorRef", "name"], "christopherbillows"),
+            (1, ["items", 0, "creatorRef", "name"], "christopherbillows"),
+            (0, ["count"], 26),
+            (1, ["count"], 26),
+            (0, ["collectionId"], 36697540),
+            (1, ["collectionId"], 36697540),
+        ],
     )
-    def test_make_api_call_cached_responses(self, 
-    mock_requests_get, rd_client, page, key_path, expected_value
+    def test_make_api_call_cached_responses(
+        self, mock_requests_get, rd_client, page, key_path, expected_value
     ):
         response = rd_client._make_api_call(page)
         json_data = response.json()
         for key in key_path:
             json_data = json_data[key]
-        assert json_data == expected_value    
-        
+        assert json_data == expected_value
+
     @pytest.mark.parametrize(
         "status_code, exception, match_str, call_count",
         [
-            (200, None, None, 1),                 # 1 call, no retries
+            (200, None, None, 1),  # 1 call, no retries
             (403, tenacity.RetryError, None, 3),  # 3 retries before raising RetryError
             (404, tenacity.RetryError, None, 3),
             (500, tenacity.RetryError, None, 3),
@@ -175,7 +203,7 @@ class TestMakeApiCall:
     def test_makes_api_call_retries_for_various_status_codes(
         self, mocker, rd_client, status_code, exception, match_str, call_count
     ):
-        """ 
+        """
         Tests handling of different status codes including retry logic.
         """
         mock_response = Mock()
@@ -197,7 +225,6 @@ class TestMakeApiCall:
 
 
 class TestExtractBenchmarkCount:
-
     @pytest.mark.parametrize("fixture_name", ["response_one_data", "response_two_data"])
     def test_extract_benchmark_count(self, request, rd_client, fixture_name):
         data = request.getfixturevalue(fixture_name)
@@ -220,7 +247,8 @@ class TestExtractBenchmarkCount:
     def test_extract_benchmark_negative_count(self, rd_client):
         data = {"count": -300}
         with pytest.raises(
-            ValueError, match="The 'count' key was found in the response data, but it's value was negative."
+            ValueError,
+            match="The 'count' key was found in the response data, but it's value was negative.",
         ):
             rd_client._extract_benchmark_count(data)
 
@@ -233,7 +261,6 @@ class TestExtractBenchmarkCount:
 
 
 class TestCalculateMaxPages:
-
     def test_calculate_max_pages_response_one(self, rd_client, response_one_data):
         benchmark_rd_count = response_one_data["count"]
         assert rd_client._calculate_max_pages(benchmark_rd_count) == 2
@@ -259,7 +286,6 @@ class TestCalculateMaxPages:
 
 
 class TestDataValidator:
-
     def test_data_validator_result_true(self, rd_client, response_one_data):
         assert rd_client._data_validator(response_one_data, 26) is None
 
@@ -279,7 +305,6 @@ class TestDataValidator:
 
 
 class TestsIndividualRdValidator:
-
     @pytest.mark.parametrize("fixture_name", ["response_one_data", "response_two_data"])
     def test__individual_rd_validator(self, request, rd_client, fixture_name):
         data = request.getfixturevalue(fixture_name)
@@ -309,24 +334,24 @@ class TestsIndividualRdValidator:
             rd_client._individual_rd_validator(rds)
 
     # def test__individual_rd_validator_manual_ids_fail_empty(self, rd_client):
-    #     #TODO: There are two tests commented out here. They test 
-          #TODO         a) if the id is blank
-          #TODO         b) if the id is 9 digits
-          
-          #TODO  Currently the individual_rd_validator does NOT check for this.
-          
-          #TODO  We need to decide to either:
-          #TODO       1) Build in the check and raise error, but are these errors "enough"
-          #TODO       2) Log it as a warning only
-          #TODO       3) Discard completely
+    #     #TODO: There are two tests commented out here. They test
+    # TODO         a) if the id is blank
+    # TODO         b) if the id is 9 digits
+
+    # TODO  Currently the individual_rd_validator does NOT check for this.
+
+    # TODO  We need to decide to either:
+    # TODO       1) Build in the check and raise error, but are these errors "enough"
+    # TODO       2) Log it as a warning only
+    # TODO       3) Discard completely
     #     rds = [{"_id": ""}, {"_id": 456}, {"_id": 789}]
     #     with pytest.raises(
-    
+
     #         rd_client._individual_rd_validator(rds)
 
     # def test__individual_rd_validator_manual_ids_not_9_digits(self, rd_client):
     #     # TODO: Finish
-    #     rds = 
+    #     rds =
     #     with pytest.raises(
     #         ValueError, match="Invalid raindrop item found in current collection."
     #     ):
@@ -334,7 +359,6 @@ class TestsIndividualRdValidator:
 
 
 class TestCumulativeRdsValidator:
-
     @pytest.mark.parametrize(
         "benchmark_count, exception, match_str",
         [

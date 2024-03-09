@@ -93,7 +93,7 @@ class TestStaleTokenFunctionality:
             "raindrop.RaindropOauthHandler.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=True
-        ) as mock_valid_token: # noqa
+        ) as mock_valid_token:  # noqa
             main()
             mock_refresh_token_runner.assert_called_once()
 
@@ -109,7 +109,7 @@ class TestStaleTokenFunctionality:
             "raindrop.RaindropOauthHandler.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=False
-        ) as mock_valid_token: #noqa
+        ) as mock_valid_token:  # noqa
             main()
             mock_refresh_token_runner.assert_not_called()
 

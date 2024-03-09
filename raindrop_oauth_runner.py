@@ -8,4 +8,3 @@ if __name__ == "__main__":
         print(new_oauth_code)
     except ExistingTokenError as e:
         print(e)
-    
