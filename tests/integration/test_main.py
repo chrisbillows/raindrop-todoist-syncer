@@ -383,7 +383,7 @@ class TestMainValid:
         # mock of TodoistAPI response required by `_add_link_as_comment`
         mock_task_response_object = Mock()
         mock_task_response_object.id = "dummy_id"
-        mock_task_response_object.title = "**Dummy Title**"
+        mock_task_response_object.title = "Dummy Title"
 
         # patch todoist API methods - not my TodoistTaskCreator class methods.
         with patch(
@@ -401,7 +401,7 @@ class TestMainValid:
             called_args, called_kwargs = mock_add_task.call_args
 
             # Can use ``assert_called_once_with` but kept individual for future ref
-            assert called_kwargs.get("content") == "**Welcome to Python.org**"
+            assert called_kwargs.get("content") == "Welcome to Python.org"
             assert called_kwargs.get("project_id") == "2314091414"
             assert called_kwargs.get("description") == ""
             assert called_kwargs.get("due_string") == "today"
@@ -570,11 +570,11 @@ class TestMainValid:
             assert x_kwargs["project_id"] == "2314091414"
             assert (
                 x_kwargs["content"]
-                == "**The Times & The Sunday Times: breaking news & today's latest headlines**"
+                == "The Times & The Sunday Times: breaking news & today's latest headlines"
             )
             assert (
                 y_kwargs["content"]
-                == "**Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more**"
+                == "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more"
             )
 
     def test_main_happy_path(self, mock_requests_get, mock_db_contents, tmp_path):
@@ -685,11 +685,11 @@ class TestMainValid:
             assert x_kwargs["project_id"] == "2314091414"
             assert (
                 x_kwargs["content"]
-                == "**The Times & The Sunday Times: breaking news & today's latest headlines**"
+                == "The Times & The Sunday Times: breaking news & today's latest headlines"
             )
             assert (
                 y_kwargs["content"]
-                == "**Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more**"
+                == "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more"
             )
 
             # assert contents of database
