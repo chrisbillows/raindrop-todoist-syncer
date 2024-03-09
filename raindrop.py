@@ -8,14 +8,19 @@ import shutil
 import webbrowser
 
 from dotenv import load_dotenv
-import ipdb
 from loguru import logger
 import requests
 from requests import Request, Response
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 
 load_dotenv()
+
 
 class Raindrop:
     """
@@ -45,10 +50,10 @@ class Raindrop:
 
     def __init__(self, raindrop_json: Dict) -> None:
         """
-        # TODO: Add error handling. Raindrop class will crash in event of a missing 
+        # TODO: Add error handling. Raindrop class will crash in event of a missing
         # TODO  field. (rd_processor has a skipped failing test in the event of a
         # TODO  raindrop missing a field).
-        
+
         Instantiate a Raindrop object from an API output JSON for a single Raindrop.
 
         Parameters
@@ -91,34 +96,35 @@ class RaindropsProcessor:
     all_raindrops_api_response :  The list of raindrops (rds) collected from multiple API
                                   calls by RaindropClient.
     """
+
     def __init__(self, all_rds: Dict[str, Any]):
         """
         Initalise an instance of the Raindrops Process, taking all_rds as state.
-        
+
         Parameters:
             all_rds : list of all a users raindrops(rds).
-            
+
         """
         self.all_rds = all_rds
 
     def newly_favourited_raindrops_extractor(self) -> List[Raindrop]:
         """
         Process favourited rds from a list of rds.
-        
-        This is the primary method for extracting newly favourited (unprocessed) rds 
-        from a list of rds. 
-        
-        It takes a list of rds and extracts favourited rds. Compares this with the 
-        favourites the system has already processed, producing a list of newly  
-        favourited/unprocessed rds. Converts these to Raindrops objects for passing to 
+
+        This is the primary method for extracting newly favourited (unprocessed) rds
+        from a list of rds.
+
+        It takes a list of rds and extracts favourited rds. Compares this with the
+        favourites the system has already processed, producing a list of newly
+        favourited/unprocessed rds. Converts these to Raindrops objects for passing to
         Todoist.
-        
+
         TODO: Currently updates the database.  This should not happen until AFTER tasks
         creation is a success. That is when an fav rd is "processed".
-        
+
         Returns:
         -------
-        raindrop_objects_for_todoist:  List of newly favourited rds as Raindrop objects 
+        raindrop_objects_for_todoist:  List of newly favourited rds as Raindrop objects
                                        ready to be sent to Todoist.
         """
         all_favs = self._extract_all_fav_rds()
@@ -127,7 +133,7 @@ class RaindropsProcessor:
         rd_objects = self._convert_to_rd_objects(untracked_favs)
         logger.info(f"Found {len(rd_objects)} tasks to create.")
         return rd_objects
-    
+
     def _extract_all_fav_rds(self) -> List[Dict]:
         """
         Finds all favourited Raindrops in an Raindrop API response. Designed to work
@@ -144,18 +150,18 @@ class RaindropsProcessor:
         """
         fav_rds = []
         for raindrop in self.all_rds:
-            if raindrop.get("important") == True:
+            if raindrop.get("important"):
                 fav_rds.append(raindrop)
         logger.info(f"Includes {len(fav_rds)} favourites.")
         # logger.debug (f"Favourites: {fav_rds}")
         return fav_rds
-    
+
     def _fetch_tracked_favs(self):
         db_manager = DatabaseManager()
         tracked_favs = db_manager.get_latest_database()["Processed Raindrops"]
         logger.info(f"db holds {len(tracked_favs)} favourited rds previously tracked")
         return tracked_favs
-    
+
     def _extract_untracked_favs(self, all_favs: List[Dict], tracked_favs: List[Dict]):
         """
         Takes a list of favourited Raindrop objects and compares them to the list of
@@ -174,7 +180,7 @@ class RaindropsProcessor:
         logger.info(f"Total untracked favourites found: {len(untracked_favs)}")
         logger.info(f"Untracked favourites found: {untracked_favs}")
         return untracked_favs
-    
+
     def _convert_to_rd_objects(self, untracked_favs: List[Dict]) -> List[Raindrop]:
         """
         Convert a list of newly favorited Raindrop JSONs to Raindrop objects ready for
@@ -262,7 +268,7 @@ class DatabaseManager:
 
         with open(self.metafile_path, "w") as metafile:
             metafile.write(new_database_file_name)
-        logger.info(f"Metafile updated")
+        logger.info("Metafile updated")
 
         return True
 
@@ -337,6 +343,7 @@ class RaindropClient:
     >>> raindrop_client = RaindropClient()
     >>> all_raindrops = raindrop_client.get_all_raindrops()
     """
+
     BASE_URL = "https://api.raindrop.io/rest/v1"
     RAINDROPS_PER_PAGE = 25
     MAX_ALLOWED_PAGES = 200
@@ -352,22 +359,22 @@ class RaindropClient:
         self.raindrop_oauth_token = os.getenv("RAINDROP_OAUTH_TOKEN")
         self.headers = {"Authorization": f"Bearer {self.raindrop_oauth_token}"}
         logger.info("Raindrop Client initalised")
-        
+
     def stale_token(self) -> bool:
         """
         Checks the current Oauth2 token is valid by calling the Raindrop API.
-        
+
         If the API call succeeds - the token is valid and `stale_token` returns False.
-        If the call fails `_core_api_call` raises an error. `stale token` catches the 
-        error and looks for a 401 status_code. A 401 error indicates the token is stale 
+        If the call fails `_core_api_call` raises an error. `stale token` catches the
+        error and looks for a 401 status_code. A 401 error indicates the token is stale
         and `stale_token` returns True.
-        
-        Any other errors are re-raised for higher level error handling. 
-         
+
+        Any other errors are re-raised for higher level error handling.
+
         Returns
         -------
         bool
-            False if the token is valid (i.e. `stale_token` is False, the token is not 
+            False if the token is valid (i.e. `stale_token` is False, the token is not
             stale), True if the token is invalid (it's true the token is stale).
         """
         try:
@@ -380,30 +387,30 @@ class RaindropClient:
                 return True
             else:
                 raise
-                    
+
     def get_all_raindrops(self) -> List[Dict[str, Any]]:
         """
         Retrieve all raindrops from the Raindrop.io API.
 
-        This is the primary method for fetching and validating raindrops from the API. 
-        It paginates through the API responses and performs several validation checks 
+        This is the primary method for fetching and validating raindrops from the API.
+        It paginates through the API responses and performs several validation checks
         to ensure the data is consistent.
-        
-        Note: 
-            The `collection_id` defaults to 0, fetching all collections. You can specify 
-            other collection IDs if needed.   
+
+        Note:
+            The `collection_id` defaults to 0, fetching all collections. You can specify
+            other collection IDs if needed.
 
         Returns:
-            List        : A list of dictionaries where each dictionary represents a 
+            List        : A list of dictionaries where each dictionary represents a
                           single raindrop. Returns an empty list if no raindrops are
                           found.
         Raises:
             ValueError  : Raised at lower levels, see validator methods in particular.
-            
+
         Also:
             API Endpoint Documentation: https://developer.raindrop.io/v1/raindrops/multiple.
             Rds are served in pages (default 25).
-            Methods structured this way to allow further validation checks etc. to be 
+            Methods structured this way to allow further validation checks etc. to be
             easily added.
         """
         logger.info("Get all raindrops called")
@@ -417,7 +424,7 @@ class RaindropClient:
                 benchmark_count = self._extract_benchmark_count(data)
                 target_pages = self._calculate_max_pages(benchmark_count)
             self._data_validator(data, benchmark_count)
-            current_rds = data.get("items", []) 
+            current_rds = data.get("items", [])
             self._individual_rd_validator(current_rds)
             cumulative_rds.extend(current_rds)
             logger.debug(f"Length of culmative rds: {len(cumulative_rds)}")
@@ -432,10 +439,10 @@ class RaindropClient:
     def _core_api_call(self, page: int) -> Response:
         """
         Makes the API call.
-        
+
         Parameters:
-            page     : A page to request from the full paginated list. 
-        
+            page     : A page to request from the full paginated list.
+
         Returns:
             response : The API response
         """
@@ -449,38 +456,42 @@ class RaindropClient:
         response.raise_for_status()
         return response
 
-
     @retry(
-    stop=stop_after_attempt(3), 
-    wait=wait_exponential(multiplier=1, max=10), 
-    retry=retry_if_exception_type(requests.exceptions.RequestException)
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, max=10),
+        retry=retry_if_exception_type(requests.exceptions.RequestException),
     )
     def _make_api_call(self, page: int) -> Response:
         """
         A retry logic wrapper for the core API caller.
-        
-        The retry logic makes three calls with increasing waits. If the headers contain 
-        rate limit status - this is logged. NOTE: 200 responses should contain headers, 
-        but this is not currently enforced. 
-               
+
+        The retry logic makes three calls with increasing waits. If the headers contain
+        rate limit status - this is logged. NOTE: 200 responses should contain headers,
+        but this is not currently enforced.
+
         Parameters:
-            page     : A page to request from the full paginated list. 
-        
+            page     : A page to request from the full paginated list.
+
         Returns:
             response : The API response
         """
         response = self._core_api_call(page)
-        if 'x-ratelimit-remaining' in response.headers and 'x-ratelimit-limit' in response.headers:
-            logger.debug(f"API calls remaining before reset: {response.headers['x-ratelimit-remaining']}/{response.headers['x-ratelimit-limit']}")
+        if (
+            "x-ratelimit-remaining" in response.headers
+            and "x-ratelimit-limit" in response.headers
+        ):
+            logger.debug(
+                f"API calls remaining before reset: {response.headers['x-ratelimit-remaining']}/{response.headers['x-ratelimit-limit']}"
+            )
         else:
-            logger.warning(f"API headers does not include rate limit status.")        
+            logger.warning("API headers does not include rate limit status.")
         return response
 
     def _response_validator(self, response: Response) -> None:
         """
         --DEPRECATED-- Validation for the response status.
-        
-        Now replaced with raise_for_status() in _make_api_call. Kept to faciliate any 
+
+        Now replaced with raise_for_status() in _make_api_call. Kept to faciliate any
         additional response validation required in future.
         """
         pass
@@ -489,13 +500,13 @@ class RaindropClient:
         """
         Extract and store the "benchmark" total of the user's rds on the server.
 
-        This method captures the benchmark from the first API call. This total could        
-        could change if the user adds or removes rds during the collection process. Or 
+        This method captures the benchmark from the first API call. This total could
+        could change if the user adds or removes rds during the collection process. Or
         with an error.
-        
+
         Parameters:
-            data       : The JSON output from the response i.e. response.json() 
-            
+            data       : The JSON output from the response i.e. response.json()
+
         Raises:
             ValueError : If no 'count' field is found, if the value of 'count' is None
                          or the value is negative.
@@ -504,28 +515,32 @@ class RaindropClient:
         logger.debug(f"Benchmark count value: {count}")
         if count is None:
             if "count" in data:
-                raise ValueError("The 'count' key was found in the response data, but its value was None.")
+                raise ValueError(
+                    "The 'count' key was found in the response data, but its value was None."
+                )
             else:
                 raise ValueError("The 'count' key was not found in the response data.")
         if count < 0:
-            raise ValueError("The 'count' key was found in the response data, but it's value was negative.")
+            raise ValueError(
+                "The 'count' key was found in the response data, but it's value was negative."
+            )
         return count
 
     def _calculate_max_pages(self, benchmark_rd_count: int) -> int:
         """
         Calculates how many api calls are required to collect all rds.
-        
+
         This takes the benchmark_rd_count (the total rds expected) and divides it by
-        the constant RAINDROPS_PER_PAGE. This is passed back to `get_all_raindrops` as 
+        the constant RAINDROPS_PER_PAGE. This is passed back to `get_all_raindrops` as
         `target_pages` which sets the number of calls to make to the API.
-        
-        NOTE: This should not allow for any infinite loops. Divmod works correctly for 
-        0, 1, etc. Negative benchmark counts raise an error. MAX_ALLOWED_PAGES caps 
+
+        NOTE: This should not allow for any infinite loops. Divmod works correctly for
+        0, 1, etc. Negative benchmark counts raise an error. MAX_ALLOWED_PAGES caps
         calls even if raindrop.io were to pass a huge benchmark count.
-        
+
         Parameters:
             benchmark_rd_count  : the users total rds on the raindrop.io server
-            
+
         Returns:
             max_pages:          : the total number of pages required to call
         """
@@ -534,20 +549,22 @@ class RaindropClient:
         if remainder:
             max_pages += 1
         if max_pages > self.MAX_ALLOWED_PAGES:
-            raise ValueError("Max pages greater than allowed. Adjust setting in class constant to override.")
+            raise ValueError(
+                "Max pages greater than allowed. Adjust setting in class constant to override."
+            )
         return max_pages
 
     def _data_validator(self, data: Dict[str, Any], benchmark_count: int) -> None:
         """
         Validate the json output from a Raindrop api response.
-        
+
         Takes the full JSON and checks:
             - the 'count' in the current response matches the 'benchmark_count' (the
               'count' in the first API response in the current operation).
-                
+
         Parameters:
             data       : The JSON output from the response i.e. response.json()
-           
+
         Raises:
             ValueError : If the current 'count' doesn't match the 'benchmark' count.
         """
@@ -564,27 +581,33 @@ class RaindropClient:
     def _individual_rd_validator(self, rds: List[Dict[str, Any]]) -> None:
         """
         Validate individual rds returned by the Raindrop API.
-        
+
         Takes a list of rds (typically of per page length) and checks:
-            - "_id" is not len(9) : Logs a warning 
+            - "_id" is not len(9) : Logs a warning
             - "_id" is None       : Raises a ValueError
             - "_id" is not an int : Raises a ValueError
-        
-        TODO: Monitor. This may be overkill. The API docs don't specify these 
-        TODO: requirements, but logically they should apply. 
+
+        TODO: Monitor. This may be overkill. The API docs don't specify these
+        TODO: requirements, but logically they should apply.
         """
         for rd in rds:
             if len(str(rd.get("_id"))) != 9:
-                logger.warning(f"Raindrop with _id {rd.get('_id')} does not have 9 chars.")
-        
+                logger.warning(
+                    f"Raindrop with _id {rd.get('_id')} does not have 9 chars."
+                )
+
         if any(rd.get("_id") is None for rd in rds):
-            raise ValueError(f"Invalid raindrop item found in current collection: _id is None.\nRaindrop: {rd}")    
-        
+            raise ValueError(
+                f"Invalid raindrop item found in current collection: _id is None.\nRaindrop: {rd}"
+            )
+
         if any(not isinstance(rd.get("_id"), int) for rd in rds):
-            raise ValueError(f"Invalid raindrop item found in current collection: _id is not of type int.\nRaindrop: {rd}")
-                
-        logger.debug(f"Current rds (validated): {len(rds)}")        
-        
+            raise ValueError(
+                f"Invalid raindrop item found in current collection: _id is not of type int.\nRaindrop: {rd}"
+            )
+
+        logger.debug(f"Current rds (validated): {len(rds)}")
+
     def _cumulative_rds_validator(
         self,
         cumulative_rds: List[Dict[str, Any]],
@@ -593,23 +616,23 @@ class RaindropClient:
     ) -> None:
         """
         Checks the expected total rds were collected, and in the correct order.
-        
+
         The rds are collected together, 25 by 25 (or RAINDROPS_PER_PAGE), like animals
-        boarding Noah's Ark. 
-        
+        boarding Noah's Ark.
+
         Current checks:
             - the total number of collected rds matches the benchmark total.
             - checks the rds were collected in the correct order, e.g. by page, 25, 25,
               3, and not 25, 3, 25.
-                
+
         Returns:
-            None:  returns None if data is valid 
-        
+            None:  returns None if data is valid
+
         Raises:
             ValueError:
-                - If the total number of collected raindrops doesn't match the expected 
+                - If the total number of collected raindrops doesn't match the expected
                   benchmark count.
-                - If the number of raindrops on the last page does not match the 
+                - If the number of raindrops on the last page does not match the
                   expected length of the last page.
         """
         if len(cumulative_rds) != benchmark_count:
@@ -625,20 +648,26 @@ class RaindropClient:
 class ExistingTokenError(Exception):
     pass
 
+
 class MissingRefreshTokenError(Exception):
     pass
+
 
 class UserCancelledError(Exception):
     pass
 
+
 class DuplicateOauthTokenError(Exception):
     pass
+
 
 class EnvDataOverwriteError(Exception):
     pass
 
+
 class OauthTokenNotWrittenError(Exception):
     pass
+
 
 class BadProgrammerError(Exception):
     pass
@@ -691,7 +720,7 @@ class RaindropOauthHandler:
         self.RAINDROP_CLIENT_ID = os.getenv("RAINDROP_CLIENT_ID")
         self.RAINDROP_CLIENT_SECRET = os.getenv("RAINDROP_CLIENT_SECRET")
         self.RAINDROP_REFRESH_TOKEN = os.getenv("RAINDROP_REFRESH_TOKEN")
-            
+
     def new_token_process_runner(self) -> Optional[int]:
         """DO NOT USE - has errors.
         Main "driver" method that orchestrates the entire oauth process and is
@@ -722,39 +751,41 @@ class RaindropOauthHandler:
         #         # TODO : Figure out how this works
         #         logger.warning("OAuth process cancelled by the user.")
         #         return "Oauth failed."
-        print("You wrote this before you understood what was happening - needs revising")
-        raise(BadProgrammerError)
+        print(
+            "You wrote this before you understood what was happening - needs revising"
+        )
+        raise (BadProgrammerError)
 
     def refresh_token_process_runner(self) -> bool:
         """Runs the process to refresh a stale oauth token.
 
-        This method uses a Raindrop Oauth2 refresh token to generate a new valid oauth2 
-        token. 
-        
-        1) Checks a refresh token is present. 
-        2) Creates a valid request (header/body) and makes the request. 
+        This method uses a Raindrop Oauth2 refresh token to generate a new valid oauth2
+        token.
+
+        1) Checks a refresh token is present.
+        2) Creates a valid request (header/body) and makes the request.
         3) Validates the response object
-        4) Extracts the new oauth token from the response.  
-        5) Creates a new .env file body using the current .env body and overwriting the 
-            stale oauth token.  
+        4) Extracts the new oauth token from the response.
+        5) Creates a new .env file body using the current .env body and overwriting the
+            stale oauth token.
         6) Validates the new .env body then overwrites the old .env file.
-        
+
         Raises
         ------
         MissingRefreshTokenError
-            If no refresh token is present. This can be used to prevent the refresh 
+            If no refresh token is present. This can be used to prevent the refresh
             process running and divert to a "authorization code" oauth request.
-        
+
         Returns
         -------
-        True    
+        True
             Code should raise an error if the entire operation doesn't complete.
         """
         logger.info("Attempting to refresh token.")
         if not os.getenv("RAINDROP_REFRESH_TOKEN"):
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
         else:
-            headers = self.HEADERS
+            headers = self.HEADERS  # noqa: F841
             body = self._refresh_token_create_body()
             response = self._make_request(body)
             self._response_validator(response)
@@ -762,7 +793,9 @@ class RaindropOauthHandler:
             new_env_body = self._create_updated_env_body(oauth_token)
             validated_new_body = self._new_env_validator(new_env_body)
             self._write_new_body_to_env(validated_new_body)
-            logger.info("Success! Oauth token refreshed. Oauth {oauth_token} written to .env.")
+            logger.info(
+                "Success! Oauth token refreshed. Oauth {oauth_token} written to .env."
+            )
             return True
 
     def _open_authorization_code_url(self) -> bool:
@@ -848,7 +881,7 @@ class RaindropOauthHandler:
             "redirect_uri": "http://localhost",
         }
         return body
-    
+
     def _refresh_token_create_body(self) -> Dict[str, str]:
         """
         Create body/data dict required to refresh an Oauth token.
@@ -857,10 +890,10 @@ class RaindropOauthHandler:
             "client_id": self.RAINDROP_CLIENT_ID,
             "client_secret": self.RAINDROP_CLIENT_SECRET,
             "grant_type": "refresh_token",
-            "refresh_token": self.RAINDROP_REFRESH_TOKEN
+            "refresh_token": self.RAINDROP_REFRESH_TOKEN,
         }
         return body
- 
+
     def _make_request(self, body: Dict[str, str]) -> Request:
         """
         Makes the oauth request and returns a Request object.
@@ -879,11 +912,15 @@ class RaindropOauthHandler:
         Checks a Response object returned by the Raindrop API Oauth2 process is valid.
         """
         if response.status_code != 200:
-            raise ValueError(f"Response status code is not 200 (as required in the docs). Status code was {response.status_code} - {response.text}")
-    
+            raise ValueError(
+                f"Response status code is not 200 (as required in the docs). Status code was {response.status_code} - {response.text}"
+            )
+
         if response.json().get("access_token") is None:
-            raise ValueError(f"Response code 200 but no token in response. Full response {response.json()}")
-        
+            raise ValueError(
+                f"Response code 200 but no token in response. Full response {response.json()}"
+            )
+
     def _extract_oauth_token(self, oauth_response: Response) -> str:
         """
         Extracts the oauth token from the response.json of a Response object.
@@ -892,127 +929,127 @@ class RaindropOauthHandler:
         access_token = data.get("access_token")
         logger.info(f"Your access token is {access_token}")
         return access_token
-    
+
     def _create_updated_env_body(self, oauth_token: str) -> list:
         """Recreates the existing .env body including a newly extracted oauth token.
-        
+
         1) Uses the new oauth token to creates a full line, with correct .env format.
-        2) Reads the current .env into memory. 
-        3) Checks if a line already begins RAINDROP_OAUTH_TOKEN.  
-        4) If so, it targets that line and overwrites it with the new oauth line. 
+        2) Reads the current .env into memory.
+        3) Checks if a line already begins RAINDROP_OAUTH_TOKEN.
+        4) If so, it targets that line and overwrites it with the new oauth line.
         5) If not, it adds the new_line to the end of the body.
-         
+
         Parameters
         ----------
-        oauth_token: str     
+        oauth_token: str
             An extracted Raindrop oauth token from an oauth response. This response will
-            be the same for an oauth request of either grant_type (authorization_code or 
+            be the same for an oauth request of either grant_type (authorization_code or
             refresh_token).
-                     
+
         Returns
         -------
         lines: list
-               The previous .env body as a list, with the new oauth token included 
-               (either overwriting the previous token, or inserted at the end.) 
+               The previous .env body as a list, with the new oauth token included
+               (either overwriting the previous token, or inserted at the end.)
         """
         new_line = f"RAINDROP_OAUTH_TOKEN = '{oauth_token}'\n"
         target_line = None
-        
-        with open('.env', 'r') as file:
+
+        with open(".env", "r") as file:
             lines = file.readlines()
-        
+
         for idx, line in enumerate(lines):
-            if line.startswith('RAINDROP_OAUTH_TOKEN'):
+            if line.startswith("RAINDROP_OAUTH_TOKEN"):
                 target_line = idx
                 break
-        
+
         if target_line is not None:
             lines[target_line] = new_line
         else:
             lines.append(new_line)
-            
+
         return lines
 
     def _new_env_validator(self, new_body: list) -> list:
-        """Runs simple validation checks on a new .env body. 
-        
+        """Runs simple validation checks on a new .env body.
+
         See inline comments for specific checks.
-                 
+
         Known edge cases that will pass:
         - where a line was inserted in error AND a line was deleted in error would pass.
-        - where a line is added in an overwrite situation 
-            (i.e. the fact it doesn't distinguish between an `overwrite` where lines 
+        - where a line is added in an overwrite situation
+            (i.e. the fact it doesn't distinguish between an `overwrite` where lines
             stay the same vs. `no existing oauth` where lines increase by one).
-        - where an existing token is deleted 
-        
+        - where an existing token is deleted
+
         TODO: Raised issue #6. Using length to validate the body may not work. It may
-            be simpler to handle .env bodies with/without a previous oauth token 
+            be simpler to handle .env bodies with/without a previous oauth token
             seperately. Or to do a more involved check e.g. extract all tokens from the
             old and new .envs into dicts and compare one-by-one.
-       
+
         Parameters
         -----------
         new_body : list
             The potential new body content for the .env file.
-        
+
         Returns
         -------
         new_body : list
             The now validated body content for the .env file.
-        
+
         Raises:
         -------
         DuplicateOauthTokenError
             If the new_body contains duplicate tokens.
         EnvDataOverwriteError
             If the new_body is longer or shorter than expected, suggesting a failure in
-            the new_body creation logic. 
+            the new_body creation logic.
         """
-        with open('.env', 'r') as file:
+        with open(".env", "r") as file:
             lines = file.readlines()
-            
+
         # Check env has changed
         if new_body == lines:
             raise EnvDataOverwriteError
-        
+
         # Check has changed by none (overwrite) or one line only.
         length_difference = abs(len(new_body) - len(lines))
-        
+
         if length_difference > 1:
             raise EnvDataOverwriteError
-        
+
         oauth_tokens = []
         for line in new_body:
             if line.startswith("RAINDROP_OAUTH"):
                 oauth_tokens.append(line)
 
-        # Checks an oauth token is present                
+        # Checks an oauth token is present
         if len(oauth_tokens) == 0:
             raise OauthTokenNotWrittenError
-        
+
         # Checks no more than one oauth token is present
         if len(oauth_tokens) > 1:
             raise DuplicateOauthTokenError
-           
-        return new_body    
-            
+
+        return new_body
+
     def _write_new_body_to_env(self, validated_new_body: list) -> bool:
         """Uses the new env_body to the overwrite the existing .env file.
-        
+
         Backs up the existing .env to .env.backup. Then overwrites the .env file with
         the updated and validated new body - including the new oauth code.
-        
+
         Parameters:
         -----------
         validated_new_body: list
             The newly updated, newly validated content for the .env.
-                                        
+
         Returns:
         --------
-        True: bool            
+        True: bool
             Will error if write fails. So I am reliably informed.
         """
-        shutil.copy('.env', '.env.backup')
-        with open('.env', 'w') as file:
-            file.writelines(validated_new_body)        
+        shutil.copy(".env", ".env.backup")
+        with open(".env", "w") as file:
+            file.writelines(validated_new_body)
         return True

@@ -2,22 +2,13 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
-import shutil
-from tempfile import TemporaryDirectory
-from typing import Any
 from unittest.mock import patch, Mock
 
 import pytest
-from requests import Response
 
 from main import main
 from raindrop import DatabaseManager, RaindropClient, RaindropsProcessor
-import raindrop
 from todoist import TodoistTaskCreator
-
-from tests.conftest import mock_requests_get
-
-# This returns a valid response object
 
 
 @pytest.fixture
@@ -88,7 +79,7 @@ class TestStaleTokenFunctionality:
         writes to the db at the moment!
         """
         x = main()
-        assert x == None
+        assert x is None
 
     @pytest.mark.skip(reason="this is prob fine but need to check")
     def test_invalid_token(
@@ -102,7 +93,7 @@ class TestStaleTokenFunctionality:
             "raindrop.RaindropOauthHandler.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=True
-        ) as mock_valid_token:
+        ) as mock_valid_token:  # noqa
             main()
             mock_refresh_token_runner.assert_called_once()
 
@@ -118,7 +109,7 @@ class TestStaleTokenFunctionality:
             "raindrop.RaindropOauthHandler.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=False
-        ) as mock_valid_token:
+        ) as mock_valid_token:  # noqa
             main()
             mock_refresh_token_runner.assert_not_called()
 
@@ -279,7 +270,7 @@ class TestMainValid:
         """
         rc = RaindropClient()
         stale_token = rc.stale_token()
-        assert stale_token == False
+        assert not stale_token
 
     def test_get_all_rds(self, mock_requests_get):
         """Calls `get_all_rds` with a mock valid API response of 26 raindrops .
@@ -295,7 +286,7 @@ class TestMainValid:
         rc = RaindropClient()
         output = rc.get_all_raindrops()
         assert len(output) == 26
-        assert type(output) == list
+        assert isinstance(output, list)
         assert output[0]["title"] == "Hacker News"
 
     def test_newly_favourited_rd_extractor(
@@ -352,7 +343,7 @@ class TestMainValid:
                     "metafile_path": os.path.join(meta_dir, "metafile.txt"),
                 }
             ),
-        ) as mock_init:
+        ) as mock_init:  # noqa F841
             # Uses RaindropClient() to extract data from the mock API files rather than
             # just loading the data directly because:
             #   a) use the consolidated two pages of API response provided by
@@ -400,7 +391,7 @@ class TestMainValid:
             return_value=mock_task_response_object,
         ) as mock_add_task, patch(
             "todoist_api_python.api.TodoistAPI.add_comment"
-        ) as mock_add_comment:
+        ) as mock_add_comment:  # noqa F841
             # create task
             task_creator = TodoistTaskCreator(untracked_raindrop_object_mock)
             task_creator.create_task()
@@ -470,7 +461,7 @@ class TestMainValid:
                     "metafile_path": os.path.join(meta_dir, "metafile.txt"),
                 }
             ),
-        ) as mock_init:
+        ) as mock_init:  # noqa F841
             dbm = DatabaseManager()
             current_rds = dbm.get_latest_database()["Processed Raindrops"]
 
@@ -533,7 +524,7 @@ class TestMainValid:
             return_value=mock_task_response_object,
         ) as mock_add_task, patch(
             "todoist_api_python.api.TodoistAPI.add_comment"
-        ) as mock_add_comment, patch.object(
+        ) as mock_add_comment, patch.object(  # noqa F841
             DatabaseManager,
             "__init__",
             lambda self: self.__dict__.update(
@@ -543,7 +534,7 @@ class TestMainValid:
                     "metafile_path": os.path.join(meta_dir, "metafile.txt"),
                 }
             ),
-        ) as mock_init:
+        ) as mock_init:  # noqa F841
             raindrop_client = RaindropClient()
 
             # mock_requests_get monkeypatches `requests.get` with valid data.
@@ -554,7 +545,7 @@ class TestMainValid:
             all_raindrops = raindrop_client.get_all_raindrops()
 
             # assert mock_requests_get monkeypatch is working
-            assert raindrop_client.stale_token() == False
+            assert not raindrop_client.stale_token()
             assert len(all_raindrops) == 26
 
             # with `patch.object` redirects hardcoded `__init__` values in a
@@ -671,7 +662,7 @@ class TestMainValid:
             return_value=mock_task_response_object,
         ) as mock_add_task, patch(
             "todoist_api_python.api.TodoistAPI.add_comment"
-        ) as mock_add_comment, patch.object(
+        ) as mock_add_comment, patch.object(  # noqa F841
             DatabaseManager,
             "__init__",
             lambda self: self.__dict__.update(
@@ -681,7 +672,7 @@ class TestMainValid:
                     "metafile_path": os.path.join(meta_dir, "metafile.txt"),
                 }
             ),
-        ) as mock_init:
+        ) as mock_init:  # noqa F841
             main()
 
             # assert `add_task` was called twice
