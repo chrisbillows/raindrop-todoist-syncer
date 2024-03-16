@@ -29,10 +29,14 @@ def custom_open_mock(*args, **kwargs):
 
 
 class TestOauthRefreshTokenRunner:
+    
+    @patch("raindrop.RaindropOauthHandler._make_request", return_value=response_valid)
+    @patch("shutil.copy")
+    @patch("raindrop.open", side_effect=custom_open_mock)
     def test_valid_response(self, raindrop_oauth, response_valid):
         """
         Patches the request with the mock response object `response valid` - which is
-        assigned a status code and a json.return_valye.
+        assigned a status code and a json.return_value.
 
         Patches shutil globally to avoid creating the backup .env copy in
         _write_new_body_to_env.
@@ -43,10 +47,7 @@ class TestOauthRefreshTokenRunner:
         overwrite in _write_new_body_to_env.
         """
         expected = True
-        with patch(
-            "raindrop.RaindropOauthHandler._make_request", return_value=response_valid
-        ), patch("shutil.copy"), patch("raindrop.open", side_effect=custom_open_mock):
-            actual = raindrop_oauth.refresh_token_process_runner()
+        actual = raindrop_oauth.refresh_token_process_runner()
         assert actual == expected
 
         def test_more_test_cases(self):
