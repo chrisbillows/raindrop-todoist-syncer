@@ -178,3 +178,10 @@ class TodoistTaskCreatorDev:
             self.api.add_comment(task_id=task_id, content=self.website_link)
         except Exception as e:
             logger.error(e)
+
+
+class TodositCredentialsManager:
+    def __init__(self) -> None:
+        """Provide variables and methods for managing Raindrop Oauth2 credentials."""
+        self.env_file = ".env"
+        self.TODOIST_API_KEY = os.getenv("TODOIST_API_KEY")

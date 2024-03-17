@@ -67,6 +67,35 @@ def mock_requests_get_no_status(monkeypatch):
     monkeypatch.setattr("requests.get", _mocked_requests_get_no_status)
 
 
+# ------------------------ mock_requests_response_object--------------------------------
+
+
+@pytest.fixture
+def response_object_200():
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.text = "Success"
+    mock_response.json.return_value = {"access_token": "I am your access token"}
+    return mock_response
+
+
+@pytest.fixture
+def response_object_400():
+    mock_response = Mock()
+    mock_response.status_code = 400
+    mock_response.text = "Bad request"
+    return mock_response
+
+
+@pytest.fixture
+def response_object_200_but_no_token():
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.text = "Success"
+    mock_response.json.return_value = {}
+    return mock_response
+
+
 # ------------------------------- mock_db ----------------------------------------------
 
 
@@ -114,3 +143,48 @@ def rd_extracted_single_raindrop_dict():
 @pytest.fixture
 def raindrop_object(rd_extracted_single_raindrop_dict):
     return Raindrop(rd_extracted_single_raindrop_dict)
+
+
+# ------------------------------- .env files ------------------------------------------
+
+
+@pytest.fixture
+def placeholder_one_liner_env():
+    mock_content = "Existing content\n"
+    return mock_content
+
+
+@pytest.fixture
+def full_env_oauth_first():
+    mock_content = [
+        "RAINDROP_ACCESS_TOKEN='8bde7733-b4de-4fb5-92ab-2709434a504e'\n"
+        "TODOIST_API_KEY = 'c691d501580e381be70d1a97f5k6624d5939b142'\n",
+        "RAINDROP_CLIENT_ID = '6491cb52xvt44917d70b2d7a'\n",
+        "RAINDROP_CLIENT_SECRET = '22914d01-5c7b-49a5-c928-a229ed013c66'\n",
+        "RAINDROP_REFRESH_TOKEN = 'b8791s45-e83f-4699-al48-39693177h296'\n",
+    ]
+    return "".join(mock_content)
+
+
+@pytest.fixture
+def full_env_oauth_middle():
+    mock_content = [
+        "TODOIST_API_KEY = 'c691d501580e381be70d1a97f5k6624d5939b142'\n",
+        "RAINDROP_CLIENT_ID = '6491cb52xvt44917d70b2d7a'\n",
+        "RAINDROP_ACCESS_TOKEN='8bde7733-b4de-4fb5-92ab-2709434a504e'\n"
+        "RAINDROP_CLIENT_SECRET = '22914d01-5c7b-49a5-c928-a229ed013c66'\n",
+        "RAINDROP_REFRESH_TOKEN = 'b8791s45-e83f-4699-al48-39693177h296'\n",
+    ]
+    return "".join(mock_content)
+
+
+@pytest.fixture
+def full_env_oauth_last():
+    mock_content = [
+        "TODOIST_API_KEY = 'c691d501580e381be70d1a97f5k6624d5939b142'\n",
+        "RAINDROP_CLIENT_ID = '6491cb52xvt44917d70b2d7a'\n",
+        "RAINDROP_CLIENT_SECRET = '22914d01-5c7b-49a5-c928-a229ed013c66'\n",
+        "RAINDROP_REFRESH_TOKEN = 'b8791s45-e83f-4699-al48-39693177h296'\n",
+        "RAINDROP_ACCESS_TOKEN='8bde7733-b4de-4fb5-92ab-2709434a504e'\n",
+    ]
+    return "".join(mock_content)
