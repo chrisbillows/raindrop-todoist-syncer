@@ -4,7 +4,27 @@ from unittest.mock import Mock
 import pytest
 from requests import HTTPError
 
-from raindrop import Raindrop
+from raindrop import (
+    Raindrop,
+    RaindropAccessTokenRefresher,
+    RaindropCredentialsManager,
+    EnvironmentVariablesFileManager,
+)
+
+
+# ---------------------------------- objects -------------------------------------------
+
+
+@pytest.fixture
+def environmental_variables_file_manager():
+    return EnvironmentVariablesFileManager()
+
+
+@pytest.fixture
+def raindrop_access_token_refresher():
+    evfm = EnvironmentVariablesFileManager()
+    rcm = RaindropCredentialsManager()
+    return RaindropAccessTokenRefresher(rcm, evfm)
 
 
 # ------------------------------- mock_requests_get-------------------------------------

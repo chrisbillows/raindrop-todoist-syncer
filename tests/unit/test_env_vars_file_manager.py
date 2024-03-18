@@ -3,16 +3,10 @@ from unittest.mock import patch, mock_open
 import pytest
 
 from raindrop import (
-    EnvironmentVariablesFileManager,
     DuplicateAccessTokenError,
     EnvDataOverwriteError,
     AccessTokenNotWrittenError,
 )
-
-
-@pytest.fixture
-def environmental_variables_file_manager():
-    return EnvironmentVariablesFileManager()
 
 
 class TestCreateEnvBodyWithUpdatedAccessToken:

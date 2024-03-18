@@ -855,7 +855,9 @@ class RaindropCredentialsManager:
         """Extracts the access token from the response.json of a Response object."""
         data = oauth_response.json()
         access_token = data.get("access_token")
-        logger.info(f"Your access token is {access_token}")
+        logger.info(
+            f"Your access token is {access_token}. I am of type {type(access_token)}"
+        )
         return access_token
 
 
@@ -878,13 +880,20 @@ class RaindropAccessTokenRefresher:
         This method uses a Raindrop Oauth2 refresh token to generate a new, valid oauth2
         access token.
 
-        1) Checks a refresh token is present.
-        2) Creates a valid request (header/body) and makes the request.
+        Using `raindrop_access_token_refresher`:
+        1) Creates a valid request (header/body)
+
+        Using `raindrop_credentials_manager`:
+
+        2) Makes the request.
         3) Validates the response object
-        4) Extracts the new oauth token from the response.
-        5) Creates a new .env file body using the current .env body and overwriting the
+        4) Extracts the new access token from the response.
+
+        Using `environment_variables_file_manager`:`
+        4) Creates a new .env file body using the current .env body and overwriting the
             stale oauth token.
-        6) Validates the new .env body then overwrites the old .env file.
+        5) Validates the new .env body then overwrites the old .env file.
+
 
         Raises
         ------
@@ -898,12 +907,11 @@ class RaindropAccessTokenRefresher:
             Code should raise an error if the entire operation doesn't complete.
         """
         logger.info("Attempting to refresh token.")
-        headers = self.HEADERS  # noqa: F841
-        body = self._refresh_token_create_body(headers)
+        body = self._refresh_token_create_body()
         response = self.rcm.make_request(body)
         self.rcm.response_validator(response)
         access_token = self.rcm.extract_access_token(response)
-        self.evfm(access_token)
+        self.evfm.write_new_access_token(access_token)
 
     def _refresh_token_create_body(self) -> Dict[str, str]:
         """

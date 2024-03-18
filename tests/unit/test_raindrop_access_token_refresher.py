@@ -1,19 +1,3 @@
-import pytest
-
-from raindrop import (
-    RaindropAccessTokenRefresher,
-    RaindropCredentialsManager,
-    EnvironmentVariablesFileManager,
-)
-
-
-@pytest.fixture
-def raindrop_access_token_refresher():
-    evfm = EnvironmentVariablesFileManager
-    rcm = RaindropCredentialsManager()
-    return RaindropAccessTokenRefresher(rcm, evfm)
-
-
 class TestCreateBody:
     def test_refresh_token_create_body_valid(self, raindrop_access_token_refresher):
         expected_body = {
