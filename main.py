@@ -5,8 +5,10 @@ import traceback
 from loguru import logger
 from raindrop import (
     DatabaseManager,
+    EnvironmentVariablesFileManager,
+    RaindropAccessTokenRefresher,
     RaindropClient,
-    RaindropOauthHandler,
+    RaindropCredentialsManager,
     RaindropsProcessor,
 )
 from todoist import TodoistTaskCreator
@@ -24,15 +26,17 @@ def main():
     - Process these raindrops.
     - For each processed task, create a task in Todoist.
     """
-    raindrop_client = RaindropClient()
-    raindrop_oauth = RaindropOauthHandler()
+    rc = RaindropClient()
+    rcm = RaindropCredentialsManager()
+    evfm = EnvironmentVariablesFileManager()
+    ratr = RaindropAccessTokenRefresher(rcm, evfm)
     dbm = DatabaseManager()
 
-    if raindrop_client.stale_token():
-        raindrop_oauth.refresh_token_process_runner()
-    all_raindrops = raindrop_client.get_all_raindrops()
-    raindrops_processor = RaindropsProcessor(all_raindrops)
-    tasks_to_create = raindrops_processor.newly_favourited_raindrops_extractor()
+    if rc.stale_token():
+        ratr.refresh_token_process_runner()
+    all_raindrops = rc.get_all_raindrops()
+    rp = RaindropsProcessor(all_raindrops)
+    tasks_to_create = rp.newly_favourited_raindrops_extractor()
     for task in tasks_to_create:
         task_creator = TodoistTaskCreator(task)
         task_creator.create_task()
