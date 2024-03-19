@@ -19,7 +19,7 @@ class TestInit:
         assert rd_client.BASE_URL == "https://api.raindrop.io/rest/v1"
 
     def test_oauth_token(self, rd_client):
-        assert rd_client.raindrop_oauth_token is not None
+        assert rd_client.raindrop_access_token is not None
 
     def test_headers(self, rd_client):
         assert rd_client.headers is not None

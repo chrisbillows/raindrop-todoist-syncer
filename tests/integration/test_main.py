@@ -90,7 +90,7 @@ class TestStaleTokenFunctionality:
         caplog,
     ):
         with patch(
-            "raindrop.RaindropOauthHandler.refresh_token_process_runner"
+            "raindrop.RaindropAccessTokenRefresher.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=True
         ) as mock_valid_token:  # noqa
@@ -106,7 +106,7 @@ class TestStaleTokenFunctionality:
         caplog,
     ):
         with patch(
-            "raindrop.RaindropOauthHandler.refresh_token_process_runner"
+            "raindrop.RaindropAccessTokenRefresher.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=False
         ) as mock_valid_token:  # noqa
