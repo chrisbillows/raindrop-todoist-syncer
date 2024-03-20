@@ -14,8 +14,7 @@ def custom_open_mock(*args, **kwargs):
 
 class TestAccessTokenRefreshRunner:
     # Patch the environment variable.
-    # @patch("os.environ", {"RAINDROP_REFRESH_TOKEN": "mock_refresh_token"})
-    #
+    @patch("os.environ", {"RAINDROP_REFRESH_TOKEN": "mock_refresh_token"})
     @patch("raindrop.open", side_effect=custom_open_mock)
     # Prevents creation of .env.backup in evfm._write_new_body_to_env
     @patch("shutil.copy")
@@ -47,22 +46,3 @@ class TestAccessTokenRefreshRunner:
         expected = None
         actual = raindrop_access_token_refresher.refresh_token_process_runner()
         assert actual == expected
-
-
-# class TestAcessTokenRefresher:
-#     # Patches rcm.make_request to return response_object_200, which contains a 200
-#     # status code and a json.return value of {"access_token": "I am your access token"}
-#     @patch("raindrop.RaindropCredentialsManager.make_request", return_value=response_object_200)
-#     # Prevents creation of .env.backup in evfm._write_new_body_to_env
-#     @patch("shutil.copy")
-#     #
-#     @patch("raindrop.open", side_effect=custom_open_mock)
-#     #Patch the environment variable.
-#     @mock.patch.dict("os.environ", {"RAINDROP_REFRESH_TOKEN": "mock_refresh_token"})
-#     def test_please_work(self, response_object_200):
-#         rcm = RaindropCredentialsManager()
-#         evfm = EnvironmentVariablesFileManager()
-#         ratr = RaindropAccessTokenRefresher(rcm, evfm)
-#         # Reponse object 200: "I am your access token"
-
-#         assert actual == expected
