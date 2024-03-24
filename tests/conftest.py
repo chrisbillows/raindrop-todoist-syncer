@@ -21,7 +21,8 @@ def environmental_variables_file_manager():
 
 
 @pytest.fixture
-def raindrop_access_token_refresher():
+def raindrop_access_token_refresher(monkeypatch):
+    monkeypatch.setenv("RAINDROP_REFRESH_TOKEN", "dummy_refresh_token")
     evfm = EnvironmentVariablesFileManager()
     rcm = RaindropCredentialsManager()
     return RaindropAccessTokenRefresher(rcm, evfm)
