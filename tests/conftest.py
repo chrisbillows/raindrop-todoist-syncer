@@ -1,16 +1,30 @@
-import json
-from unittest.mock import Mock
-
+# Configure the test enviornment before importing any modules that depend on environment
+# variables e.g. API keys.
 import pytest
-from requests import HTTPError
+from dotenv import load_dotenv
+import os
 
-from raindrop import (
+
+# load_dotenv MUST happen before any modules that rely on it.
+# ``autouse=True` automatically loads the fixture into all tests.
+@pytest.fixture(autouse=True, scope="session")
+def load_env():
+    """Automatically loads environment variables from .env.test for all tests."""
+    os.environ["ENV"] = "test"
+    load_dotenv(dotenv_path=".env.test", override=True)
+
+
+# noqa E402 ignores these imports being after the fixture
+import json  # noqa E402
+from unittest.mock import Mock  # noqa E402
+from requests import HTTPError  # noqa E402
+
+from raindrop import (  # noqa E402
     Raindrop,
     RaindropAccessTokenRefresher,
     RaindropCredentialsManager,
     EnvironmentVariablesFileManager,
 )
-
 
 # ---------------------------------- objects -------------------------------------------
 
