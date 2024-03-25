@@ -1,13 +1,10 @@
 import os
 from typing import List
 
-from dotenv import load_dotenv
 from loguru import logger
 from todoist_api_python.api import TodoistAPI
 
 from raindrop import Raindrop
-
-load_dotenv()
 
 
 class TodoistTaskCreator:

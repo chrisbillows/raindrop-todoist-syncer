@@ -2,13 +2,12 @@ from datetime import datetime, timezone
 import json
 import os
 import re
+import shutil
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, parse_qs
-import shutil
 import warnings
 import webbrowser
 
-from dotenv import load_dotenv
 from loguru import logger
 import requests
 from requests import Request, Response
@@ -22,9 +21,6 @@ from tenacity import (
 
 def unfinished_warning(message):
     warnings.warn(message, category=UserWarning, stacklevel=2)
-
-
-load_dotenv()
 
 
 class ExistingTokenError(Exception):

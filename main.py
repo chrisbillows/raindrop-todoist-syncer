@@ -1,8 +1,20 @@
+# Configure environment variables. This must be done before modules that rely on
+# environment variables e.g raindrop and todoist classes.
+import os
+from dotenv import load_dotenv
+
+# If a test, do not load .env. The test set-up will use .env.test.
+if os.getenv("ENV") != "test":
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
 import datetime
+import os
 import time
 import traceback
-
 from loguru import logger
+
 from raindrop import (
     DatabaseManager,
     EnvironmentVariablesFileManager,
