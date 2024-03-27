@@ -1,15 +1,15 @@
-import json
 from unittest.mock import patch
 
+import json
 import pytest
 
 from raindrop import RaindropsProcessor
-from todoist import TodoistTaskCreatorDev
+from todoist import TodoistTaskCreator
 
 
 @pytest.fixture
-def todoist_task_creator():
-    return TodoistTaskCreatorDev()
+def todoist_task_creator(raindrop_object):
+    return TodoistTaskCreator(raindrop_object)
 
 
 @pytest.fixture
@@ -34,16 +34,12 @@ class TestInit:
 
 
 class TestCreateTask:
-    def test_create_task_actual_rd_objects(
-        self, todoist_task_creator, list_of_rd_objects
-    ):
-        rd_object = list_of_rd_objects[2]
-
+    def test_create_task_actual_rd_objects(self, todoist_task_creator):
         with patch("todoist.TodoistAPI.add_task") as mock_add_task:
-            todoist_task_creator.create_task(rd_object)
+            todoist_task_creator.create_task()
             mock_add_task.assert_called_once_with(
-                content="**Obsidian - Sharpen your thinking**",
-                project_id=TodoistTaskCreatorDev.MAIN_WORK_PROJECT,
+                content="Welcome to Python.org",
+                project_id=todoist_task_creator.MAIN_WORK_PROJECT,
                 description="",
                 due_string="today",
                 due_lang="en",
