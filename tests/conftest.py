@@ -106,7 +106,7 @@ def mock_requests_get_no_status(monkeypatch):
 
 
 @pytest.fixture
-def response_object_200():
+def oauth_request_response_object_200():
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.text = "Success"
@@ -115,7 +115,7 @@ def response_object_200():
 
 
 @pytest.fixture
-def response_object_400():
+def oauth_request_response_object_400():
     mock_response = Mock()
     mock_response.status_code = 400
     mock_response.text = "Bad request"
@@ -123,7 +123,7 @@ def response_object_400():
 
 
 @pytest.fixture
-def response_object_200_but_no_token():
+def oauth_request_response_object_200_but_no_token():
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.text = "Success"
