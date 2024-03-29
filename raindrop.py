@@ -2,13 +2,12 @@ from datetime import datetime, timezone
 import json
 import os
 import re
+import shutil
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, parse_qs
-import shutil
 import warnings
 import webbrowser
 
-from dotenv import load_dotenv
 from loguru import logger
 import requests
 from requests import Request, Response
@@ -22,9 +21,6 @@ from tenacity import (
 
 def unfinished_warning(message):
     warnings.warn(message, category=UserWarning, stacklevel=2)
-
-
-load_dotenv()
 
 
 class ExistingTokenError(Exception):
@@ -677,8 +673,25 @@ class RaindropClient:
 
 
 class EnvironmentVariablesFileManager:
-    def __init__(self) -> None:
-        pass
+    """A class to mange the contents of .env file.
+
+    This class manages the contents of the .env file itself. It contains methods that
+    allow for refresh
+
+    Attributes
+    ----------
+    env_file: default = "env"
+        Path to a .env file that can will be read into memory and overwritten.
+
+    NOTE
+    ----
+    `env_file` is not read into the environment here. This is for updating the file,
+    and allows for passing different .env files for testing.
+    """
+
+    def __init__(self, env_file=".env", env_backup=".env.backup") -> None:
+        self.env_file = env_file
+        self.env_backup = env_backup
 
     def write_new_access_token(self, access_token: str) -> None:
         new_env_body = self._create_env_body_with_updated_access_token(access_token)
@@ -714,7 +727,7 @@ class EnvironmentVariablesFileManager:
         new_line = f"RAINDROP_ACCESS_TOKEN = '{access_token}'\n"
         target_line = None
 
-        with open(".env", "r") as file:
+        with open(self.env_file, "r") as file:
             lines = file.readlines()
 
         for idx, line in enumerate(lines):
@@ -764,7 +777,7 @@ class EnvironmentVariablesFileManager:
             If the new_body is longer or shorter than expected, suggesting a failure in
             the new_body creation logic.
         """
-        with open(".env", "r") as file:
+        with open(self.env_file, "r") as file:
             lines = file.readlines()
 
         # Check env has changed
@@ -808,8 +821,8 @@ class EnvironmentVariablesFileManager:
         True: bool
             Will error if write fails. So I am reliably informed.
         """
-        shutil.copy(".env", ".env.backup")
-        with open(".env", "w") as file:
+        shutil.copy(self.env_file, self.env_backup)
+        with open(self.env_file, "w") as file:
             file.writelines(validated_new_body)
 
 
