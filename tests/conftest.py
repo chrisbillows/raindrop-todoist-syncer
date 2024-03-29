@@ -1,6 +1,8 @@
 # Configure the test enviornment before importing any modules that depend on environment
 # variables e.g. API keys.
+import shutil
 import pytest
+from pathlib import Path
 from dotenv import load_dotenv
 import os
 
@@ -36,8 +38,22 @@ def environmental_variables_file_manager():
 
 @pytest.fixture
 def raindrop_access_token_refresher(monkeypatch):
-    monkeypatch.setenv("RAINDROP_REFRESH_TOKEN", "dummy_refresh_token")
-    evfm = EnvironmentVariablesFileManager()
+    # A fixture to instantiante a RaindropAcessTokenRefresher instance that uses the
+    # `.env.test` file.
+    evfm = EnvironmentVariablesFileManager(".env.test")
+    rcm = RaindropCredentialsManager()
+    return RaindropAccessTokenRefresher(rcm, evfm)
+
+
+@pytest.fixture
+def raindrop_access_token_refresher_for_file_overwriting(monkeypatch, tmp_path):
+    # A fixture to instantiante a RaindropAcessTokenRefresher instance that uses a
+    # tmp_path duplicate of `.env.test`` to allow for both reading and overwriting.
+    env_file = Path(".env.test")
+    tmp_env_file = str(tmp_path / ".temp_env")
+    tmp_env_backup_file = str(tmp_path / ".temp_backup_env")
+    shutil.copyfile(env_file, tmp_env_file)
+    evfm = EnvironmentVariablesFileManager(tmp_env_file, tmp_env_backup_file)
     rcm = RaindropCredentialsManager()
     return RaindropAccessTokenRefresher(rcm, evfm)
 
@@ -107,6 +123,7 @@ def mock_requests_get_no_status(monkeypatch):
 
 @pytest.fixture
 def oauth_request_response_object_200():
+    # A valid Oauth2 response with an access token.
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.text = "Success"
@@ -116,6 +133,7 @@ def oauth_request_response_object_200():
 
 @pytest.fixture
 def oauth_request_response_object_400():
+    # An invalid Oauth2 response.
     mock_response = Mock()
     mock_response.status_code = 400
     mock_response.text = "Bad request"
@@ -124,6 +142,7 @@ def oauth_request_response_object_400():
 
 @pytest.fixture
 def oauth_request_response_object_200_but_no_token():
+    # A response with a valid code but no access token is present.
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.text = "Success"
