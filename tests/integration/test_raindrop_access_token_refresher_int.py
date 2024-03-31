@@ -4,7 +4,7 @@ from unittest.mock import patch
 def test_fixture_uses_env_test_file(raindrop_access_token_refresher):
     # Test the `raindrop_access_token_refresher` is correctly picking up the .env.test
     # file instead of the user's .env file.
-    expected = ".env.test"
+    expected = "mock_data/.env.test"
     evfm = raindrop_access_token_refresher.evfm
     actual = evfm.env_file
     assert actual == expected

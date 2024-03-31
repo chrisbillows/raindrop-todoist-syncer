@@ -8,6 +8,7 @@ from urllib.parse import urlparse, parse_qs
 import warnings
 import webbrowser
 
+from dotenv import load_dotenv
 from loguru import logger
 import requests
 from requests import Request, Response
@@ -17,6 +18,8 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
+
+load_dotenv()
 
 
 def unfinished_warning(message):

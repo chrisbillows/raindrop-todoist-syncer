@@ -1,32 +1,33 @@
-# Configure the test enviornment before importing any modules that depend on environment
-# variables e.g. API keys.
-import shutil
-import pytest
-from pathlib import Path
-from dotenv import load_dotenv
+import json
 import os
+from pathlib import Path
+from unittest.mock import Mock
+import shutil
 
+import pytest
+from requests import HTTPError
 
-# load_dotenv MUST happen before any modules that rely on it.
-# ``autouse=True` automatically loads the fixture into all tests.
-@pytest.fixture(autouse=True, scope="session")
-def load_env():
-    """Automatically loads environment variables from .env.test for all tests."""
-    os.environ["ENV"] = "test"
-    load_dotenv(dotenv_path=".env.test", override=True)
-
-
-# noqa E402 ignores these imports being after the fixture
-import json  # noqa E402
-from unittest.mock import Mock  # noqa E402
-from requests import HTTPError  # noqa E402
-
-from raindrop import (  # noqa E402
+from raindrop import (
     Raindrop,
     RaindropAccessTokenRefresher,
     RaindropCredentialsManager,
     EnvironmentVariablesFileManager,
 )
+
+# ---------------------------------- env vars-------------------------------------------
+
+
+# Sets the environment variables for all tests without being passed via `autouse=True`.
+# Can be overriden by passing a monkeypatch.setenv fixture to a test, or using a
+# monkeypatch.setenv within a test.
+@pytest.fixture(autouse=True)
+def set_env_vars_confest(monkeypatch):
+    monkeypatch.setenv("TODOIST_API_KEY", "abc123")
+    monkeypatch.setenv("RAINDROP_CLIENT_ID", "cdf456")
+    monkeypatch.setenv("RAINDROP_CLIENT_SECRET", "ghi789")
+    monkeypatch.setenv("RAINDROP_REFRESH_TOKEN", "jkl987")
+    monkeypatch.setenv("RAINDROP_ACCESS_TOKEN", "mno654")
+
 
 # ---------------------------------- objects -------------------------------------------
 
@@ -40,7 +41,7 @@ def environmental_variables_file_manager():
 def raindrop_access_token_refresher(monkeypatch):
     # A fixture to instantiante a RaindropAcessTokenRefresher instance that uses the
     # `.env.test` file.
-    evfm = EnvironmentVariablesFileManager(".env.test")
+    evfm = EnvironmentVariablesFileManager("mock_data/.env.test")
     rcm = RaindropCredentialsManager()
     return RaindropAccessTokenRefresher(rcm, evfm)
 
@@ -49,9 +50,11 @@ def raindrop_access_token_refresher(monkeypatch):
 def raindrop_access_token_refresher_for_file_overwriting(monkeypatch, tmp_path):
     # A fixture to instantiante a RaindropAcessTokenRefresher instance that uses a
     # tmp_path duplicate of `.env.test`` to allow for both reading and overwriting.
-    env_file = Path(".env.test")
+    env_file = Path("tests") / "mock_data" / ".env.test"
+    print(os.getcwd())
     tmp_env_file = str(tmp_path / ".temp_env")
     tmp_env_backup_file = str(tmp_path / ".temp_backup_env")
+    print(env_file)
     shutil.copyfile(env_file, tmp_env_file)
     evfm = EnvironmentVariablesFileManager(tmp_env_file, tmp_env_backup_file)
     rcm = RaindropCredentialsManager()
