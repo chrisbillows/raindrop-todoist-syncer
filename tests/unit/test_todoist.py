@@ -3,8 +3,8 @@ from unittest.mock import patch
 import json
 import pytest
 
-from raindrop import RaindropsProcessor
-from todoist import TodoistTaskCreator
+from raindrop_todoist_syncer.raindrop import RaindropsProcessor
+from raindrop_todoist_syncer.todoist import TodoistTaskCreator
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from raindrop import RaindropCredentialsManager
+from raindrop_todoist_syncer.raindrop import RaindropCredentialsManager
 
 
 @pytest.fixture

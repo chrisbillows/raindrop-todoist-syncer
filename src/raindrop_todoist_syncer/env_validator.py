@@ -2,9 +2,12 @@ import re
 
 from loguru import logger
 
-from logging_config import configure_logging
-from raindrop import EnvironmentVariablesFileManager, RaindropCredentialsManager
-from todoist import TodositCredentialsManager
+from raindrop_todoist_syncer.logging_config import configure_logging
+from src.raindrop_todoist_syncer.raindrop import (
+    EnvironmentVariablesFileManager,
+    RaindropCredentialsManager,
+)
+from src.raindrop_todoist_syncer.todoist import TodositCredentialsManager
 
 configure_logging()
 

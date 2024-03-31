@@ -3,7 +3,7 @@ import os
 from loguru import logger
 from todoist_api_python.api import TodoistAPI
 
-from raindrop import Raindrop
+from raindrop_todoist_syncer.raindrop import Raindrop
 
 
 class TodoistTaskCreator:

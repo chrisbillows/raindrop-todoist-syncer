@@ -2,7 +2,7 @@ import datetime
 import traceback
 from loguru import logger
 
-from src.raindrop_todoist_syncer.raindrop import (
+from raindrop_todoist_syncer.raindrop import (
     DatabaseManager,
     EnvironmentVariablesFileManager,
     RaindropAccessTokenRefresher,
@@ -10,7 +10,7 @@ from src.raindrop_todoist_syncer.raindrop import (
     RaindropCredentialsManager,
     RaindropsProcessor,
 )
-from src.raindrop_todoist_syncer.todoist import TodoistTaskCreator
+from raindrop_todoist_syncer.todoist import TodoistTaskCreator
 
 from raindrop_todoist_syncer.logging_config import configure_logging
 

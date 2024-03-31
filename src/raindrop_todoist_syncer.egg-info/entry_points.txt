@@ -1,0 +1,3 @@
+[console_scripts]
+raindrop-todoist-syncer = raindrop_todoist_syncer.main:main
+rts = raindrop_todoist_syncer.main:main
