@@ -191,6 +191,7 @@ class TestMakeApiCall:
             json_data = json_data[key]
         assert json_data == expected_value
 
+    @pytest.mark.slow
     @pytest.mark.parametrize(
         "status_code, exception, match_str, call_count",
         [
