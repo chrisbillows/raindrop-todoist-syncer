@@ -10,8 +10,8 @@ from raindrop_todoist_syncer.main import main
 from raindrop_todoist_syncer.raindrop import (
     DatabaseManager,
     RaindropClient,
-    RaindropsProcessor,
 )
+from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.todoist import TodoistTaskCreator
 
 
@@ -258,7 +258,10 @@ class TestMainValid:
         `test_stale_token_requests_patch` for the preferred approach.
         """
         rc = RaindropClient()
-        with patch("raindrop_todoist_syncer.raindrop.RaindropClient.stale_token", return_value=7):
+        with patch(
+            "raindrop_todoist_syncer.raindrop.RaindropClient.stale_token",
+            return_value=7,
+        ):
             stale_token = rc.stale_token()
         assert stale_token == 7
 

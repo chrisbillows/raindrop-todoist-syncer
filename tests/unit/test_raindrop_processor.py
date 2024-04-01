@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from raindrop_todoist_syncer.raindrop import RaindropsProcessor
+from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.rd_class import Raindrop
 
 
@@ -44,7 +44,7 @@ class TestMainFunction:
     fiddle with every single thing! LIVE WITH THIS AS IT IS!
     """
 
-    @patch("raindrop_todoist_syncer.raindrop.DatabaseManager")
+    @patch("raindrop_todoist_syncer.rd_process.DatabaseManager")
     def test_newly_favourited_raindrops_exctractor(self, MockDatabaseManager):
         mock_db_return_value = {
             "Processed Raindrops": [
@@ -102,7 +102,7 @@ class TestExtractAllFavRds:
 
 
 class TestFetchTrackedFavs:
-    @patch("raindrop_todoist_syncer.raindrop.DatabaseManager")
+    @patch("raindrop_todoist_syncer.rd_process.DatabaseManager")
     def test_fetch_tracked_favs(self, MockDatabaseManager):
         mock_db_return_value = {
             "Processed Raindrops": [

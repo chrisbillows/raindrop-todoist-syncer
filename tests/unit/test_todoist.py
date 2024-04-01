@@ -3,7 +3,7 @@ from unittest.mock import patch
 import json
 import pytest
 
-from raindrop_todoist_syncer.raindrop import RaindropsProcessor
+from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.todoist import TodoistTaskCreator
 
 
