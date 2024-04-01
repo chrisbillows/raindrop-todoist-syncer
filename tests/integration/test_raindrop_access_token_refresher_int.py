@@ -41,7 +41,7 @@ class TestAccessTokenRefreshRunner:
     # The only mocked element is the request to the Raindrop.io API itself.
 
     # Patches `rcm.make_request`` which requests a new Oauth2 access token.
-    @patch("raindrop.RaindropCredentialsManager.make_request")
+    @patch("raindrop_todoist_syncer.raindrop.RaindropCredentialsManager.make_request")
     def test_happy_path(
         self,
         mock_make_request,
@@ -59,7 +59,7 @@ class TestAccessTokenRefreshRunner:
         assert actual == expected
 
     # Patches `rcm.make_request`` which requests a new Oauth2 access token.
-    @patch("raindrop.RaindropCredentialsManager.make_request")
+    @patch("raindrop_todoist_syncer.raindrop.RaindropCredentialsManager.make_request")
     def test_temp_env_file_updated_correctly(
         self,
         mock_make_request,
@@ -82,7 +82,7 @@ class TestAccessTokenRefreshRunner:
         expected = "I am your access token"
         assert actual == expected
 
-    @patch("raindrop.RaindropCredentialsManager.make_request")
+    @patch("raindrop_todoist_syncer.raindrop.RaindropCredentialsManager.make_request")
     def test_temp_env_file_backedup_correctly(
         self,
         mock_make_request,

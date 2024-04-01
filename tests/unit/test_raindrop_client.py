@@ -6,7 +6,7 @@ from requests import HTTPError
 import requests
 import tenacity
 
-from src.raindrop_todoist_syncer.raindrop import RaindropClient
+from raindrop_todoist_syncer.raindrop import RaindropClient
 
 
 @pytest.fixture
