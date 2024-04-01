@@ -43,7 +43,7 @@ class TestMainFunction:
     fiddle with every single thing! LIVE WITH THIS AS IT IS!
     """
 
-    @patch("raindrop.DatabaseManager")
+    @patch("raindrop_todoist_syncer.raindrop.DatabaseManager")
     def test_newly_favourited_raindrops_exctractor(self, MockDatabaseManager):
         mock_db_return_value = {
             "Processed Raindrops": [
@@ -101,7 +101,7 @@ class TestExtractAllFavRds:
 
 
 class TestFetchTrackedFavs:
-    @patch("raindrop.DatabaseManager")
+    @patch("raindrop_todoist_syncer.raindrop.DatabaseManager")
     def test_fetch_tracked_favs(self, MockDatabaseManager):
         mock_db_return_value = {
             "Processed Raindrops": [

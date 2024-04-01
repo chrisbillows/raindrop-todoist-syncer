@@ -35,7 +35,9 @@ class TestInit:
 
 class TestCreateTask:
     def test_create_task_actual_rd_objects(self, todoist_task_creator):
-        with patch("todoist.TodoistAPI.add_task") as mock_add_task:
+        with patch(
+            "raindrop_todoist_syncer.todoist.TodoistAPI.add_task"
+        ) as mock_add_task:
             todoist_task_creator.create_task()
             mock_add_task.assert_called_once_with(
                 content="Welcome to Python.org",

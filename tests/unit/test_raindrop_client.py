@@ -35,7 +35,9 @@ class TestInit:
 
 class TestStaleToken:
     def test_200_response(self, mocker, rd_client):
-        with patch("raindrop.RaindropClient._core_api_call") as mock_call:
+        with patch(
+            "raindrop_todoist_syncer.raindrop.RaindropClient._core_api_call"
+        ) as mock_call:
             mock_response = Mock()
             mock_response.status_code = 200
             mock_call.return_value = mock_response
@@ -44,7 +46,7 @@ class TestStaleToken:
 
     def test_401_response(self, rd_client):
         with patch(
-            "raindrop.RaindropClient._core_api_call",
+            "raindrop_todoist_syncer.raindrop.RaindropClient._core_api_call",
             side_effect=requests.exceptions.HTTPError(response=Mock(status_code=401)),
         ):
             result = rd_client.stale_token()
@@ -52,7 +54,7 @@ class TestStaleToken:
 
     def test_404_response(self, rd_client):
         with patch(
-            "raindrop.RaindropClient._core_api_call",
+            "raindrop_todoist_syncer.raindrop.RaindropClient._core_api_call",
             side_effect=requests.exceptions.HTTPError(response=Mock(status_code=404)),
         ):
             with pytest.raises(HTTPError):
