@@ -10,7 +10,7 @@ from raindrop_todoist_syncer.raindrop import (
     EnvironmentVariablesFileManager,
     RaindropClient,
 )
-from raindrop_todoist_syncer.todoist import TodoistTaskCreator
+from raindrop_todoist_syncer.td_task_create import TodoistTaskCreator
 
 from raindrop_todoist_syncer.logging_config import configure_logging
 

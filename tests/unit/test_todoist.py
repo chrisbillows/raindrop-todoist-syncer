@@ -4,7 +4,7 @@ import json
 import pytest
 
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
-from raindrop_todoist_syncer.todoist import TodoistTaskCreator
+from raindrop_todoist_syncer.td_task_create import TodoistTaskCreator
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ class TestInit:
 class TestCreateTask:
     def test_create_task_actual_rd_objects(self, todoist_task_creator):
         with patch(
-            "raindrop_todoist_syncer.todoist.TodoistAPI.add_task"
+            "raindrop_todoist_syncer.td_task_create.TodoistAPI.add_task"
         ) as mock_add_task:
             todoist_task_creator.create_task()
             mock_add_task.assert_called_once_with(
