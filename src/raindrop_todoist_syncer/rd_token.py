@@ -6,8 +6,8 @@ import webbrowser
 from loguru import logger
 from urllib.parse import urlparse, parse_qs
 
+from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
 from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
-from raindrop_todoist_syncer.raindrop import EnvironmentVariablesFileManager
 
 
 def unfinished_warning(message):

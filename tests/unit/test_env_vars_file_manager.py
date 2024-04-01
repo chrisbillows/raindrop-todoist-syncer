@@ -2,7 +2,7 @@ from unittest.mock import patch, mock_open
 
 import pytest
 
-from raindrop_todoist_syncer.raindrop import (
+from raindrop_todoist_syncer.env_manage import (
     DuplicateAccessTokenError,
     EnvDataOverwriteError,
     AccessTokenNotWrittenError,

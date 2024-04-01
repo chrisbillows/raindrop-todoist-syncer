@@ -4,7 +4,7 @@ from loguru import logger
 
 from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 from raindrop_todoist_syncer.logging_config import configure_logging
-from raindrop_todoist_syncer.raindrop import EnvironmentVariablesFileManager
+from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
 
 # from raindrop_todoist_syncer.todoist import TodoistCredentialsManager
 
