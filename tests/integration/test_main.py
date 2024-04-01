@@ -6,11 +6,9 @@ from unittest.mock import patch, Mock
 
 import pytest
 
+from raindrop_todoist_syncer.db_manage import DatabaseManager
 from raindrop_todoist_syncer.main import main
-from raindrop_todoist_syncer.raindrop import (
-    DatabaseManager,
-    RaindropClient,
-)
+from raindrop_todoist_syncer.raindrop import RaindropClient
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.todoist import TodoistTaskCreator
 

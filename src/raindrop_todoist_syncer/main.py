@@ -2,9 +2,9 @@ import datetime
 import traceback
 from loguru import logger
 
+from raindrop_todoist_syncer.db_manage import DatabaseManager
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.raindrop import (
-    DatabaseManager,
     EnvironmentVariablesFileManager,
     RaindropAccessTokenRefresher,
     RaindropClient,
