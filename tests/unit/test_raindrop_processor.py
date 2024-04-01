@@ -3,7 +3,8 @@ from unittest.mock import patch
 
 import pytest
 
-from raindrop_todoist_syncer.raindrop import RaindropsProcessor, Raindrop
+from raindrop_todoist_syncer.raindrop import RaindropsProcessor
+from raindrop_todoist_syncer.rd_class import Raindrop
 
 
 @pytest.fixture
