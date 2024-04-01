@@ -7,7 +7,7 @@ import shutil
 import pytest
 from requests import HTTPError
 
-from src.raindrop_todoist_syncer.raindrop import (
+from raindrop_todoist_syncer.raindrop import (
     Raindrop,
     RaindropAccessTokenRefresher,
     RaindropCredentialsManager,

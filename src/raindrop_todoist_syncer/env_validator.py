@@ -3,7 +3,7 @@ import re
 from loguru import logger
 
 from raindrop_todoist_syncer.logging_config import configure_logging
-from src.raindrop_todoist_syncer.raindrop import (
+from raindrop_todoist_syncer.raindrop import (
     EnvironmentVariablesFileManager,
     RaindropCredentialsManager,
 )
