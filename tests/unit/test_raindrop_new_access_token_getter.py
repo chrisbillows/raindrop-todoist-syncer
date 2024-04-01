@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
+from raindrop_todoist_syncer.rd_token import RaindropNewAccessTokenGetter
 from raindrop_todoist_syncer.raindrop import (
-    RaindropNewAccessTokenGetter,
     RaindropCredentialsManager,
     EnvironmentVariablesFileManager,
 )
