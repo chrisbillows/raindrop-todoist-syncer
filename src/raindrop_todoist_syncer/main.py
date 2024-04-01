@@ -3,12 +3,12 @@ import traceback
 from loguru import logger
 
 from raindrop_todoist_syncer.db_manage import DatabaseManager
+from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
 from raindrop_todoist_syncer.raindrop import (
     EnvironmentVariablesFileManager,
     RaindropClient,
-    RaindropCredentialsManager,
 )
 from raindrop_todoist_syncer.todoist import TodoistTaskCreator
 
