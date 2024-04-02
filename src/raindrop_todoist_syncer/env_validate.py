@@ -2,9 +2,11 @@ import re
 
 from loguru import logger
 
-from logging_config import configure_logging
-from raindrop import EnvironmentVariablesFileManager, RaindropCredentialsManager
-from todoist import TodositCredentialsManager
+from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
+from raindrop_todoist_syncer.logging_config import configure_logging
+from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
+
+# from raindrop_todoist_syncer.todoist import TodoistCredentialsManager
 
 configure_logging()
 
@@ -42,7 +44,7 @@ def sense_check_raindrop_client_secret(rcm: RaindropCredentialsManager):
 
 
 def required_env_variables_checker(
-    rcm: RaindropCredentialsManager, tcm: TodositCredentialsManager
+    rcm: RaindropCredentialsManager,  # tcm: TodositCredentialsManager
 ):
     """Validate the .env file contains all required environment variables.
 
@@ -60,16 +62,16 @@ def required_env_variables_checker(
         raise ValueError("RAINDROP_REFRESH_TOKEN is not set.")
     if not rcm.RAINDROP_ACCESS_TOKEN:
         raise ValueError("RAINDROP_ACCESS_TOKEN is not set.")
-    if not tcm.TODOIST_API_KEY:
-        raise ValueError("TODOIST_API_KEY is not set.")
+    # if not tcm.TODOIST_API_KEY:
+    #     raise ValueError("TODOIST_API_KEY is not set.")
 
 
 def main():
     logger.info("Verifying .env configuration.")
     evfm = EnvironmentVariablesFileManager()
     rcm = RaindropCredentialsManager(evfm)
-    tcm = TodositCredentialsManager()
-    required_env_variables_checker(rcm, tcm)
+    # tcm = TodositCredentialsManager()
+    # required_env_variables_checker(rcm, tcm)
     sense_check_raindrop_client_id(rcm)
     sense_check_raindrop_client_secret(rcm)
     logger.info(".env configuration verified.")

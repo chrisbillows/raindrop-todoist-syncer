@@ -6,9 +6,11 @@ from unittest.mock import patch, Mock
 
 import pytest
 
-from main import main
-from raindrop import DatabaseManager, RaindropClient, RaindropsProcessor
-from todoist import TodoistTaskCreator
+from raindrop_todoist_syncer.db_manage import DatabaseManager
+from raindrop_todoist_syncer.main import main
+from raindrop_todoist_syncer.rd_client import RaindropClient
+from raindrop_todoist_syncer.rd_process import RaindropsProcessor
+from raindrop_todoist_syncer.td_task import TodoistTaskCreator
 
 
 @pytest.fixture
@@ -90,7 +92,7 @@ class TestStaleTokenFunctionality:
         caplog,
     ):
         with patch(
-            "raindrop.RaindropAccessTokenRefresher.refresh_token_process_runner"
+            "raindrop_todoist_syncer.rd_token.RaindropAccessTokenRefresher.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=True
         ) as mock_valid_token:  # noqa
@@ -106,7 +108,7 @@ class TestStaleTokenFunctionality:
         caplog,
     ):
         with patch(
-            "raindrop.RaindropAccessTokenRefresher.refresh_token_process_runner"
+            "raindrop_todoist_syncer.rd_token.RaindropAccessTokenRefresher.refresh_token_process_runner"
         ) as mock_refresh_token_runner, patch(
             "raindrop.RaindropClient.stale_token", return_value=False
         ) as mock_valid_token:  # noqa
@@ -254,7 +256,10 @@ class TestMainValid:
         `test_stale_token_requests_patch` for the preferred approach.
         """
         rc = RaindropClient()
-        with patch("raindrop.RaindropClient.stale_token", return_value=7):
+        with patch(
+            "raindrop_todoist_syncer.main.RaindropClient.stale_token",
+            return_value=7,
+        ):
             stale_token = rc.stale_token()
         assert stale_token == 7
 

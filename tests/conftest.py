@@ -7,12 +7,10 @@ import shutil
 import pytest
 from requests import HTTPError
 
-from raindrop import (
-    Raindrop,
-    RaindropAccessTokenRefresher,
-    RaindropCredentialsManager,
-    EnvironmentVariablesFileManager,
-)
+from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
+from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
+from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
+from raindrop_todoist_syncer.rd_object import Raindrop
 
 # ---------------------------------- env vars-------------------------------------------
 
