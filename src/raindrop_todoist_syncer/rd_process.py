@@ -3,7 +3,7 @@ from typing import Any
 from loguru import logger
 
 from raindrop_todoist_syncer.db_manage import DatabaseManager
-from raindrop_todoist_syncer.rd_class import Raindrop
+from raindrop_todoist_syncer.rd_object import Raindrop
 
 
 class RaindropsProcessor:
