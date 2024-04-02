@@ -10,7 +10,7 @@ from raindrop_todoist_syncer.db_manage import DatabaseManager
 from raindrop_todoist_syncer.main import main
 from raindrop_todoist_syncer.rd_client import RaindropClient
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
-from raindrop_todoist_syncer.td_task_create import TodoistTaskCreator
+from raindrop_todoist_syncer.td_task import TodoistTaskCreator
 
 
 @pytest.fixture
