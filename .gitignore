@@ -4,7 +4,7 @@ __pycache__/
 *.pyd
 venv/
 .DS_Store
-.env
+.env*
 cache/
 scratch*.py
 .vscode/
@@ -13,4 +13,7 @@ scratch*.py
 database/
 metafile/
 *.log
+logs/
 local.raindrop-todoist-syncer.plist
+**/*.egg-info/*
+build/
