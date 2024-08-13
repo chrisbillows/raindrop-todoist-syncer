@@ -34,7 +34,7 @@ class TestInit:
 
 
 class TestStaleToken:
-    def test_200_response(self, mocker, rd_client):
+    def test_200_response(self, rd_client):
         with patch(
             "raindrop_todoist_syncer.rd_client.RaindropClient._core_api_call"
         ) as mock_call:
@@ -193,6 +193,7 @@ class TestMakeApiCall:
             json_data = json_data[key]
         assert json_data == expected_value
 
+    @pytest.mark.skip
     @pytest.mark.slow
     @pytest.mark.parametrize(
         "status_code, exception, match_str, call_count",

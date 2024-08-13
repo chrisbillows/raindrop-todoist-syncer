@@ -1,3 +1,41 @@
+[project]
+name = "raindrop-todoist-syncer"
+version = "0.0.1"
+authors = [
+  { name="Chris Billows", email="christopherbillows+rts@gmail.com" },
+]
+description = "Convert favourited Raindrops into tasks in Todoist"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "loguru>=0.7.2",
+    "pre-commit>=3.8.0",
+    "python-dotenv>=1.0.1",
+    "pytest>=8.3.2",
+    "requests>=2.32.3",
+    "ruff>=0.5.7",
+    "tenacity>=9.0.0",
+    "todoist-api-python>=2.1.7",
+]
+
+[project.urls]
+Homepage = "https://github.com/chrisbillows/raindrop_todoist_syncer"
+Issues = "https://github.com/chrisbillows/raindrop_todoist_syncer/issues"
+
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=70.0"]
 build-backend = "setuptools.build_meta"
+
+[project.scripts]
+rts = "raindrop_todoist_syncer.main:main"
+
+# [tool.setuptools.packages.find]
+# where = ["src"]
+
+# [tool.ruff]
+# select = ["ALL"]
