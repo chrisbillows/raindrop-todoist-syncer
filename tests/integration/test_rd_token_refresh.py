@@ -55,7 +55,7 @@ class TestAccessTokenRefreshRunner:
         # Sets the return value mock request.
         mock_make_request.return_value = oauth_request_response_object_200
 
-        expected = None
+        expected = "I am your access token"
         actual = ratr.refresh_token_process_runner()
 
         assert actual == expected

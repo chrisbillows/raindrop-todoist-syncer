@@ -39,7 +39,7 @@ class RaindropAccessTokenRefresher:
             raise MissingRefreshTokenError("No refresh token in .env. Refresh aborted")
         self.evfm = evfm
 
-    def refresh_token_process_runner(self) -> bool:
+    def refresh_token_process_runner(self) -> str:
         """Runs the process to refresh a stale access token.
 
         This method uses a Raindrop Oauth2 refresh token to generate a new, valid oauth2
@@ -68,15 +68,16 @@ class RaindropAccessTokenRefresher:
 
         Returns
         -------
-        True
-            Code should raise an error if the entire operation doesn't complete.
+        str
+            The new access token.
         """
         logger.info("Attempting to refresh token.")
         body = self._refresh_token_create_body()
         response = self.rcm.make_request(body)
         self.rcm.response_validator(response)
-        access_token = self.rcm.extract_access_token(response)
-        self.evfm.write_new_access_token(access_token)
+        new_access_token = self.rcm.extract_access_token(response)
+        self.evfm.write_new_access_token(new_access_token)
+        return new_access_token
 
     def _refresh_token_create_body(self) -> dict[str, str]:
         """
