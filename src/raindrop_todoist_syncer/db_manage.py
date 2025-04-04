@@ -119,7 +119,7 @@ class DatabaseManager:
         processed_raindrops_blank = {"Processed Raindrops": []}
 
         output_file = (
-            "001_processed_raindrops_" f"{datetime.now().strftime('%Y%m%d_%H%M')}.json"
+            f"001_processed_raindrops_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
         )
 
         database_file_name = os.path.join(self.database_directory, output_file)

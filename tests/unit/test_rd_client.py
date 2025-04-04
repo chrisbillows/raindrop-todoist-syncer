@@ -290,6 +290,7 @@ class TestMakeApiCall:
             assert mock_get.call_count == call_count
 
 
+@pytest.mark.skip("Seem to be calling the API for real.")
 class TestExtractBenchmarkCount:
     @pytest.mark.parametrize("fixture_name", ["response_one_data", "response_two_data"])
     def test_extract_benchmark_count(

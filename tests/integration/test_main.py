@@ -91,11 +91,14 @@ class TestStaleTokenFunctionality:
         mock_todoist_creator,
         caplog,
     ):
-        with patch(
-            "raindrop_todoist_syncer.rd_token.RaindropAccessTokenRefresher.refresh_token_process_runner"
-        ) as mock_refresh_token_runner, patch(
-            "raindrop.RaindropClient.stale_token", return_value=True
-        ) as mock_valid_token:  # noqa
+        with (
+            patch(
+                "raindrop_todoist_syncer.rd_token.RaindropAccessTokenRefresher.refresh_token_process_runner"
+            ) as mock_refresh_token_runner,
+            patch(
+                "raindrop.RaindropClient.stale_token", return_value=True
+            ) as mock_valid_token,  # noqa
+        ):
             main()
             mock_refresh_token_runner.assert_called_once()
 
@@ -107,11 +110,14 @@ class TestStaleTokenFunctionality:
         mock_todoist_creator,
         caplog,
     ):
-        with patch(
-            "raindrop_todoist_syncer.rd_token.RaindropAccessTokenRefresher.refresh_token_process_runner"
-        ) as mock_refresh_token_runner, patch(
-            "raindrop.RaindropClient.stale_token", return_value=False
-        ) as mock_valid_token:  # noqa
+        with (
+            patch(
+                "raindrop_todoist_syncer.rd_token.RaindropAccessTokenRefresher.refresh_token_process_runner"
+            ) as mock_refresh_token_runner,
+            patch(
+                "raindrop.RaindropClient.stale_token", return_value=False
+            ) as mock_valid_token,  # noqa
+        ):
             main()
             mock_refresh_token_runner.assert_not_called()
 
@@ -391,12 +397,13 @@ class TestMainValid:
         mock_task_response_object.title = "Dummy Title"
 
         # patch todoist API methods - not my TodoistTaskCreator class methods.
-        with patch(
-            "todoist_api_python.api.TodoistAPI.add_task",
-            return_value=mock_task_response_object,
-        ) as mock_add_task, patch(
-            "todoist_api_python.api.TodoistAPI.add_comment"
-        ) as mock_add_comment:  # noqa F841
+        with (
+            patch(
+                "todoist_api_python.api.TodoistAPI.add_task",
+                return_value=mock_task_response_object,
+            ) as mock_add_task,
+            patch("todoist_api_python.api.TodoistAPI.add_comment") as mock_add_comment,  # noqa F841
+        ):
             # create task
             task_creator = TodoistTaskCreator(untracked_raindrop_object_mock)
             task_creator.create_task()
@@ -524,22 +531,24 @@ class TestMainValid:
         # patch 1) TodoistAPI.add_task
         # patch 2) TodoistAPI.add_comment
         # patch 3) DatabaseManager.__init__.database_directory etc.
-        with patch(
-            "todoist_api_python.api.TodoistAPI.add_task",
-            return_value=mock_task_response_object,
-        ) as mock_add_task, patch(
-            "todoist_api_python.api.TodoistAPI.add_comment"
-        ) as mock_add_comment, patch.object(  # noqa F841
-            DatabaseManager,
-            "__init__",
-            lambda self: self.__dict__.update(
-                {
-                    "database_directory": str(db_dir),
-                    "metafile_directory": str(meta_dir),
-                    "metafile_path": os.path.join(meta_dir, "metafile.txt"),
-                }
-            ),
-        ) as mock_init:  # noqa F841
+        with (
+            patch(
+                "todoist_api_python.api.TodoistAPI.add_task",
+                return_value=mock_task_response_object,
+            ) as mock_add_task,
+            patch("todoist_api_python.api.TodoistAPI.add_comment") as mock_add_comment,  # noqa F841
+            patch.object(
+                DatabaseManager,
+                "__init__",
+                lambda self: self.__dict__.update(
+                    {
+                        "database_directory": str(db_dir),
+                        "metafile_directory": str(meta_dir),
+                        "metafile_path": os.path.join(meta_dir, "metafile.txt"),
+                    }
+                ),
+            ) as mock_init,  # noqa F841
+        ):
             raindrop_client = RaindropClient()
 
             # mock_requests_get monkeypatches `requests.get` with valid data.
@@ -662,22 +671,24 @@ class TestMainValid:
         # patch 1) TodoistAPI.add_task
         # patch 2) TodoistAPI.add_comment
         # patch 3) DatabaseManager.__init__.database_directory etc.
-        with patch(
-            "todoist_api_python.api.TodoistAPI.add_task",
-            return_value=mock_task_response_object,
-        ) as mock_add_task, patch(
-            "todoist_api_python.api.TodoistAPI.add_comment"
-        ) as mock_add_comment, patch.object(  # noqa F841
-            DatabaseManager,
-            "__init__",
-            lambda self: self.__dict__.update(
-                {
-                    "database_directory": str(db_dir),
-                    "metafile_directory": str(meta_dir),
-                    "metafile_path": os.path.join(meta_dir, "metafile.txt"),
-                }
-            ),
-        ) as mock_init:  # noqa F841
+        with (
+            patch(
+                "todoist_api_python.api.TodoistAPI.add_task",
+                return_value=mock_task_response_object,
+            ) as mock_add_task,
+            patch("todoist_api_python.api.TodoistAPI.add_comment") as mock_add_comment,  # noqa F841
+            patch.object(
+                DatabaseManager,
+                "__init__",
+                lambda self: self.__dict__.update(
+                    {
+                        "database_directory": str(db_dir),
+                        "metafile_directory": str(meta_dir),
+                        "metafile_path": os.path.join(meta_dir, "metafile.txt"),
+                    }
+                ),
+            ) as mock_init,  # noqa F841
+        ):
             main()
 
             # assert `add_task` was called twice
