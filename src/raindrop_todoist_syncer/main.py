@@ -30,8 +30,6 @@ def main():
     ratr = RaindropAccessTokenRefresher(rcm, evfm)
     dbm = DatabaseManager()
 
-    if rc.stale_token():
-        ratr.refresh_token_process_runner()
     all_raindrops = rc.get_all_raindrops()
     rp = RaindropsProcessor(all_raindrops)
     tasks_to_create = rp.newly_favourited_raindrops_extractor()
