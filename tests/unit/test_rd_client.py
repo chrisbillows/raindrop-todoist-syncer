@@ -15,7 +15,7 @@ from raindrop_todoist_syncer.rd_client import (
 class RaindropClientSimpleInit(RaindropClient):
     """Simplify init for testing"""
 
-    def init(self):
+    def __init__(self):
         self.raindrop_access_token = "abc123"
         self.headers = {"Authorization": f"Bearer {self.raindrop_access_token}"}
 
