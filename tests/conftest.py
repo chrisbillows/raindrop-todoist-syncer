@@ -16,7 +16,7 @@ from raindrop_todoist_syncer.rd_object import Raindrop
 
 
 # Sets the environment variables for all tests without being passed via `autouse=True`.
-# Can be overriden by passing a monkeypatch.setenv fixture to a test, or using a
+# Can be overridden by passing a monkeypatch.setenv fixture to a test, or using a
 # monkeypatch.setenv within a test.
 @pytest.fixture(autouse=True)
 def set_env_vars_confest(monkeypatch):
@@ -37,7 +37,7 @@ def environmental_variables_file_manager():
 
 @pytest.fixture
 def raindrop_access_token_refresher(monkeypatch):
-    # A fixture to instantiante a RaindropAcessTokenRefresher instance that uses the
+    # A fixture to instantiate a RaindropAccessTokenRefresher instance that uses the
     # `.env.test` file.
     evfm = EnvironmentVariablesFileManager("mock_data/.env.test")
     rcm = RaindropCredentialsManager()
@@ -46,7 +46,7 @@ def raindrop_access_token_refresher(monkeypatch):
 
 @pytest.fixture
 def raindrop_access_token_refresher_for_file_overwriting(monkeypatch, tmp_path):
-    # A fixture to instantiante a RaindropAcessTokenRefresher instance that uses a
+    # A fixture to instantiate a RaindropAccessTokenRefresher instance that uses a
     # tmp_path duplicate of `.env.test`` to allow for both reading and overwriting.
     env_file = Path("tests") / "mock_data" / ".env.test"
     print(os.getcwd())

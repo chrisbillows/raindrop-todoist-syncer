@@ -1,8 +1,7 @@
-import os
 from loguru import logger
 from typing import Any, Dict, List
 
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 import requests
 from requests import Response
 from tenacity import (
@@ -12,8 +11,9 @@ from tenacity import (
     wait_exponential,
 )
 
-
-load_dotenv()
+from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
+from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
+from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 
 
 class RaindropClient:
@@ -47,9 +47,22 @@ class RaindropClient:
             raindrop_access_token (str) : Oauth access token extracted from .env
             headers (dict)             : HTTP request header
         """
-        self.raindrop_access_token = os.getenv("RAINDROP_ACCESS_TOKEN")
+        self.raindrop_access_token = dotenv_values(".env")["RAINDROP_ACCESS_TOKEN"]
         self.headers = {"Authorization": f"Bearer {self.raindrop_access_token}"}
-        logger.info("Raindrop Client initalised")
+        self._refresh_raindrop_access_token_if_stale()
+        logger.info("Raindrop Client initialised")
+
+    def _refresh_raindrop_access_token_if_stale(self) -> None:
+        """
+        If `stale_token` fetch a new token and update object including headers.
+        """
+        if self.stale_token():
+            rcm = RaindropCredentialsManager()
+            evfm = EnvironmentVariablesFileManager()
+            ratr = RaindropAccessTokenRefresher(rcm, evfm)
+            new_token = ratr.refresh_token_process_runner()
+            self.raindrop_access_token = new_token
+            self.headers = {"Authorization": f"Bearer {self.raindrop_access_token}"}
 
     def stale_token(self) -> bool:
         """

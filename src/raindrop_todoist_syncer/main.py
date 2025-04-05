@@ -3,10 +3,7 @@ import traceback
 from loguru import logger
 
 from raindrop_todoist_syncer.db_manage import DatabaseManager
-from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
-from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
-from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
 from raindrop_todoist_syncer.rd_client import RaindropClient
 
 from raindrop_todoist_syncer.td_task import TodoistTaskCreator
@@ -25,13 +22,8 @@ def main():
     - For each processed task, create a task in Todoist.
     """
     rc = RaindropClient()
-    rcm = RaindropCredentialsManager()
-    evfm = EnvironmentVariablesFileManager()
-    ratr = RaindropAccessTokenRefresher(rcm, evfm)
     dbm = DatabaseManager()
 
-    if rc.stale_token():
-        ratr.refresh_token_process_runner()
     all_raindrops = rc.get_all_raindrops()
     rp = RaindropsProcessor(all_raindrops)
     tasks_to_create = rp.newly_favourited_raindrops_extractor()
