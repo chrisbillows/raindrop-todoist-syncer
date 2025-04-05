@@ -12,6 +12,11 @@ from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
 from raindrop_todoist_syncer.rd_object import Raindrop
 
+
+# @pytest.fixture
+# def mock_user_config() -> UserConfig:
+
+
 # ---------------------------------- env vars-------------------------------------------
 
 
