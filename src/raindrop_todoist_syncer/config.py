@@ -38,6 +38,3 @@ def make_user_config() -> UserConfig:
         raindrop_refresh_token=env_vars["RAINDROP_REFRESH_TOKEN"],
         raindrop_access_token=env_vars["RAINDROP_ACCESS_TOKEN"],
     )
-
-
-USER_CONFIG = make_user_config()
