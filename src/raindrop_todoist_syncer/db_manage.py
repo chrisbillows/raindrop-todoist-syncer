@@ -6,6 +6,7 @@ from typing import Any
 
 from loguru import logger
 
+from raindrop_todoist_syncer.config import UserConfig
 from raindrop_todoist_syncer.rd_object import Raindrop
 
 
@@ -21,6 +22,11 @@ class DatabaseManager:
     A metafile, stored in 'metafile' in the project root, tracks the path to the most
     recent database version.
 
+    Parameters
+    ----------
+    user_config : UserConfig
+        A user config.
+
     Attributes
     ----------
     database_directory : str
@@ -31,10 +37,11 @@ class DatabaseManager:
         Path of the metafile.
     """
 
-    def __init__(self):
-        self.database_directory = "database"
-        self.metafile_directory = "metafile"
-        self.metafile_path = "metafile/metafile.txt"
+    def __init__(self, user_config: UserConfig):
+        self.user_config = user_config
+        self.database_directory = self.user_config.database_directory
+        self.metafile_directory = self.user_config.metafile_directory
+        self.metafile_path = self.user_config.metafile_path
 
     def update_database(self, new_favourited_raindrop_objects: list[Raindrop]) -> bool:
         """

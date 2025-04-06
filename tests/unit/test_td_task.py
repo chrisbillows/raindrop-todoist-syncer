@@ -8,8 +8,8 @@ from raindrop_todoist_syncer.td_task import TodoistTaskCreator
 
 
 @pytest.fixture
-def todoist_task_creator(raindrop_object):
-    return TodoistTaskCreator(raindrop_object)
+def todoist_task_creator(raindrop_object, mock_user_config):
+    return TodoistTaskCreator(mock_user_config, raindrop_object)
 
 
 @pytest.fixture

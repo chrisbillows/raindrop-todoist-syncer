@@ -17,11 +17,15 @@ from raindrop_todoist_syncer.rd_object import Raindrop
 def mock_user_config(tmp_path) -> UserConfig:
     tmp_config_dir = tmp_path / "config_dir"
     tmp_env_file = tmp_config_dir / "mock_env"
+    tmp_db_dir = tmp_config_dir / "rts.db"
+    tmp_metafile_dir = tmp_config_dir / "metafile"
+    tmp_metafile_path = tmp_metafile_dir / "metafile.txt"
     user_config = UserConfig(
         config_dir=tmp_config_dir,
         env_file=tmp_env_file,
-        # db_file:
-        # metafile:
+        database_directory=tmp_db_dir,
+        metafile_directory=tmp_metafile_dir,
+        metafile_path=tmp_metafile_path,
         todoist_api_key="ab12",
         raindrop_client_id="cd34",
         raindrop_client_secret="ef56",
@@ -55,21 +59,9 @@ def environmental_variables_file_manager(mock_user_config):
 
 
 @pytest.fixture
-def raindrop_access_token_refresher(monkeypatch):
+def raindrop_access_token_refresher(monkeypatch, mock_user_config: UserConfig):
     # A fixture to instantiate a RaindropAccessTokenRefresher instance that uses the
     # `.env.test` file.
-    tmp_config_dir = Path("config_dir")
-    mock_user_config = UserConfig(
-        config_dir=tmp_config_dir,
-        env_file=Path("mock_data/.env.test"),
-        # db_file:
-        # metafile:
-        todoist_api_key="ab12",
-        raindrop_client_id="cd34",
-        raindrop_client_secret="ef56",
-        raindrop_refresh_token="gh67",
-        raindrop_access_token="ij910",
-    )
     evfm = EnvironmentVariablesFileManager(mock_user_config)
     rcm = RaindropCredentialsManager(mock_user_config)
     return RaindropAccessTokenRefresher(rcm, evfm)
@@ -90,6 +82,9 @@ def raindrop_access_token_refresher_for_file_overwriting(
     new_mock_user_config = UserConfig(
         config_dir=tmp_config_dir,
         env_file=tmp_env_file,
+        database_directory=mock_user_config.database_directory,
+        metafile_directory=mock_user_config.metafile_directory,
+        metafile_path=mock_user_config.metafile_path,
         todoist_api_key=mock_user_config.todoist_api_key,
         raindrop_client_id=mock_user_config.raindrop_client_id,
         raindrop_client_secret=mock_user_config.raindrop_client_secret,

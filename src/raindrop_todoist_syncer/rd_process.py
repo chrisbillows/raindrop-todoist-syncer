@@ -2,6 +2,7 @@ from typing import Any
 
 from loguru import logger
 
+from raindrop_todoist_syncer.config import UserConfig
 from raindrop_todoist_syncer.db_manage import DatabaseManager
 from raindrop_todoist_syncer.rd_object import Raindrop
 
@@ -15,14 +16,16 @@ class RaindropsProcessor:
                                   calls by RaindropClient.
     """
 
-    def __init__(self, all_rds: dict[str, Any]):
+    def __init__(self, user_config: UserConfig, all_rds: dict[str, Any]):
         """
         Initalise an instance of the Raindrops Process, taking all_rds as state.
 
         Parameters:
+            user_config: a user config object.
             all_rds : list of all a users raindrops(rds).
 
         """
+        self.user_config = user_config
         self.all_rds = all_rds
 
     def newly_favourited_raindrops_extractor(self) -> list[Raindrop]:
@@ -75,7 +78,7 @@ class RaindropsProcessor:
         return fav_rds
 
     def _fetch_tracked_favs(self):
-        db_manager = DatabaseManager()
+        db_manager = DatabaseManager(self.user_config)
         tracked_favs = db_manager.get_latest_database()["Processed Raindrops"]
         logger.info(f"db holds {len(tracked_favs)} favourited rds previously tracked")
         return tracked_favs

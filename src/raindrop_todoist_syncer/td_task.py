@@ -1,8 +1,7 @@
-import os
-
 from loguru import logger
 from todoist_api_python.api import TodoistAPI
 
+from raindrop_todoist_syncer.config import UserConfig
 from raindrop_todoist_syncer.rd_object import Raindrop
 
 
@@ -33,7 +32,7 @@ class TodoistTaskCreator:
         Adds the Raindrops website link as a comment to the task.
     """
 
-    def __init__(self, raindrop: Raindrop) -> None:
+    def __init__(self, user_config: UserConfig, raindrop: Raindrop) -> None:
         """
         Constructs all the necessary attributes for the TodoistTaskCreator object.
 
@@ -42,8 +41,9 @@ class TodoistTaskCreator:
             raindrop : Raindrop
                 an instance of the Raindrop class
         """
+        self.user_config = user_config
         self.MAIN_WORK_PROJECT = "2314091414"
-        self.TODOIST_API_KEY = os.getenv("TODOIST_API_KEY")
+        self.TODOIST_API_KEY = self.user_config.todoist_api_key
         self.api = TodoistAPI(self.TODOIST_API_KEY)
         self.task_title = raindrop.title
         self.task_description = raindrop.notes

@@ -3,12 +3,13 @@ from unittest.mock import patch
 
 import pytest
 
+from raindrop_todoist_syncer.config import UserConfig
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.rd_object import Raindrop
 
 
 @pytest.fixture
-def rd_processor():
+def rd_processor(mock_user_config: UserConfig):
     """
     A dummy JSON equivalent to the list of dicts extracted by the get_all_raindrops
     method of the RaindropsClient. i.e. this is the expected data the driver method of
@@ -16,7 +17,7 @@ def rd_processor():
     """
     with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
         cumulative_rds = json.load(f)
-    return RaindropsProcessor(cumulative_rds)
+    return RaindropsProcessor(mock_user_config, cumulative_rds)
 
 
 @pytest.fixture
@@ -45,7 +46,9 @@ class TestMainFunction:
     """
 
     @patch("raindrop_todoist_syncer.rd_process.DatabaseManager")
-    def test_newly_favourited_raindrops_exctractor(self, MockDatabaseManager):
+    def test_newly_favourited_raindrops_exctractor(
+        self, MockDatabaseManager, mock_user_config: UserConfig
+    ):
         mock_db_return_value = {
             "Processed Raindrops": [
                 {"id": 1, "title": "Some Title"},
@@ -57,7 +60,7 @@ class TestMainFunction:
         )
         with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
             all_rds = json.load(f)
-        rd_processor = RaindropsProcessor(all_rds)
+        rd_processor = RaindropsProcessor(mock_user_config, all_rds)
         rd_objects = rd_processor.newly_favourited_raindrops_extractor()
         assert len(rd_objects) == 1
 
@@ -71,39 +74,41 @@ class TestExtractAllFavRds:
         new_fav_rds = rd_processor._extract_all_fav_rds()
         assert len(new_fav_rds) == 1 and new_fav_rds[0]["_id"] == 628161667
 
-    def test_extract_all_fav_rds_two_of_three(self):
+    def test_extract_all_fav_rds_two_of_three(self, mock_user_config: UserConfig):
         all_rds = [
             {"_id": 1, "important": True},
             {"_id": 2, "important": True},
             {"_id": 3},
         ]
-        rdp = RaindropsProcessor(all_rds)
+        rdp = RaindropsProcessor(mock_user_config, all_rds)
         new_fav_rds = rdp._extract_all_fav_rds()
         assert new_fav_rds == [
             {"_id": 1, "important": True},
             {"_id": 2, "important": True},
         ]
 
-    def test_extract_all_fav_rds_none(self):
+    def test_extract_all_fav_rds_none(self, mock_user_config: UserConfig):
         all_rds = [
             {"_id": 1},
             {"_id": 2},
             {"_id": 3},
         ]
-        rdp = RaindropsProcessor(all_rds)
+        rdp = RaindropsProcessor(mock_user_config, all_rds)
         new_fav_rds = rdp._extract_all_fav_rds()
         assert new_fav_rds == []
 
-    def test_extact_all_fav__rds_empty(self):
+    def test_extact_all_fav__rds_empty(self, mock_user_config: UserConfig):
         all_rds = []
-        rdp = RaindropsProcessor(all_rds)
+        rdp = RaindropsProcessor(mock_user_config, all_rds)
         new_fav_rds = rdp._extract_all_fav_rds()
         assert new_fav_rds == []
 
 
 class TestFetchTrackedFavs:
     @patch("raindrop_todoist_syncer.rd_process.DatabaseManager")
-    def test_fetch_tracked_favs(self, MockDatabaseManager):
+    def test_fetch_tracked_favs(
+        self, MockDatabaseManager, mock_user_config: UserConfig
+    ):
         mock_db_return_value = {
             "Processed Raindrops": [
                 {"id": 1, "Title": "Some Title"},
@@ -113,7 +118,7 @@ class TestFetchTrackedFavs:
         MockDatabaseManager.return_value.get_latest_database.return_value = (
             mock_db_return_value
         )
-        rdp = RaindropsProcessor([])
+        rdp = RaindropsProcessor(mock_user_config, [])
         tracked_favs = rdp._fetch_tracked_favs()
         tracked_fav_ids = {rd["id"] for rd in tracked_favs}
         assert tracked_fav_ids == {1, 2}
@@ -137,7 +142,9 @@ class TestExtractUntrackedFavs:
         )
         assert untracked_favs == []
 
-    def test_extract_untracked_favs_three_new_three_seen(self):
+    def test_extract_untracked_favs_three_new_three_seen(
+        self, mock_user_config: UserConfig
+    ):
         tracked_favs = [{"id": 123}, {"id": 789}, {"id": 131415}]
         all_favs = [
             {"_id": 123, "title": "Title 1"},
@@ -147,30 +154,30 @@ class TestExtractUntrackedFavs:
             {"_id": 131415, "title": "Title 5"},
             {"_id": 161718, "title": "Title 6"},
         ]
-        rdp = RaindropsProcessor(all_favs)
+        rdp = RaindropsProcessor(mock_user_config, all_favs)
         untracked_favs = rdp._extract_untracked_favs(all_favs, tracked_favs)
         untracked_favs_ids = {rd["_id"] for rd in untracked_favs}
         assert untracked_favs_ids == {456, 101112, 161718}
 
-    def test_extract_untracked_favs_three_seen(self):
+    def test_extract_untracked_favs_three_seen(self, mock_user_config: UserConfig):
         tracked_favs = [{"id": 123}, {"id": 456}, {"id": 789}]
         all_favs = [
             {"_id": 123, "title": "Title 1"},
             {"_id": 456, "title": "Title 2"},
             {"_id": 789, "title": "Title 3"},
         ]
-        rdp = RaindropsProcessor(all_favs)
+        rdp = RaindropsProcessor(mock_user_config, all_favs)
         untracked_favs = rdp._extract_untracked_favs(all_favs, tracked_favs)
         assert untracked_favs == []
 
-    def test_extract_untracked_favs_none_tracked(self):
+    def test_extract_untracked_favs_none_tracked(self, mock_user_config: UserConfig):
         tracked_favs = []
         all_favs = [
             {"_id": 123, "title": "Title 1"},
             {"_id": 456, "title": "Title 2"},
             {"_id": 789, "title": "Title 3"},
         ]
-        rdp = RaindropsProcessor(all_favs)
+        rdp = RaindropsProcessor(mock_user_config, all_favs)
         untracked_favs = rdp._extract_untracked_favs(all_favs, tracked_favs)
         untracked_favs_ids = {rd["_id"] for rd in untracked_favs}
         assert untracked_favs_ids == {123, 456, 789}
@@ -178,11 +185,11 @@ class TestExtractUntrackedFavs:
 
 class TestConvertToRdObjects:
     @pytest.fixture
-    def dummy_mock_fav(self):
+    def dummy_mock_fav(self, mock_user_config: UserConfig):
         with open("tests/mock_data/cumulative_rd_list.json", "r") as f:
             all_rds = json.load(f)
         fav = [rd for rd in all_rds if rd.get("important")]
-        return RaindropsProcessor([])._convert_to_rd_objects(fav)
+        return RaindropsProcessor(mock_user_config, [])._convert_to_rd_objects(fav)
 
     def test_is_instance_of_raindrop_dummy(self, dummy_mock_fav):
         assert isinstance(dummy_mock_fav[0], Raindrop)
@@ -206,7 +213,7 @@ class TestConvertToRdObjects:
         assert dummy_mock_fav[0].link == "https://www.amazon.co.uk/"
 
     @pytest.fixture
-    def marty_mock_fav(self):
+    def marty_mock_fav(self, mock_user_config: UserConfig):
         fav = [
             {
                 "_id": 123,
@@ -217,7 +224,7 @@ class TestConvertToRdObjects:
                 "link": "www.backtothefuture!.com",
             }
         ]
-        return RaindropsProcessor(fav)._convert_to_rd_objects(fav)
+        return RaindropsProcessor(mock_user_config, fav)._convert_to_rd_objects(fav)
 
     def test_is_instance_of_raindrop_marty(self, marty_mock_fav):
         assert isinstance(marty_mock_fav[0], Raindrop)
@@ -237,9 +244,9 @@ class TestConvertToRdObjects:
     def test_has_correct_link_marty(self, marty_mock_fav):
         assert marty_mock_fav[0].link == "www.backtothefuture!.com"
 
-    def test_empty_list(self):
+    def test_empty_list(self, mock_user_config: UserConfig):
         fav = []
-        rdp = RaindropsProcessor(fav)
+        rdp = RaindropsProcessor(mock_user_config, fav)
         rd_objects = rdp._convert_to_rd_objects(fav)
         assert rd_objects == []
 
@@ -247,7 +254,7 @@ class TestConvertToRdObjects:
     @pytest.mark.skip(
         reason="Known issue: Raindrop class will crash in event of a missing field."
     )
-    def test_id_field_missing(self):
+    def test_id_field_missing(self, mock_user_config: UserConfig):
         fav = [
             {
                 "created": "1955-11-05T01:24:00.111Z",
@@ -257,6 +264,6 @@ class TestConvertToRdObjects:
                 "link": "www.backtothefuture!.com",
             }
         ]
-        rdp = RaindropsProcessor(fav)
+        rdp = RaindropsProcessor(mock_user_config, fav)
         rd_objects = rdp._convert_to_rd_objects(fav)
         assert rd_objects == []

@@ -23,14 +23,15 @@ def main():
     - For each processed task, create a task in Todoist.
     """
     user_config: UserConfig = make_user_config()
+    logger.info(user_config)
     rc = RaindropClient(user_config)
-    dbm = DatabaseManager()
+    dbm = DatabaseManager(user_config)
 
     all_raindrops = rc.get_all_raindrops()
-    rp = RaindropsProcessor(all_raindrops)
+    rp = RaindropsProcessor(user_config, all_raindrops)
     tasks_to_create = rp.newly_favourited_raindrops_extractor()
     for task in tasks_to_create:
-        task_creator = TodoistTaskCreator(task)
+        task_creator = TodoistTaskCreator(user_config, task)
         task_creator.create_task()
         dbm.update_database([task])
 
