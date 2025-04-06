@@ -35,7 +35,3 @@ def test_make_user_config(
     }
     user_config: UserConfig = make_user_config()
     assert getattr(user_config, attr) == expected_value
-
-
-# with patch.dict(os.environ, XDG_CONFIG_HOME=str(tmp_config_dir)):
-# tmp_config_dir = tmp_path / "config"

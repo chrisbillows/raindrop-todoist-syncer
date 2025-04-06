@@ -6,6 +6,7 @@ from requests import HTTPError
 import requests
 import tenacity
 
+from raindrop_todoist_syncer.config import UserConfig
 from raindrop_todoist_syncer.rd_client import (
     RaindropClient,
     RaindropAccessTokenRefresher,
@@ -54,39 +55,33 @@ class TestInitRefreshingToken:
 
     @patch.object(RaindropAccessTokenRefresher, "refresh_token_process_runner")
     @patch.object(RaindropClient, "stale_token")
-    @patch("raindrop_todoist_syncer.rd_client.dotenv_values")
     def test_stale_token_false_does_not_refresh_token(
         self,
-        mock_dot_env_values: MagicMock,
         mock_stale_token: MagicMock,
         mock_refresh_token_process_runner: MagicMock,
+        mock_user_config: UserConfig,
     ):
-        # Mock .env value, otherwise real value used.
-        mock_dot_env_values.return_value = {"RAINDROP_ACCESS_TOKEN": "let-me-in"}
         mock_stale_token.return_value = False
-        rd_client = RaindropClient()
+        rd_client = RaindropClient(mock_user_config)
         mock_stale_token.assert_called_once()
         mock_refresh_token_process_runner.assert_not_called()
-        assert rd_client.raindrop_access_token == "let-me-in"
+        assert rd_client.raindrop_access_token == "ij910"
 
     @patch.object(RaindropAccessTokenRefresher, "refresh_token_process_runner")
     @patch.object(RaindropClient, "stale_token")
-    @patch("raindrop_todoist_syncer.rd_client.dotenv_values")
     def test_stale_token_true_refreshes_token(
         self,
-        mock_dot_env_values: MagicMock,
         mock_stale_token: MagicMock,
         mock_refresh_token_process_runner: MagicMock,
+        mock_user_config: UserConfig,
     ):
-        mock_refresh_token_process_runner.return_value = "let-me-OUT!"
+        mock_refresh_token_process_runner.return_value = "minty fresh token"
 
-        # Mock .env value, otherwise real value used.
-        mock_dot_env_values.return_value = {"RAINDROP_ACCESS_TOKEN": "let-me-in"}
         mock_stale_token.return_value = True
-        rd_client = RaindropClient()
+        rd_client = RaindropClient(mock_user_config)
         mock_stale_token.assert_called_once()
         mock_refresh_token_process_runner.assert_called_once()
-        assert rd_client.raindrop_access_token == "let-me-OUT!"
+        assert rd_client.raindrop_access_token == "minty fresh token"
 
 
 class TestStaleToken:

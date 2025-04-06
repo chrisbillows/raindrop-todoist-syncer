@@ -2,6 +2,8 @@ import shutil
 
 from loguru import logger
 
+from raindrop_todoist_syncer.config import UserConfig
+
 
 class ExistingTokenError(Exception):
     pass
@@ -36,9 +38,9 @@ class EnvironmentVariablesFileManager:
     and allows for passing different .env files for testing.
     """
 
-    def __init__(self, env_file=".env", env_backup=".env.backup") -> None:
-        self.env_file = env_file
-        self.env_backup = env_backup
+    def __init__(self, user_config: UserConfig) -> None:
+        self.env_file = user_config.env_file
+        self.env_backup = user_config.config_dir / ".env.backup"
 
     def write_new_access_token(self, access_token: str) -> None:
         new_env_body = self._create_env_body_with_updated_access_token(access_token)

@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 from unittest.mock import Mock
 import shutil
@@ -7,14 +6,29 @@ import shutil
 import pytest
 from requests import HTTPError
 
+from raindrop_todoist_syncer.config import UserConfig
 from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
 from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
 from raindrop_todoist_syncer.rd_object import Raindrop
 
 
-# @pytest.fixture
-# def mock_user_config() -> UserConfig:
+@pytest.fixture
+def mock_user_config(tmp_path) -> UserConfig:
+    tmp_config_dir = tmp_path / "config_dir"
+    tmp_env_file = tmp_config_dir / "mock_env"
+    user_config = UserConfig(
+        config_dir=tmp_config_dir,
+        env_file=tmp_env_file,
+        # db_file:
+        # metafile:
+        todoist_api_key="ab12",
+        raindrop_client_id="cd34",
+        raindrop_client_secret="ef56",
+        raindrop_refresh_token="gh67",
+        raindrop_access_token="ij910",
+    )
+    return user_config
 
 
 # ---------------------------------- env vars-------------------------------------------
@@ -36,30 +50,54 @@ def set_env_vars_confest(monkeypatch):
 
 
 @pytest.fixture
-def environmental_variables_file_manager():
-    return EnvironmentVariablesFileManager()
+def environmental_variables_file_manager(mock_user_config):
+    return EnvironmentVariablesFileManager(mock_user_config)
 
 
 @pytest.fixture
 def raindrop_access_token_refresher(monkeypatch):
     # A fixture to instantiate a RaindropAccessTokenRefresher instance that uses the
     # `.env.test` file.
-    evfm = EnvironmentVariablesFileManager("mock_data/.env.test")
+    tmp_config_dir = Path("config_dir")
+    mock_user_config = UserConfig(
+        config_dir=tmp_config_dir,
+        env_file=Path("mock_data/.env.test"),
+        # db_file:
+        # metafile:
+        todoist_api_key="ab12",
+        raindrop_client_id="cd34",
+        raindrop_client_secret="ef56",
+        raindrop_refresh_token="gh67",
+        raindrop_access_token="ij910",
+    )
+    evfm = EnvironmentVariablesFileManager(mock_user_config)
     rcm = RaindropCredentialsManager()
     return RaindropAccessTokenRefresher(rcm, evfm)
 
 
 @pytest.fixture
-def raindrop_access_token_refresher_for_file_overwriting(monkeypatch, tmp_path):
+def raindrop_access_token_refresher_for_file_overwriting(
+    monkeypatch, tmp_path, mock_user_config: UserConfig
+):
     # A fixture to instantiate a RaindropAccessTokenRefresher instance that uses a
     # tmp_path duplicate of `.env.test`` to allow for both reading and overwriting.
     env_file = Path("tests") / "mock_data" / ".env.test"
-    print(os.getcwd())
+    tmp_config_dir: Path = tmp_path / "config"  # ".env.backup"
+    tmp_config_dir.mkdir(parents=True)
     tmp_env_file = str(tmp_path / ".temp_env")
-    tmp_env_backup_file = str(tmp_path / ".temp_backup_env")
-    print(env_file)
     shutil.copyfile(env_file, tmp_env_file)
-    evfm = EnvironmentVariablesFileManager(tmp_env_file, tmp_env_backup_file)
+
+    new_mock_user_config = UserConfig(
+        config_dir=tmp_config_dir,
+        env_file=tmp_env_file,
+        todoist_api_key=mock_user_config.todoist_api_key,
+        raindrop_client_id=mock_user_config.raindrop_client_id,
+        raindrop_client_secret=mock_user_config.raindrop_client_secret,
+        raindrop_access_token=mock_user_config.raindrop_access_token,
+        raindrop_refresh_token=mock_user_config.raindrop_refresh_token,
+    )
+
+    evfm = EnvironmentVariablesFileManager(new_mock_user_config)
     rcm = RaindropCredentialsManager()
     return RaindropAccessTokenRefresher(rcm, evfm)
 

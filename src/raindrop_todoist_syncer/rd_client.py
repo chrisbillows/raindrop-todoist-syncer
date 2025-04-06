@@ -1,7 +1,6 @@
 from loguru import logger
 from typing import Any, Dict, List
 
-from dotenv import dotenv_values
 import requests
 from requests import Response
 from tenacity import (
@@ -11,6 +10,7 @@ from tenacity import (
     wait_exponential,
 )
 
+from raindrop_todoist_syncer.config import UserConfig
 from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
 from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
 from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
@@ -39,15 +39,19 @@ class RaindropClient:
     RAINDROPS_PER_PAGE = 25
     MAX_ALLOWED_PAGES = 200
 
-    def __init__(self) -> None:
+    def __init__(self, user_config: UserConfig) -> None:
         """
         Initializes an instance of Raindrop Client.
+
+        Parameters:
+            user_config (UserConfig) : User configuration variables
 
         Instance variables:
             raindrop_access_token (str) : Oauth access token extracted from .env
             headers (dict)             : HTTP request header
         """
-        self.raindrop_access_token = dotenv_values(".env")["RAINDROP_ACCESS_TOKEN"]
+        self.user_config = user_config
+        self.raindrop_access_token = user_config.raindrop_access_token
         self.headers = {"Authorization": f"Bearer {self.raindrop_access_token}"}
         self._refresh_raindrop_access_token_if_stale()
         logger.info("Raindrop Client initialised")
@@ -58,9 +62,11 @@ class RaindropClient:
         """
         if self.stale_token():
             rcm = RaindropCredentialsManager()
-            evfm = EnvironmentVariablesFileManager()
+            evfm = EnvironmentVariablesFileManager(self.user_config)
             ratr = RaindropAccessTokenRefresher(rcm, evfm)
             new_token = ratr.refresh_token_process_runner()
+            # Update object with new value
+            self.user_config.raindrop_access_token = new_token
             self.raindrop_access_token = new_token
             self.headers = {"Authorization": f"Bearer {self.raindrop_access_token}"}
 

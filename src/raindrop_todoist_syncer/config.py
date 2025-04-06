@@ -8,7 +8,7 @@ from pathlib import Path
 from dotenv import dotenv_values
 
 
-@dataclass(frozen=True)
+@dataclass
 class UserConfig:
     config_dir: Path
     env_file: Path
