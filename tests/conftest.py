@@ -71,7 +71,7 @@ def raindrop_access_token_refresher(monkeypatch):
         raindrop_access_token="ij910",
     )
     evfm = EnvironmentVariablesFileManager(mock_user_config)
-    rcm = RaindropCredentialsManager()
+    rcm = RaindropCredentialsManager(mock_user_config)
     return RaindropAccessTokenRefresher(rcm, evfm)
 
 
@@ -98,7 +98,7 @@ def raindrop_access_token_refresher_for_file_overwriting(
     )
 
     evfm = EnvironmentVariablesFileManager(new_mock_user_config)
-    rcm = RaindropCredentialsManager()
+    rcm = RaindropCredentialsManager(new_mock_user_config)
     return RaindropAccessTokenRefresher(rcm, evfm)
 
 

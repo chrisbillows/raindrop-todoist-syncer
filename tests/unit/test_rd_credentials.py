@@ -1,13 +1,11 @@
-from unittest.mock import patch
-
 import pytest
 
 from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 
 
 @pytest.fixture
-def raindrop_credentials_manager():
-    return RaindropCredentialsManager()
+def raindrop_credentials_manager(mock_user_config):
+    return RaindropCredentialsManager(mock_user_config)
 
 
 class TestRaindropCredentialsManagerInit:
@@ -26,26 +24,12 @@ class TestRaindropCredentialsManagerInit:
         actual = raindrop_credentials_manager.HEADERS
         assert actual == expected
 
-    # Stop the .env file being loaded.
-    @patch("dotenv.load_dotenv", return_value=None)
-    # Define environment variables into the test environment.
-    @patch("os.getenv")
-    def test_env_vars_output_correctly(self, mock_getenv, mock_load_dotenv):
-        mock_getenv.side_effect = lambda env_var: {
-            "RAINDROP_CLIENT_ID": "test_client_id",
-            "RAINDROP_CLIENT_SECRET": "test_client_secret",
-            "RAINDROP_REFRESH_TOKEN": "test_refresh_token",
-            "RAINDROP_ACCESS_TOKEN": "test_access_token",
-        }.get(env_var)
-
-        # rcm fixture cannot be used here or else the object is instantiated without
-        # the patch being applied.
-        rcm = RaindropCredentialsManager()
-
-        assert rcm.RAINDROP_CLIENT_ID == "test_client_id"
-        assert rcm.RAINDROP_CLIENT_SECRET == "test_client_secret"
-        assert rcm.RAINDROP_REFRESH_TOKEN == "test_refresh_token"
-        assert rcm.RAINDROP_ACCESS_TOKEN == "test_access_token"
+    def test_env_vars_output_correctly(self, mock_user_config):
+        rcm = RaindropCredentialsManager(mock_user_config)
+        assert rcm.RAINDROP_CLIENT_ID == "cd34"
+        assert rcm.RAINDROP_CLIENT_SECRET == "ef56"
+        assert rcm.RAINDROP_REFRESH_TOKEN == "gh67"
+        assert rcm.RAINDROP_ACCESS_TOKEN == "ij910"
 
 
 class TestRaindropCredentialsManagerMakeRequest:

@@ -61,7 +61,7 @@ class RaindropClient:
         If `stale_token` fetch a new token and update object including headers.
         """
         if self.stale_token():
-            rcm = RaindropCredentialsManager()
+            rcm = RaindropCredentialsManager(self.user_config)
             evfm = EnvironmentVariablesFileManager(self.user_config)
             ratr = RaindropAccessTokenRefresher(rcm, evfm)
             new_token = ratr.refresh_token_process_runner()
