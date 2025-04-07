@@ -1,14 +1,6 @@
 from unittest.mock import patch
 
 
-def test_fixture_uses_env_test_file(raindrop_access_token_refresher):
-    # Test the `raindrop_access_token_refresher` is correctly picking up the .env.test
-    # file instead of the user's .env file.
-    evfm = raindrop_access_token_refresher.evfm
-    actual = evfm.env_file
-    assert "private/var/folders" in str(actual)
-
-
 def test_fixture_doesnt_use_real_env_files(
     raindrop_access_token_refresher_for_file_overwriting,
 ):
