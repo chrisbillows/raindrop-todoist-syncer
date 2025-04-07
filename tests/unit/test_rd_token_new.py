@@ -8,9 +8,9 @@ from raindrop_todoist_syncer.rd_token import RaindropNewAccessTokenGetter
 
 
 @pytest.fixture
-def raindrop_new_access_token_getter():
-    evfm = EnvironmentVariablesFileManager()
-    rcm = RaindropCredentialsManager()
+def raindrop_new_access_token_getter(mock_user_config):
+    evfm = EnvironmentVariablesFileManager(mock_user_config)
+    rcm = RaindropCredentialsManager(mock_user_config)
     return RaindropNewAccessTokenGetter(rcm, evfm)
 
 

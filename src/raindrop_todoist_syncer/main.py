@@ -2,6 +2,7 @@ import datetime
 import traceback
 from loguru import logger
 
+from raindrop_todoist_syncer.config import UserConfig, make_user_config
 from raindrop_todoist_syncer.db_manage import DatabaseManager
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.rd_client import RaindropClient
@@ -21,14 +22,16 @@ def main():
     - Process these raindrops.
     - For each processed task, create a task in Todoist.
     """
-    rc = RaindropClient()
-    dbm = DatabaseManager()
+    user_config: UserConfig = make_user_config()
+    logger.info(user_config)
+    rc = RaindropClient(user_config)
+    dbm = DatabaseManager(user_config)
 
     all_raindrops = rc.get_all_raindrops()
-    rp = RaindropsProcessor(all_raindrops)
+    rp = RaindropsProcessor(user_config, all_raindrops)
     tasks_to_create = rp.newly_favourited_raindrops_extractor()
     for task in tasks_to_create:
-        task_creator = TodoistTaskCreator(task)
+        task_creator = TodoistTaskCreator(user_config, task)
         task_creator.create_task()
         dbm.update_database([task])
 

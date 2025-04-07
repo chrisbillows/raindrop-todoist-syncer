@@ -2,6 +2,7 @@ import re
 
 from loguru import logger
 
+from raindrop_todoist_syncer.config import UserConfig, make_user_config
 from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 from raindrop_todoist_syncer.logging_config import configure_logging
 from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
@@ -67,8 +68,9 @@ def required_env_variables_checker(
 
 
 def main():
+    user_config: UserConfig = make_user_config()
     logger.info("Verifying .env configuration.")
-    evfm = EnvironmentVariablesFileManager()
+    evfm = EnvironmentVariablesFileManager(user_config)
     rcm = RaindropCredentialsManager(evfm)
     # tcm = TodositCredentialsManager()
     # required_env_variables_checker(rcm, tcm)

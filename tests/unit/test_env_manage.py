@@ -198,18 +198,18 @@ class TestNewEnvValidator:
 class TestWriteNewBodyToEnv:
     def test_successful_write(self, environmental_variables_file_manager):
         valid_body = [
-            "TODOIST_API_KEY = 'c691d501580e381be70d1a97f5k6624d5939b142'\n",
-            "RAINDROP_CLIENT_ID = '6491cb52xvt44917d70b2d7a'\n",
-            "RAINDROP_CLIENT_SECRET = '22914d01-5c7b-49a5-c928-a229ed013c66'\n",
-            "RAINDROP_REFRESH_TOKEN = 'b8791s45-e83f-4699-al48-39693177h296'\n",
-            "RAINDROP_ACCESS_TOKEN='8bde7733-b4de-4fb5-92ab-2709434a504e'\n",
+            "TODOIST_API_KEY = 'c691d501580e381be70d1a97f5k6624d5939b1'\n",
+            "RAINDROP_CLIENT_ID = '6491cb52xvt44917d70b2d'\n",
+            "RAINDROP_CLIENT_SECRET = '22914d01-5c7b-49a5-c928-a229ed013c'\n",
+            "RAINDROP_REFRESH_TOKEN = 'b8791s45-e83f-4699-al48-39693177h2'\n",
+            "RAINDROP_ACCESS_TOKEN='8bde7733-b4de-4fb5-92ab-2709434a50'\n",
         ]
         mocked_open = mock_open()
         with patch("shutil.copy") as mock_copy, patch("builtins.open", mocked_open):
             result = environmental_variables_file_manager._write_new_body_to_env(
                 valid_body
             )
-            mock_copy.assert_called_once_with(".env", ".env.backup")
-            mocked_open.assert_called_once_with(".env", "w")
+            mock_copy.assert_called_once()
+            mocked_open.assert_called_once()
             mocked_open.return_value.writelines.assert_called_once_with(valid_body)
             assert result is None

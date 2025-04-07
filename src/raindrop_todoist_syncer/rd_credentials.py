@@ -1,25 +1,24 @@
 import json
-import os
 
-from dotenv import load_dotenv
 from loguru import logger
 import requests
 from requests import Request, Response
 
-load_dotenv()
+from raindrop_todoist_syncer.config import UserConfig
 
 
 class RaindropCredentialsManager:
-    def __init__(self) -> None:
+    def __init__(self, user_config: UserConfig) -> None:
         """Provide variables and methods for managing Raindrop Oauth2 credentials."""
-        self.env_file = ".env"
+        self.user_config = user_config
+        self.env_file = user_config.env_file
         self.AUTH_CODE_BASE_URL = "https://raindrop.io/oauth/authorize"
         self.REDIRECT_URI = "http://localhost"
         self.HEADERS = {"Content-Type": "application/json"}
-        self.RAINDROP_CLIENT_ID = os.getenv("RAINDROP_CLIENT_ID")
-        self.RAINDROP_CLIENT_SECRET = os.getenv("RAINDROP_CLIENT_SECRET")
-        self.RAINDROP_REFRESH_TOKEN = os.getenv("RAINDROP_REFRESH_TOKEN")
-        self.RAINDROP_ACCESS_TOKEN = os.getenv("RAINDROP_ACCESS_TOKEN")
+        self.RAINDROP_CLIENT_ID = self.user_config.raindrop_client_id
+        self.RAINDROP_CLIENT_SECRET = self.user_config.raindrop_client_secret
+        self.RAINDROP_REFRESH_TOKEN = self.user_config.raindrop_refresh_token
+        self.RAINDROP_ACCESS_TOKEN = self.user_config.raindrop_access_token
 
     def make_request(self, body: dict[str, str]) -> Request:
         """Makes the an request and returns a Request object."""
