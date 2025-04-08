@@ -20,7 +20,7 @@ class InterceptHandler(logging.Handler):
 
 
 def configure_logging():
-    logger.remove(0)  # Remove loguru's default logger
+    logger.remove()  # Remove loguru's default logger
     if not os.path.exists("logs"):
         os.makedirs("logs")
 

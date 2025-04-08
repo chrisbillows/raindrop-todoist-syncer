@@ -15,12 +15,14 @@ from raindrop_todoist_syncer.rd_object import Raindrop
 
 @pytest.fixture
 def mock_user_config(tmp_path) -> UserConfig:
+    tmp_user_dir = tmp_path
     tmp_config_dir = tmp_path / "config_dir"
     tmp_env_file = tmp_config_dir / "mock_env"
     tmp_db_dir = tmp_config_dir / "rts.db"
     tmp_metafile_dir = tmp_config_dir / "metafile"
     tmp_metafile_path = tmp_metafile_dir / "metafile.txt"
     user_config = UserConfig(
+        user_dir=tmp_user_dir,
         config_dir=tmp_config_dir,
         env_file=tmp_env_file,
         database_directory=tmp_db_dir,
@@ -73,6 +75,7 @@ def raindrop_access_token_refresher_for_file_overwriting(
 ):
     # A fixture to instantiate a RaindropAccessTokenRefresher instance that uses a
     # tmp_path duplicate of `.env.test`` to allow for both reading and overwriting.
+    tmp_usr_dir = tmp_path
     env_file = Path("tests") / "mock_data" / ".env.test"
     tmp_config_dir: Path = tmp_path / "config"  # ".env.backup"
     tmp_config_dir.mkdir(parents=True)
@@ -80,6 +83,7 @@ def raindrop_access_token_refresher_for_file_overwriting(
     shutil.copyfile(env_file, tmp_env_file)
 
     new_mock_user_config = UserConfig(
+        user_dir=tmp_usr_dir,
         config_dir=tmp_config_dir,
         env_file=tmp_env_file,
         database_directory=mock_user_config.database_directory,

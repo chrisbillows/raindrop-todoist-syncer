@@ -2,7 +2,7 @@
 Application configuration.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 from pathlib import Path
 from dotenv import dotenv_values
@@ -14,6 +14,8 @@ class UserConfig:
     User configuration.
     """
 
+    user_dir: Path
+    launch_agents_dir: Path = field(init=False)
     config_dir: Path
     env_file: Path
     database_directory: str
@@ -25,8 +27,11 @@ class UserConfig:
     raindrop_refresh_token: str
     raindrop_access_token: str
 
+    def __post_init__(self):
+        self.launch_agents_dir = self.user_dir / "Library" / "LaunchAgents"
 
-def make_user_config() -> UserConfig:
+
+def make_user_config(user_dir: Path | None = None) -> UserConfig:
     """
     Create a user config.
 
@@ -35,13 +40,16 @@ def make_user_config() -> UserConfig:
     UserConfig
         An initialised UserConfig
     """
-    config_dir = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config")) / "rts"
+    if user_dir is None:
+        user_dir = Path.home
+    config_dir = Path(os.getenv("XDG_CONFIG_HOME", user_dir / ".config")) / "rts"
     env_file = config_dir / ".env"
     database_directory = config_dir / "rts.db"
     metafile_directory = config_dir / "metafile"
     metafile_path = metafile_directory / "metafile.txt"
     env_vars = dotenv_values(env_file)
     return UserConfig(
+        user_dir=user_dir,
         config_dir=config_dir,
         env_file=env_file,
         database_directory=database_directory,
