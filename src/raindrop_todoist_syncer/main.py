@@ -81,7 +81,7 @@ def driver(args: argparse.Namespace):
     elif args.command == "automate_disable":
         user_config = make_user_config()
         am = AutomationManager(user_config)
-        am.deactivate_automatic_rd_fetch_and_task_creation
+        am.deactivate_automatic_rd_fetch_and_task_creation()
 
 
 def main():
