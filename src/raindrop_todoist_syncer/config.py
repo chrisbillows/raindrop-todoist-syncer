@@ -18,6 +18,7 @@ class UserConfig:
     launch_agents_dir: Path = field(init=False)
     config_dir: Path
     env_file: Path
+    logs_dir: Path
     database_directory: str
     metafile_directory: str
     metafile_path: str
@@ -44,6 +45,7 @@ def make_user_config(user_dir: Path | None = None) -> UserConfig:
         user_dir = Path.home()
     config_dir = Path(os.getenv("XDG_CONFIG_HOME", user_dir / ".config")) / "rts"
     env_file = config_dir / ".env"
+    logs_dir = config_dir / "logs"
     database_directory = config_dir / "rts.db"
     metafile_directory = config_dir / "metafile"
     metafile_path = metafile_directory / "metafile.txt"
@@ -52,6 +54,7 @@ def make_user_config(user_dir: Path | None = None) -> UserConfig:
         user_dir=user_dir,
         config_dir=config_dir,
         env_file=env_file,
+        logs_dir=logs_dir,
         database_directory=database_directory,
         metafile_directory=metafile_directory,
         metafile_path=metafile_path,

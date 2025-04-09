@@ -27,7 +27,7 @@ def mock_plist_file_content():
 
 
 @pytest.mark.parametrize(
-    "attr", ["path_to_rts_executable", "automation_dir", "plist_file_path", "logs_dir"]
+    "attr", ["path_to_rts_executable", "automation_dir", "plist_file_path"]
 )
 def test_mock_automation_manager_path_attributes_do_not_use_real_user_dir(
     mock_automation_manager: AutomationManager, attr: str
@@ -122,18 +122,13 @@ def test_automation_manager_ensure_directories_exist(
 def test_create_plist_file_content(mock_automation_manager: AutomationManager):
     mock_automation_manager._create_plist_file_content()
     actual = mock_automation_manager.plist_content.split("\n")
+    executable = actual[10].strip()
+    stdout_log = actual[17].strip()
+    stderr_log = actual[20].strip()
 
-    assert actual[10].strip().endswith(".local/bin/rts</string>")
-    assert (
-        actual[17]
-        .strip()
-        .endswith("/config_dir/logs/raindrop_todoist_syncer_std_out.log</string>")
-    )
-    assert (
-        actual[20]
-        .strip()
-        .endswith("/config_dir/logs/raindrop_todoist_syncer_err.log</string>")
-    )
+    assert executable.endswith(".local/bin/rts</string>")
+    assert stdout_log.endswith("/config_dir/logs/launchd-stdout.log</string>")
+    assert stderr_log.endswith("/config_dir/logs/launchd-stderr.log</string>")
     assert actual[21] == "</dict>"
     assert actual[22] == "</plist>"
 

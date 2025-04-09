@@ -25,10 +25,10 @@ PLIST_TEMPLATE = """
         <true/>
 
         <key>StandardOutPath</key>
-        <string>{{PATH_TO_CONFIG_DIR}}/logs/raindrop_todoist_syncer_std_out.log</string>
+        <string>{{PATH_TO_LOGS_DIR}}/launchd-stdout.log</string>
 
         <key>StandardErrorPath</key>
-        <string>{{PATH_TO_CONFIG_DIR}}/logs/raindrop_todoist_syncer_err.log</string>
+        <string>{{PATH_TO_LOGS_DIR}}/launchd-stderr.log</string>
 </dict>
 </plist>
 """
@@ -67,7 +67,6 @@ class AutomationManager:
         self.plist_file_path = (
             self.automation_dir / "com.raindrop-todoist-syncer.raindrop_fetcher.plist"
         )
-        self.logs_dir = self.user_config.config_dir / "logs"
         self.plist_content = ""
         self.launch_agents_dir = user_config.user_dir / "Library" / "LaunchAgents"
         self.symlink_path = self.launch_agents_dir / self.plist_file_path.name
@@ -84,7 +83,7 @@ class AutomationManager:
         self._install_plist_file()
         logger.info(
             f"Raindrop Todoist Syncer is now installed to run automatically. To confirm"
-            f" check log files at:\n{self.logs_dir}"
+            f" check log files at:\n{self.user_config.logs_dir}"
         )
 
     def deactivate_automatic_rd_fetch_and_task_creation(self) -> None:
@@ -106,7 +105,7 @@ class AutomationManager:
           already exist and is therefore a double check)
         """
         self.automation_dir.mkdir(parents=True, exist_ok=True)
-        self.logs_dir.mkdir(parents=True, exist_ok=True)
+        self.user_config.logs_dir.mkdir(parents=True, exist_ok=True)
         self.user_config.launch_agents_dir.mkdir(parents=True, exist_ok=True)
 
     def _create_plist_file_content(self) -> None:
@@ -120,8 +119,8 @@ class AutomationManager:
             "{{PATH_TO_EXECUTABLE}}", str(self.path_to_rts_executable)
         )
         content = content.replace(
-            "{{PATH_TO_CONFIG_DIR}}",
-            str(self.user_config.config_dir),
+            "{{PATH_TO_LOGS_DIR}}",
+            str(self.user_config.logs_dir),
         )
         logger.debug("Generated plist file content.")
         self.plist_content = content

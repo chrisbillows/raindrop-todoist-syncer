@@ -18,6 +18,7 @@ def mock_user_config(tmp_path) -> UserConfig:
     tmp_user_dir = tmp_path
     tmp_config_dir = tmp_path / "config_dir"
     tmp_env_file = tmp_config_dir / "mock_env"
+    tmp_logs_dir = tmp_config_dir / "logs"
     tmp_db_dir = tmp_config_dir / "rts.db"
     tmp_metafile_dir = tmp_config_dir / "metafile"
     tmp_metafile_path = tmp_metafile_dir / "metafile.txt"
@@ -25,6 +26,7 @@ def mock_user_config(tmp_path) -> UserConfig:
         user_dir=tmp_user_dir,
         config_dir=tmp_config_dir,
         env_file=tmp_env_file,
+        logs_dir=tmp_logs_dir,
         database_directory=tmp_db_dir,
         metafile_directory=tmp_metafile_dir,
         metafile_path=tmp_metafile_path,
@@ -86,6 +88,7 @@ def raindrop_access_token_refresher_for_file_overwriting(
         user_dir=tmp_usr_dir,
         config_dir=tmp_config_dir,
         env_file=tmp_env_file,
+        logs_dir=mock_user_config.logs_dir,
         database_directory=mock_user_config.database_directory,
         metafile_directory=mock_user_config.metafile_directory,
         metafile_path=mock_user_config.metafile_path,
