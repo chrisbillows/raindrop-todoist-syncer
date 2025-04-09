@@ -41,7 +41,7 @@ def make_user_config(user_dir: Path | None = None) -> UserConfig:
         An initialised UserConfig
     """
     if user_dir is None:
-        user_dir = Path.home
+        user_dir = Path.home()
     config_dir = Path(os.getenv("XDG_CONFIG_HOME", user_dir / ".config")) / "rts"
     env_file = config_dir / ".env"
     database_directory = config_dir / "rts.db"
