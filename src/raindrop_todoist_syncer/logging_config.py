@@ -1,7 +1,9 @@
 import logging
-import os
 import sys
 from loguru import logger
+
+
+from raindrop_todoist_syncer.config import make_user_config
 
 
 class InterceptHandler(logging.Handler):
@@ -21,8 +23,9 @@ class InterceptHandler(logging.Handler):
 
 def configure_logging():
     logger.remove()  # Remove loguru's default logger
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
+
+    user_config = make_user_config()
+    user_config.logs_dir.mkdir(parents=True, exist_ok=True)
 
     # Intercept third party logs
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
