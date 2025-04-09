@@ -15,6 +15,59 @@ from raindrop_todoist_syncer.logging_config import configure_logging
 configure_logging()
 
 
+def fetch_raindrops_and_create_tasks(
+    user_config: UserConfig,
+    raindrop_client: RaindropClient,
+    database_manager: DatabaseManager,
+) -> None:
+    """
+    Driver function to fetch raindrops, create tasks and update database.
+
+    Parameters
+    ----------
+    user_config: UserConfig
+        A UserConfig object.
+    raindrop_client: RaindropClient
+        A RaindropClient object.
+    database_manager: DatabaseManager
+        A Database Manager object
+    """
+    all_raindrops = raindrop_client.get_all_raindrops()
+    rp = RaindropsProcessor(user_config, all_raindrops)
+    tasks_to_create = rp.newly_favourited_raindrops_extractor()
+    for task in tasks_to_create:
+        task_creator = TodoistTaskCreator(user_config, task)
+        task_creator.create_task()
+        database_manager.update_database([task])
+
+
+def driver(args: argparse.Namespace):
+    """
+    Driver function.
+
+    Parameters
+    ----------
+    args: argparse.Namespace
+        The parsed args
+
+    """
+    logger.info(f"Parsed args were {args}")
+    user_config = make_user_config()
+
+    if args.command == "run":
+        rc = RaindropClient(user_config)
+        dbm = DatabaseManager(user_config)
+        fetch_raindrops_and_create_tasks(user_config, rc, dbm)
+
+    if args.command == "automate_enable":
+        am = AutomationManager(user_config)
+        am.activate_automatic_rd_fetch_and_task_creation()
+
+    elif args.command == "automate_disable":
+        am = AutomationManager(user_config)
+        am.deactivate_automatic_rd_fetch_and_task_creation()
+
+
 def parse_args() -> None:
     """
     Parse args.
@@ -39,49 +92,6 @@ def parse_args() -> None:
     parser.set_defaults(command="run")
 
     return parser.parse_args()
-
-
-def fetch_raindrops_and_create_tasks() -> None:
-    """
-    Fetch raindrops, create tasks and update database.
-    """
-    user_config: UserConfig = make_user_config()
-    logger.info(user_config)
-    rc = RaindropClient(user_config)
-    dbm = DatabaseManager(user_config)
-    all_raindrops = rc.get_all_raindrops()
-    rp = RaindropsProcessor(user_config, all_raindrops)
-    tasks_to_create = rp.newly_favourited_raindrops_extractor()
-    for task in tasks_to_create:
-        task_creator = TodoistTaskCreator(user_config, task)
-        task_creator.create_task()
-        dbm.update_database([task])
-
-
-def driver(args: argparse.Namespace):
-    """
-    Driver function.
-
-    Parameters
-    ----------
-    args: argparse.Namespace
-        The parsed args
-
-    """
-    logger.info(f"Parsed args were {args}")
-
-    if args.command == "run":
-        fetch_raindrops_and_create_tasks()
-
-    if args.command == "automate_enable":
-        user_config = make_user_config()
-        am = AutomationManager(user_config)
-        am.activate_automatic_rd_fetch_and_task_creation()
-
-    elif args.command == "automate_disable":
-        user_config = make_user_config()
-        am = AutomationManager(user_config)
-        am.deactivate_automatic_rd_fetch_and_task_creation()
 
 
 def main():
