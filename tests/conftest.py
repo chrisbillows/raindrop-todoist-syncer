@@ -1,42 +1,41 @@
 import json
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock, patch
 import shutil
 
 import pytest
 from requests import HTTPError
 
-from raindrop_todoist_syncer.config import UserConfig
+from raindrop_todoist_syncer.config import UserConfig, SystemConfig, SecretsConfig
 from raindrop_todoist_syncer.env_manage import EnvironmentVariablesFileManager
 from raindrop_todoist_syncer.rd_credentials import RaindropCredentialsManager
 from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
 from raindrop_todoist_syncer.rd_object import Raindrop
 
 
-@pytest.fixture
-def mock_user_config(tmp_path) -> UserConfig:
-    tmp_user_dir = tmp_path
-    tmp_config_dir = tmp_path / "config_dir"
-    tmp_env_file = tmp_config_dir / "mock_env"
-    tmp_logs_dir = tmp_config_dir / "logs"
-    tmp_db_dir = tmp_config_dir / "rts.db"
-    tmp_metafile_dir = tmp_config_dir / "metafile"
-    tmp_metafile_path = tmp_metafile_dir / "metafile.txt"
-    user_config = UserConfig(
-        user_dir=tmp_user_dir,
-        config_dir=tmp_config_dir,
-        env_file=tmp_env_file,
-        logs_dir=tmp_logs_dir,
-        database_directory=tmp_db_dir,
-        metafile_directory=tmp_metafile_dir,
-        metafile_path=tmp_metafile_path,
-        todoist_api_key="ab12",
-        raindrop_client_id="cd34",
-        raindrop_client_secret="ef56",
-        raindrop_refresh_token="gh67",
-        raindrop_access_token="ij910",
-    )
-    return user_config
+@pytest.fixture()
+@patch("raindrop_todoist_syncer.config.dotenv_values")
+@patch("raindrop_todoist_syncer.config.Path.exists", return_value=True)
+def mock_user_config(
+    _mock_path_exists: MagicMock, mock_dotenv_values: MagicMock, tmp_path: Path
+) -> UserConfig:
+    """
+    Create a mock user config with real paths to a tmp dir.
+
+    None of the files are created, including the '.env' file.
+    """
+    mock_dotenv_values.return_value = {
+        "TODOIST_API_KEY": "ab12",
+        "RAINDROP_CLIENT_ID": "cd34",
+        "RAINDROP_CLIENT_SECRET": "ef56",
+        "RAINDROP_REFRESH_TOKEN": "gh78",
+        "RAINDROP_ACCESS_TOKEN": "ij910",
+    }
+    mock_user_dir = tmp_path / "mock_user_dir"
+    mock_system_config = SystemConfig(mock_user_dir)
+    mock_secrets_config = SecretsConfig(mock_system_config)
+    mock_user_config = UserConfig(mock_system_config, mock_secrets_config)
+    return mock_user_config
 
 
 # ---------------------------------- env vars-------------------------------------------
