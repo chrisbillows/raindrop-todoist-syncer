@@ -1,29 +1,30 @@
 # Raindrop Todoist Syncer
 
-Convert favourited Raindrop bookmarks into a Todoist tasks.
+Convert favourited Raindrop bookmarks into Todoist tasks
 
 > [!CAUTION]
-> This was a learning project. I still use it - it works - but the code is uggggly.
+> This was a learning project. I still use it - it works - but the code is uggggly
 
 ## Features
 
 - Create Todoist tasks from favorited Raindrop bookmarks
 - Option to run automatically in the background (on Mac only) via macOS launchd
 
-My usage:
+### My usage
 
-- Turn browser windows into todos. No more tabs upon tabs of things I won't do. Now I
-have todoist tasks upon tasks I won't do. Much more manageable.
+- Turn browser windows into todos.
+- No more tabs upon tabs of things I won't do.
+- Now I have todoist tasks upon tasks I won't do.
+- Much more manageable.
 
-<br>
+### Screenshot
 
 ![A Todoist Task created from a favourited Raindrop](todoist_task_example.png)
 *A Todoist Task created from a favourited Raindrop*
 
 ## Getting Started
 
-These instructions will guide you through the process of setting up and running
-Raindrop-Todoist-Syncer on your own machine.
+Follow these instruction to set up and run Raindrop Todoist Syncer.
 
 ### Prerequisites
 
@@ -31,23 +32,33 @@ Raindrop-Todoist-Syncer on your own machine.
 * A Raindrop account with favorited items and
 * A Todoist account
 
-Automated fetching of Raindrops requires Mac as it relies on Apples's launchd / plist
-files for automation. (Although it should be simple to set up a cron job to do similar).
+Automated fetching of Raindrops is Mac only - it relies on Apples's launchd / plist
+files for automation. (Although a simple cron job would do similar).
 
 ### Installation
 
-1. Installation with the uv package manager (or pipx) is recommended. (To install uv see
+1. Installation with the [*uv*](https://github.com/astral-sh/uv) package manager (or
+pipx) is recommended. (To install *uv* see
 [here](https://docs.astral.sh/uv/getting-started/installation/))
-2. Run `uv tool install git+https://github.com/chrisbillows/raindrop-todoist-syncer.git`
-3. Confirm the installation by running `which rts`. You should see something like:
+2. Run
 ```
-/Users/<your_user_name>/.local/bin/rts
+uv tool install git+https://github.com/chrisbillows/raindrop-todoist-syncer.git
 ```
-4. Run the command `rts --help` and the Raindrop Todoist Syncer CLI help should appear.
+3. Confirm the installation by:
+- Run:
+```
+which rts
+```
+You should see something like: `/Users/<your_user_name>/.local/bin/rts`
+- Run
+```
+rts --help
+```
+The Raindrop Todoist Syncer CLI help should appear.
 
 The package now needs to be configured.
 
-### `.env` file
+### Configure the package - the `.env` file
 
 The package requires the following file:
 
@@ -64,22 +75,22 @@ mkdir -p "$HOME/.config/rts" && touch "$HOME/.config/rts/.env"
 Open the empty file with the text editor of your choice e.g.
 
 ```
-open "$HOME/.config/rts/.env" # Open with TextEdit
+open "$HOME/.config/rts/.env" # Open the .env file with TextEdit
 ```
 
 Add the following to the `.env` file.
 
-### API Access Tokens
+#### API Access Tokens
 
 Raindrop Todoist Syncer requires API access to Todoist and Raindrop.io.
 
 This is configured by adding API tokens to the `.env` file.
 
 > [!CAUTION]
-> For both applications API access allows view and modification access to your data. API
-tokens should be treated like a password and not shared.
-> Raindrop-Todoist-Syncer runs locally on your machine. I have no access to your is
-data; nothing is shared. But, if in doubt, always CHECK WITH A GROWN-UP! Or Chat GPT.
+> For both applications API access allows view and modification access to your data.
+> API tokens should be treated *like passwords* and not shared.
+> Raindrop-Todoist-Syncer runs locally on your machine. I have no access to your data;
+nothing is shared. But, if in doubt, always CHECK WITH A GROWN-UP! Or Chat GPT.
 
 #### Todoist API
 
@@ -161,14 +172,16 @@ manage this in Login Items & Extensions.`
 
 To disable automated sync (and remove the `.plist` file) run:
 
-`rts automate_disable`
+```
+rts automate_disable
+```
 
 ## Uninstall
 
 You can remove the package via uv with the command
 
 ```
-uv
+uv tool uninstall raindrop-todoist-syncer
 ```
 
 You can delete all Raindrop Todoist Syncer files with:
