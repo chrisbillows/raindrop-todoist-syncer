@@ -145,14 +145,14 @@ def mock_requests_get(monkeypatch, response_one_data, response_two_data):
 
     def _mocked_requests_get(url, headers=None, params=None):
         mock_response = Mock()
-        if params == {"perpage": 25, "page": 0}:
+        if params == {"perpage": 25, "page": 0, "search": "❤️"}:
             mock_response.json.return_value = response_one_data
             mock_response.status_code = 200
             mock_response.headers = {
                 "x-ratelimit-remaining": 119,
                 "x-ratelimit-limit": 120,
             }
-        elif params == {"perpage": 25, "page": 1}:
+        elif params == {"perpage": 25, "page": 1, "search": "❤️"}:
             mock_response.json.return_value = response_two_data
             mock_response.status_code = 200
             mock_response.headers = {
