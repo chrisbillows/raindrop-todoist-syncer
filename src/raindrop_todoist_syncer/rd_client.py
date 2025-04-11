@@ -150,7 +150,7 @@ class RaindropClient:
 
     def _core_api_call(self, page: int) -> Response:
         """
-        Makes the API call.
+        Makes the API call to fetch only favourited raindrops.
 
         Parameters:
             page     : A page to request from the full paginated list.
@@ -159,7 +159,7 @@ class RaindropClient:
             response : The API response
         """
         collection_id = 0
-        params = {"perpage": self.RAINDROPS_PER_PAGE, "page": page}
+        params = {"perpage": self.RAINDROPS_PER_PAGE, "page": page, "search": "❤️"}
         response = requests.get(
             f"{self.BASE_URL}/raindrops/{collection_id}/",
             headers=self.headers,
