@@ -22,6 +22,9 @@ PLIST_TEMPLATE = """
         <key>RunAtLoad</key>
         <true/>
 
+        <key>StartInterval</key>
+        <integer>300</integer>
+
         <key>StandardOutPath</key>
         <string>{{PATH_TO_LOGS_DIR}}/launchd-stdout.log</string>
 

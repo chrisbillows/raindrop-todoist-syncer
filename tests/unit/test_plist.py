@@ -123,14 +123,14 @@ def test_create_plist_file_content(mock_automation_manager: AutomationManager):
     mock_automation_manager._create_plist_file_content()
     actual = mock_automation_manager.plist_content.split("\n")
     executable = actual[10].strip()
-    stdout_log = actual[17].strip()
-    stderr_log = actual[20].strip()
+    stdout_log = actual[20].strip()
+    stderr_log = actual[23].strip()
 
     assert executable.endswith(".local/bin/rts</string>")
     assert stdout_log.endswith("/.config/rts/logs/launchd-stdout.log</string>")
     assert stderr_log.endswith("/.config/rts/logs/launchd-stderr.log</string>")
-    assert actual[21] == "</dict>"
-    assert actual[22] == "</plist>"
+    assert actual[24] == "</dict>"
+    assert actual[25] == "</plist>"
 
 
 def test_write_plist_file(
