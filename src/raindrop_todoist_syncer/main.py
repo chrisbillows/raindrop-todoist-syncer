@@ -105,11 +105,11 @@ def main() -> None:
     """
     Entry point for raindrop todoist syncer.
     """
+    args = parse_args()
     system_config = SystemConfig()
     configure_logging(system_config)
     logger.info(system_config)
 
-    args = parse_args()
     user_config = UserConfig.from_env_file(system_config)
     driver(args, user_config)
 

@@ -93,11 +93,11 @@ def test_parse_args(command_ran_in_cli: str | None, expected: argparse.Namespace
 
 @patch("raindrop_todoist_syncer.main.driver")
 @patch("raindrop_todoist_syncer.main.UserConfig.from_env_file")
-@patch("raindrop_todoist_syncer.main.parse_args")
 @patch("raindrop_todoist_syncer.main.SystemConfig")
+@patch("raindrop_todoist_syncer.main.parse_args")
 def test_main(
-    mock_system_config: MagicMock,
     mock_parse_args: MagicMock,
+    mock_system_config: MagicMock,
     mock_user_config_from_env: MagicMock,
     mock_driver: MagicMock,
     mock_system_config_real_paths: SystemConfig,
