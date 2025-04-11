@@ -1,28 +1,30 @@
-# Raindrop-Todoist-Syncer
+# Raindrop Todoist Syncer
 
-Raindrop-Todoist-Syncer is a Python script designed to convert any favourited Raindrop into a task in Todoist. It is intended to be run as a background cron job.
+Convert favourited Raindrop bookmarks into Todoist tasks
 
-> VERY MUCH A WORK IN PROGRESS
-
-**Note: This is primarily a learning project for trying to explore more professional development practices, including:**
-- **Documenting with Google python style-guide docstrings"**
-- **Debugging with ipdb**
-- **Type hinting**
-- **Proper error handling**
-- **Unit testing**
-- **Static testing/linting**
-- **Logging**
-- **Use of pre-commit hooks to enforce styling/tests etc**
-- **Basic CI/CD for automated testing**
+> [!CAUTION]
+> This was a learning project. I still use it - it works - but the code is uggggly
 
 ## Features
 
-- Automatically syncs favorited Raindrops to Todoist tasks
-- Runs as a background cron job
+- Create Todoist tasks from favorited Raindrop bookmarks
+- Option to run automatically in the background (on Mac only) via macOS launchd
+
+### My usage
+
+- Turn browser windows into todos.
+- No more tabs upon tabs of things I won't do.
+- Now I have todoist tasks upon tasks I won't do.
+- Much more manageable.
+
+### Screenshot
+
+![A Todoist Task created from a favourited Raindrop](todoist_task_example.png)
+*A Todoist Task created from a favourited Raindrop*
 
 ## Getting Started
 
-These instructions will guide you through the process of setting up and running Raindrop-Todoist-Syncer on your own machine.
+Follow these instruction to set up and run Raindrop Todoist Syncer.
 
 ### Prerequisites
 
@@ -30,59 +32,170 @@ These instructions will guide you through the process of setting up and running 
 * A Raindrop account with favorited items and
 * A Todoist account
 
+Automated fetching of Raindrops is Mac only - it relies on Apples's launchd / plist
+files for automation. (Although a simple cron job would do similar).
+
 ### Installation
 
-1. Clone the repository: `git clone https://github.com/yourusername/raindrop-todoist-syncer.git`
-2. Navigate into the project directory: `cd raindrop-todoist-syncer`
-3. Install the required dependencies: `pip install -r requirements.txt`
-4. Configure the application by editing the configuration file with your own Raindrop and Todoist account details
+1. Installation with the [*uv*](https://github.com/astral-sh/uv) package manager (or
+pipx) is recommended. (To install *uv* see
+[here](https://docs.astral.sh/uv/getting-started/installation/))
+2. Run
+```
+uv tool install git+https://github.com/chrisbillows/raindrop-todoist-syncer.git
+```
+3. Confirm the installation by:
+- Run:
+```
+which rts
+```
+You should see something like: `/Users/<your_user_name>/.local/bin/rts`
+- Run
+```
+rts --help
+```
+The Raindrop Todoist Syncer CLI help should appear.
 
-### API Access
+The package now needs to be configured.
 
-To run this script requires API access to Todoist and Raindrop. For both applications
-API access allows full access to view and modify your data. API tokens should be
-treated like a password and not shared.
+### Configure the package - the `.env` file
 
-Raindrop-Todoist-Syncer runs locally on your machine and no information is shared, but,
-if in doubt, always CHECK WITH A GROWN-UP! Or Chat GPT. :0)
+The package requires the following file:
+
+```
+~/.config/rts/.env
+```
+
+To create it run this command:
+
+```bash
+mkdir -p "$HOME/.config/rts" && touch "$HOME/.config/rts/.env"
+```
+
+Open the empty file with the text editor of your choice e.g.
+
+```
+open "$HOME/.config/rts/.env" # Open the .env file with TextEdit
+```
+
+Add the following to the `.env` file.
+
+#### API Access Tokens
+
+Raindrop Todoist Syncer requires API access to Todoist and Raindrop.io.
+
+This is configured by adding API tokens to the `.env` file.
+
+> [!CAUTION]
+> For both applications API access allows view and modification access to your data.
+> API tokens should be treated *like passwords* and not shared.
+> Raindrop-Todoist-Syncer runs locally on your machine. I have no access to your data;
+nothing is shared. But, if in doubt, always CHECK WITH A GROWN-UP! Or Chat GPT.
 
 #### Todoist API
 
 In Todoist, go to "Integrations" and under "Developer" copy your API key.
 
-Save it to the .env file as:
+Save it to the `.env` file as:
 
+```
 TODOIST_API_KEY = 'abc123'
+```
 
 #### Raindrop API
 
 Use of the Raindrop API requires an Oauth token.
 
-First go to "Settings", "Integrations" and, under "For Developers", select "Create new app".
-Save your client ID and client secret to .env in the root directory as:
+First go to "Settings", "Integrations" and, under "For Developers", select "Create
+new app". Save your client ID and client secret to `.env` file as:
 
+```
 RAINDROP_CLIENT_ID = 'abc123'
 RAINDROP_CLIENT_SECRET = 'def5456'
+```
 
 To get the oauth token follow the steps here:
 
-https://developer.raindrop.io/
+https://developer.raindrop.io/v1/authentication/token
 
-The script will handle this automatically in future.
+Add the following to your `.env` file.
+
+```
+RAINDROP_REFRESH_TOKEN = 'abc123'
+RAINDROP_ACCESS_TOKEN = 'def456'
+```
 
 ### Usage
 
-Currently:
+####  Run
 
-1. Run the script: `python main.py`
-2. The script will automatically sync any favorited Raindrops to Todoist tasks - AS LONG
-AS THE TERMINAL REMAINS OPEN.
-3. This will run as a background cron job once I figure out error handling for SIGTERM, SIGKILL interrupts.
+> [!NOTE]
+> Before you run Raindrop Todoist Syncer for the first time, check your Raindrop
+favourites. They will *ALL* be turned into Todoist tasks.
+
+Run Raindrop Todoist Syncer once with the command:
+
+```
+rts
+```
+
+or
+
+```
+rts run
+```
+
+This will turn your Raindrop favourites into Todoist tasks. Subsequent runs will only
+convert NEW favourites into Todoist tasks.
+
+#### Automate syncing
+
+Raindrop Todoist Syncer can fetch Raindrops and create tasks automatically by running in
+ the background.
+
+To enable this run:
+
+```
+rts automate_enable
+```
+
+This will install a `.plist` file in `~/Library/LaunchAgents`. This file tells macOS to
+run the Raindrop Todoist command in the background every 5 minutes.
+
+> [!WARNING]
+> After running `rts automate_enable` you will get a macOS notification:
+> `Background Items Added. "rts" is an item that can run in the background. You can
+manage this in Login Items & Extensions.`
+> If can toggle this permission in ``Login Items & Extensions``.
+
+#### Disable automated syncing
+
+To disable automated sync (and remove the `.plist` file) run:
+
+```
+rts automate_disable
+```
+
+## Uninstall
+
+You can remove the package via uv with the command
+
+```
+uv tool uninstall raindrop-todoist-syncer
+```
+
+You can delete all Raindrop Todoist Syncer files with:
+
+```
+rm -rf ~/.config/rts
+```
+
+All logs and application files are stored in `~/.config/rts`.  No other files or clutter
+ are added to your machine.
 
 ## Contact
 
-If you want to contact me you can reach me at [christopherbillows@gmail.com](mailto:christopherbillows@gmail.com). I am currently seeking an entry level role.
-
+If you want to contact me you can reach me at [christopherbillows@gmail.com](mailto:christopherbillows@gmail.com).
 
 # License
 

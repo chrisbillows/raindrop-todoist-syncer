@@ -4,8 +4,8 @@ from unittest.mock import patch
 def test_fixture_doesnt_use_real_env_files(
     raindrop_access_token_refresher_for_file_overwriting,
 ):
-    # Test the `raindrop_access_token_refresher` is not using the users .env file or the
-    # .env.test file - and therefore using a tmp_path file.
+    # Test the `raindrop_access_token_refresher` is not using the user's .env file or
+    # the .env.test file - and is therefore using a tmp_path file.
     expected = [".env", ".env.test"]
     evfm = raindrop_access_token_refresher_for_file_overwriting.evfm
     actual = evfm.env_file

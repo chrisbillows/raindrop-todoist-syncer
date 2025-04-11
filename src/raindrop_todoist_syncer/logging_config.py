@@ -1,7 +1,10 @@
 import logging
-import os
 import sys
+
 from loguru import logger
+
+
+from raindrop_todoist_syncer.config import SystemConfig
 
 
 class InterceptHandler(logging.Handler):
@@ -19,38 +22,36 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=6, exception=record.exc_info).log(level, record.getMessage())
 
 
-def configure_logging():
-    logger.remove(0)  # Remove loguru's default logger
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
+def configure_logging(system_config: SystemConfig):
+    # Remove loguru's default handler (which logs to stderr with colors)
+    logger.remove()
 
-    # Intercept third party logs
+    # Create the logs directory if it doesn't exist
+    system_config.logs_dir.mkdir(parents=True, exist_ok=True)
+    log_file_builtins = system_config.logs_dir / "builtins.log"
+    log_file = system_config.logs_dir / "log.log"
+
+    # ------- Python logging config -------
+    # Route standard `logging` (e.g. from third-party libs) into loguru via
+    # InterceptHandler
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
     logging.root.setLevel(logging.DEBUG)
-
-    # Configure seperate file handling if req'd e.g. for monitoring third party modules
-    # for debugging notifications I'm unaware of
-    file_handler = logging.FileHandler("logs/builtin_logging.log")
+    # Additionally log raw built-in logging messages to a separate file. `requests`
+    # does this, so include to ensure all requests logs are intercepted.
+    file_handler = logging.FileHandler(log_file_builtins)
     file_handler.setLevel(logging.DEBUG)
     logging.root.addHandler(file_handler)
 
+    # ------- Loguru config -------
+    # Console logs go to stdout (as configured)
+    # If no `format=` is specified, loguru enables colored output by default.
+    # Uncomment `format=` to disable colors or customize layout.
     logger.add(
         sys.stdout,
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
         level="INFO",
     )
-
     logger.add(
-        "logs/log.log",
+        log_file,
         rotation="5 MB",
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
         level="DEBUG",
-    )
-
-    logger.add(
-        "logs/log_serialized.log",
-        rotation="5 MB",
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
-        level="DEBUG",
-        serialize=True,
     )

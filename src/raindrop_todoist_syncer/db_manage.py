@@ -6,7 +6,7 @@ from typing import Any
 
 from loguru import logger
 
-from raindrop_todoist_syncer.config import UserConfig
+from raindrop_todoist_syncer.config import UserConfigProtocol
 from raindrop_todoist_syncer.rd_object import Raindrop
 
 
@@ -37,10 +37,10 @@ class DatabaseManager:
         Path of the metafile.
     """
 
-    def __init__(self, user_config: UserConfig):
+    def __init__(self, user_config: UserConfigProtocol):
         self.user_config = user_config
-        self.database_directory = self.user_config.database_directory
-        self.metafile_directory = self.user_config.metafile_directory
+        self.database_directory = self.user_config.database_dir
+        self.metafile_directory = self.user_config.metafile_dir
         self.metafile_path = self.user_config.metafile_path
 
     def update_database(self, new_favourited_raindrop_objects: list[Raindrop]) -> bool:

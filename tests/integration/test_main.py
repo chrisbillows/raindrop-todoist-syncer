@@ -122,42 +122,6 @@ class TestStaleTokenFunctionality:
             mock_refresh_token_runner.assert_not_called()
 
 
-@pytest.fixture
-def DELETE_ME_mock_db_data() -> dict[str, any]:
-    """Creates the contents of a database file.
-
-    Can be used in memory (as if read from the file) or written to a file and
-    then read.
-
-    Source of the data is an extracted API response using a set of real
-    raindrops created for testing purposes (e.g. BBC News etc).
-
-    Two items are removed, allowing the same test set to be used to introduce
-    new, untracked raindrops.
-
-    Can be used in conjunction with `mock_requests_get` which currently collects
-    26 raindrops.  This database will hold 23 of those raindrops, leaving 3 "new"
-    raindrops to be actioned.
-
-    Returns
-    -------
-    mock_db_data: dict[str, any]
-        A dictionary containing one item, the key "Processed Raindrops" and the
-        value a list of raindrop dictionaries.
-
-    See Also
-    --------
-    The return value can be used with `create_mock_db_files` to create a tempfile
-    db and metafile data for most realistic use.
-    """
-    mock_db_data = {"Processed Raindrops": []}
-    with open("tests/mock_data/rd_api_response_one.json") as f:
-        full_api_response = json.load(f)
-    mock_db_content = full_api_response["items"][:-2]
-    mock_db_data["Processed Raindrops"] = mock_db_content
-    return mock_db_data
-
-
 # @pytest.fixture
 # def mock_database_environment(monkeypatch, mock_db_data):
 #     """A fixture to mock database/metafile attributes in a DatabaseManager object.
