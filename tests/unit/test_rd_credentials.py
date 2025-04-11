@@ -28,7 +28,7 @@ class TestRaindropCredentialsManagerInit:
         rcm = RaindropCredentialsManager(mock_user_config)
         assert rcm.RAINDROP_CLIENT_ID == "cd34"
         assert rcm.RAINDROP_CLIENT_SECRET == "ef56"
-        assert rcm.RAINDROP_REFRESH_TOKEN == "gh67"
+        assert rcm.RAINDROP_REFRESH_TOKEN == "gh78"
         assert rcm.RAINDROP_ACCESS_TOKEN == "ij910"
 
 

@@ -127,8 +127,8 @@ def test_create_plist_file_content(mock_automation_manager: AutomationManager):
     stderr_log = actual[20].strip()
 
     assert executable.endswith(".local/bin/rts</string>")
-    assert stdout_log.endswith("/config_dir/logs/launchd-stdout.log</string>")
-    assert stderr_log.endswith("/config_dir/logs/launchd-stderr.log</string>")
+    assert stdout_log.endswith("/.config/rts/logs/launchd-stdout.log</string>")
+    assert stderr_log.endswith("/.config/rts/logs/launchd-stderr.log</string>")
     assert actual[21] == "</dict>"
     assert actual[22] == "</plist>"
 

@@ -1,9 +1,9 @@
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 import pytest
 
 from raindrop_todoist_syncer.config import UserConfig, SystemConfig, SecretsConfig
+from tests.conftest import mock_env_vars_func
 
 
 @pytest.mark.parametrize(
@@ -25,61 +25,20 @@ def test_system_config_init(attr: str, expected_value: Path):
 
 
 @pytest.mark.parametrize(
-    "attr, expected_value",
-    [
-        ("todoist_api_key", "ab12"),
-        ("raindrop_client_id", "cd34"),
-        ("raindrop_client_secret", "ef56"),
-        ("raindrop_refresh_token", "gh67"),
-        ("raindrop_access_token", "ij910"),
-    ],
+    "attr, expected_value", [(k.lower(), v) for k, v in mock_env_vars_func().items()]
 )
-def test_secrets_config_init_env_present_all_required_values_present(
-    attr: str, expected_value: str, tmp_path: Path
+def test_secrets_config_init_all_required_values_present(
+    attr: str, expected_value: str
 ):
-    mock_user_dir = tmp_path / "mock_user_dir"
-    mock_system_config = SystemConfig(mock_user_dir)
-
-    mock_secrets = {
-        "TODOIST_API_KEY": "ab12",
-        "RAINDROP_CLIENT_ID": "cd34",
-        "RAINDROP_CLIENT_SECRET": "ef56",
-        "RAINDROP_REFRESH_TOKEN": "gh67",
-        "RAINDROP_ACCESS_TOKEN": "ij910",
-    }
-    mock_secrets_str = "\n".join([f"{k} = '{v}'" for k, v in mock_secrets.items()])
-
-    mock_system_config.env_file.parent.mkdir(parents=True, exist_ok=True)
-    mock_system_config.env_file.write_text(mock_secrets_str)
-
-    mock_secrets_config = SecretsConfig(mock_system_config)
-
+    mock_secrets_config = SecretsConfig(mock_env_vars_func())
     assert getattr(mock_secrets_config, attr) == expected_value
 
 
-def test_secrets_config_init_env_present_value_missing(tmp_path: Path):
-    mock_user_dir = tmp_path / "mock_user_dir"
-    mock_system_config = SystemConfig(mock_user_dir)
-
-    mock_secrets = {
-        "TODOIST_API_KEY": "ab12",
-        "RAINDROP_CLIENT_ID": "cd34",
-        "RAINDROP_CLIENT_SECRET": "ef56",
-        "RAINDROP_REFRESH_TOKEN": "gh67",
-        # "RAINDROP_ACCESS_TOKEN": "ij910",  # Missing value
-    }
-    mock_secrets_str = "\n".join([f"{k} = '{v}'" for k, v in mock_secrets.items()])
-
-    mock_system_config.env_file.parent.mkdir(parents=True, exist_ok=True)
-    mock_system_config.env_file.write_text(mock_secrets_str)
+def test_secrets_config_init_value_missing():
+    env_var = mock_env_vars_func()
+    env_var.pop("RAINDROP_ACCESS_TOKEN")
     with pytest.raises(KeyError):
-        SecretsConfig(mock_system_config)
-
-
-def test_secrets_config_missing_env():
-    mock_system_config = SystemConfig(Path("mock_user_dir"))
-    with pytest.raises(FileNotFoundError):
-        SecretsConfig(mock_system_config)
+        SecretsConfig(env_var)
 
 
 @pytest.mark.parametrize(
@@ -93,32 +52,40 @@ def test_secrets_config_missing_env():
         ("metafile_dir", Path("mock_user_dir/.config/rts/metafile")),
         ("metafile_path", Path("mock_user_dir/.config/rts/metafile/metafile.txt")),
         ("launch_agents_dir", Path("mock_user_dir/Library/LaunchAgents")),
-        ("todoist_api_key", "ab12"),
-        ("raindrop_client_id", "cd34"),
-        ("raindrop_client_secret", "ef56"),
-        ("raindrop_refresh_token", "gh78"),
-        ("raindrop_access_token", "ij910"),
-    ],
+    ]
+    + [(k.lower(), v) for k, v in mock_env_vars_func().items()],
 )
-@patch("raindrop_todoist_syncer.config.dotenv_values")
-@patch("raindrop_todoist_syncer.config.Path.exists", return_value=True)
-def test_user_config(
-    _mock_path_exists: MagicMock,
-    mock_dotenv_values: MagicMock,
-    attr: str,
-    expected_value: str,
-):
+def test_user_config_init_and_promote_attributes(attr: str, expected_value: str):
     # This test could use the `mock_user_config` confest fixture. This test doesn't
-    # use a real path for `mock_user_dir`, so kept for this negligible difference.
-    mock_dotenv_values.return_value = {
-        "TODOIST_API_KEY": "ab12",
-        "RAINDROP_CLIENT_ID": "cd34",
-        "RAINDROP_CLIENT_SECRET": "ef56",
-        "RAINDROP_REFRESH_TOKEN": "gh78",
-        "RAINDROP_ACCESS_TOKEN": "ij910",
-    }
+    # use a real path for `mock_user_dir`, so kept for that negligible difference.
     mock_system_config = SystemConfig(Path("mock_user_dir"))
-    mock_secrets_config = SecretsConfig(mock_system_config)
+    mock_secrets_config = SecretsConfig(mock_env_vars_func())
     mock_user_config = UserConfig(mock_system_config, mock_secrets_config)
-
     assert getattr(mock_user_config, attr) == expected_value
+
+
+def test_user_config_from_env_file_happy_path(
+    mock_system_config_real_paths: SystemConfig,
+):
+    mock_system_config_real_paths.env_file.parent.mkdir(parents=True, exist_ok=True)
+    mock_system_config_real_paths.env_file.write_text(
+        "\n".join([f"{k} = {v}" for k, v in mock_env_vars_func().items()])
+    )
+
+    user_config = UserConfig.from_env_file(mock_system_config_real_paths)
+    assert isinstance(user_config, UserConfig)
+
+
+def test_user_config_from_env_file_env_missing_key():
+    system_config = SystemConfig(Path("mock_user_dir"))
+    with pytest.raises(FileNotFoundError):
+        UserConfig.from_env_file(system_config)
+
+
+def test_user_config_from_env_file_missing_env_file():
+    system_config = SystemConfig(Path("mock_user_dir"))
+    with pytest.raises(FileNotFoundError):
+        UserConfig.from_env_file(system_config)
+
+
+# # @patch("raindrop_todoist_syncer.config.dotenv_values")

@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock
 import shutil
 
 import pytest
@@ -13,27 +13,58 @@ from raindrop_todoist_syncer.rd_token import RaindropAccessTokenRefresher
 from raindrop_todoist_syncer.rd_object import Raindrop
 
 
-@pytest.fixture()
-@patch("raindrop_todoist_syncer.config.dotenv_values")
-@patch("raindrop_todoist_syncer.config.Path.exists", return_value=True)
-def mock_user_config(
-    _mock_path_exists: MagicMock, mock_dotenv_values: MagicMock, tmp_path: Path
-) -> UserConfig:
+def mock_env_vars_func():
     """
-    Create a mock user config with real paths to a tmp dir.
+    Mock environment variables.
 
-    None of the files are created, including the '.env' file.
+    Returned from a func to allow mutation in individual tests.
+
+    NOTE: This cannot be only a fixture as it's used for test parametrization.
     """
-    mock_dotenv_values.return_value = {
+    return {
         "TODOIST_API_KEY": "ab12",
         "RAINDROP_CLIENT_ID": "cd34",
         "RAINDROP_CLIENT_SECRET": "ef56",
         "RAINDROP_REFRESH_TOKEN": "gh78",
         "RAINDROP_ACCESS_TOKEN": "ij910",
     }
+
+
+@pytest.fixture()
+def mock_env_vars_fixture():
+    """
+    Fixture version of `mock_env_vars_func`.
+    """
+    return mock_env_vars_func()
+
+
+@pytest.fixture()
+def mock_system_config_fake_paths():
+    """
+    Mock SystemConfig object with fake paths.
+    """
+    return SystemConfig(Path("mock_user_dir"))
+
+
+@pytest.fixture()
+def mock_system_config_real_paths(tmp_path):
+    """
+    Mock SystemConfig object with real paths.
+    """
+    mock_user_dir = tmp_path / "mock_user_dir"
+    return SystemConfig(mock_user_dir)
+
+
+@pytest.fixture()
+def mock_user_config(tmp_path: Path, mock_env_vars_fixture: dict) -> UserConfig:
+    """
+    Create a mock user config with real paths to a tmp dir.
+
+    None of the files are created, including the '.env' file.
+    """
     mock_user_dir = tmp_path / "mock_user_dir"
     mock_system_config = SystemConfig(mock_user_dir)
-    mock_secrets_config = SecretsConfig(mock_system_config)
+    mock_secrets_config = SecretsConfig(mock_env_vars_fixture)
     mock_user_config = UserConfig(mock_system_config, mock_secrets_config)
     return mock_user_config
 
@@ -76,30 +107,14 @@ def raindrop_access_token_refresher_for_file_overwriting(
 ):
     # A fixture to instantiate a RaindropAccessTokenRefresher instance that uses a
     # tmp_path duplicate of `.env.test`` to allow for both reading and overwriting.
-    tmp_usr_dir = tmp_path
-    env_file = Path("tests") / "mock_data" / ".env.test"
-    tmp_config_dir: Path = tmp_path / "config"  # ".env.backup"
-    tmp_config_dir.mkdir(parents=True)
-    tmp_env_file = str(tmp_path / ".temp_env")
-    shutil.copyfile(env_file, tmp_env_file)
+    env_file_test_path = Path("tests") / "mock_data" / ".env.test"
 
-    new_mock_user_config = UserConfig(
-        user_dir=tmp_usr_dir,
-        config_dir=tmp_config_dir,
-        env_file=tmp_env_file,
-        logs_dir=mock_user_config.logs_dir,
-        database_directory=mock_user_config.database_directory,
-        metafile_directory=mock_user_config.metafile_directory,
-        metafile_path=mock_user_config.metafile_path,
-        todoist_api_key=mock_user_config.todoist_api_key,
-        raindrop_client_id=mock_user_config.raindrop_client_id,
-        raindrop_client_secret=mock_user_config.raindrop_client_secret,
-        raindrop_access_token=mock_user_config.raindrop_access_token,
-        raindrop_refresh_token=mock_user_config.raindrop_refresh_token,
-    )
+    mock_user_config.env_file.parent.mkdir(parents=True)
+    shutil.copyfile(env_file_test_path, mock_user_config.env_file)
 
-    evfm = EnvironmentVariablesFileManager(new_mock_user_config)
-    rcm = RaindropCredentialsManager(new_mock_user_config)
+    evfm = EnvironmentVariablesFileManager(mock_user_config)
+    rcm = RaindropCredentialsManager(mock_user_config)
+
     return RaindropAccessTokenRefresher(rcm, evfm)
 
 

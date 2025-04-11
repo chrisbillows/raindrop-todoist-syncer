@@ -4,6 +4,7 @@ from unittest.mock import patch, Mock, MagicMock
 
 import pytest
 
+from raindrop_todoist_syncer.config import SystemConfig, UserConfig
 from raindrop_todoist_syncer.main import (
     main,
     driver,
@@ -35,29 +36,42 @@ def test_fetch_raindrops_and_create_tasks(
     mock_db_manager.update_database.assert_called_once()
 
 
+# Patch as __init_ calls API to refresh token. DBManager not mocked as passed to a Mock.
+@patch("raindrop_todoist_syncer.main.RaindropClient")
 @patch("raindrop_todoist_syncer.main.fetch_raindrops_and_create_tasks")
-def test_driver_command_run(mock_fetch_raindrops_and_create_tasks: MagicMock):
+def test_driver_command_run(
+    mock_fetch_raindrops_and_create_tasks: MagicMock,
+    _mock_raindrop_client: MagicMock,
+    mock_user_config: UserConfig,
+):
     # No command, i.e. the default command creates the same Namespace object.
     mock_args = argparse.Namespace(command="run")
-    driver(mock_args)
+    driver(mock_args, mock_user_config)
     mock_fetch_raindrops_and_create_tasks.assert_called_once()
 
 
 @patch(
-    "raindrop_todoist_syncer.main.AutomationManager.activate_automatic_rd_fetch_and_task_creation"
+    "raindrop_todoist_syncer.main.AutomationManager."
+    "activate_automatic_rd_fetch_and_task_creation"
 )
-def test_driver_command_automate_enable(mock_activate_automate: MagicMock):
+def test_driver_command_automate_enable(
+    mock_activate_automate: MagicMock,
+    mock_user_config: UserConfig,
+):
     mock_args = argparse.Namespace(command="automate_enable")
-    driver(mock_args)
+    driver(mock_args, mock_user_config)
     mock_activate_automate.assert_called_once()
 
 
 @patch(
     "raindrop_todoist_syncer.main.AutomationManager.deactivate_automatic_rd_fetch_and_task_creation"
 )
-def test_driver_command_run_automate_disable(mock_deactivate_automate: MagicMock):
+def test_driver_command_run_automate_disable(
+    mock_deactivate_automate: MagicMock,
+    mock_user_config: UserConfig,
+):
     mock_args = argparse.Namespace(command="automate_disable")
-    driver(mock_args)
+    driver(mock_args, mock_user_config)
     mock_deactivate_automate.assert_called_once()
 
 
@@ -77,9 +91,20 @@ def test_parse_args(command_ran_in_cli: str | None, expected: argparse.Namespace
     assert actual == expected
 
 
-@patch("raindrop_todoist_syncer.main.parse_args")
 @patch("raindrop_todoist_syncer.main.driver")
-def test_main(mock_driver: MagicMock, mock_parse_args: MagicMock):
+@patch("raindrop_todoist_syncer.main.UserConfig.from_env_file")
+@patch("raindrop_todoist_syncer.main.parse_args")
+@patch("raindrop_todoist_syncer.main.SystemConfig")
+def test_main(
+    mock_system_config: MagicMock,
+    mock_parse_args: MagicMock,
+    mock_user_config_from_env: MagicMock,
+    mock_driver: MagicMock,
+    mock_system_config_real_paths: SystemConfig,
+):
+    # Real paths used as `configure_logging` will creates log dir.
+    mock_system_config.return_value = mock_system_config_real_paths
     main()
     mock_parse_args.assert_called_once()
+    mock_user_config_from_env.assert_called_once_with(mock_system_config_real_paths)
     mock_driver.assert_called_once()

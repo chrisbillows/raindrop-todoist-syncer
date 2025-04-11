@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Protocol
 
 from dotenv import dotenv_values
-from loguru import logger
 
 
 class UserConfigProtocol(Protocol):
@@ -20,8 +19,8 @@ class UserConfigProtocol(Protocol):
     config_dir: Path
     env_file: Path
     logs_dir: Path
-    database_directory: Path
-    metafile_directory: Path
+    database_dir: Path
+    metafile_dir: Path
     metafile_path: Path
     launch_agents_dir: Path
     logs_dir: Path
@@ -56,44 +55,36 @@ class SystemConfig:
         self.metafile_path = self.metafile_dir / "metafile.txt"
         self.launch_agents_dir = self.user_dir / "Library" / "LaunchAgents"
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({', '.join(f'{attr}={value!r}' for attr, value in self.__dict__.items())})"
+
 
 class SecretsConfig:
     """
-    User's API secrets configuration.
+    User's API secrets loaded from a dict.
 
     Parameters
     ----------
-    system_dir: SystemConfig
-        A system config object (required for the `.env` path).
+    env_vars : dict
+        A dictionary of expected secrets, usually from a `.env` file.
     """
 
-    def __init__(self, system_config: SystemConfig) -> None:
-        self.system_config = system_config
-        if not system_config.env_file.exists():
-            logger.error(
-                f"No '.env' file found at {self.system_config.env_file}. Please create "
-                "this file to continue. See: "
-                "https://github.com/chrisbillows/raindrop-todoist-syncer/blob/main/README.md"
-            )
-            raise FileNotFoundError
+    def __init__(self, env_vars: dict) -> None:
+        self.todoist_api_key = env_vars["TODOIST_API_KEY"]
+        self.raindrop_client_id = env_vars["RAINDROP_CLIENT_ID"]
+        self.raindrop_client_secret = env_vars["RAINDROP_CLIENT_SECRET"]
+        self.raindrop_refresh_token = env_vars["RAINDROP_REFRESH_TOKEN"]
+        self.raindrop_access_token = env_vars["RAINDROP_ACCESS_TOKEN"]
 
-        env_vars = dotenv_values(system_config.env_file)
-
-        try:
-            self.todoist_api_key = env_vars["TODOIST_API_KEY"]
-            self.raindrop_client_id = env_vars["RAINDROP_CLIENT_ID"]
-            self.raindrop_client_secret = env_vars["RAINDROP_CLIENT_SECRET"]
-            self.raindrop_refresh_token = env_vars["RAINDROP_REFRESH_TOKEN"]
-            self.raindrop_access_token = env_vars["RAINDROP_ACCESS_TOKEN"]
-        except KeyError as err:
-            raise KeyError(f"Missing required environment variable: {err.args[0]}")
+    def __repr__(self):
+        return f"{self.__class__.__name__}(secrets=***REDACTED***)"
 
 
 class UserConfig(UserConfigProtocol):
     """
     A User Config object.
 
-    Combines SystemConfig and SecretsConfig objects
+    Combines SystemConfig and SecretsConfig objects.
 
     """
 
@@ -104,6 +95,37 @@ class UserConfig(UserConfigProtocol):
         self.secrets_config = secrets_config
         self._promote_attributes(system_config)
         self._promote_attributes(secrets_config)
+
+    @classmethod
+    def from_env_file(cls, system_config: SystemConfig) -> "UserConfig":
+        """
+        Construct a `UserConfig` from a given `SystemConfig`.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the `.env` file does not exist.
+        KeyError
+            If any required secret is missing.
+        """
+        if not system_config.env_file.exists():
+            raise FileNotFoundError(
+                f"No '.env' file found at {system_config.env_file}. "
+                "Please create this file. See: "
+                "https://github.com/chrisbillows/raindrop-todoist-syncer/blob/main/README.md"
+            )
+        env_vars = dotenv_values(system_config.env_file)
+        try:
+            secrets_config = SecretsConfig(env_vars)
+        except KeyError as err:
+            raise KeyError(f"Missing required environment variable: {err.args[0]}")
+        return cls(system_config=system_config, secrets_config=secrets_config)
+
+    def __repr__(self) -> None:
+        return (
+            f"{self.__class__.__name__}(\n  {repr(self.system_config)},\n  "
+            f"{repr(self.secrets_config)}\n)"
+        )
 
     def _promote_attributes(self, config_obj) -> None:
         for attr in vars(config_obj):

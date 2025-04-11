@@ -4,9 +4,7 @@ import subprocess
 from loguru import logger
 
 from raindrop_todoist_syncer.config import UserConfig
-from raindrop_todoist_syncer.logging_config import configure_logging
 
-configure_logging()
 
 PLIST_TEMPLATE = """
 <?xml version="1.0" encoding="UTF-8"?>

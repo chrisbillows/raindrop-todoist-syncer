@@ -1,18 +1,16 @@
 import argparse
 import datetime
 import traceback
+
 from loguru import logger
 
-from raindrop_todoist_syncer.config import UserConfig, make_user_config
+from raindrop_todoist_syncer.config import UserConfig, SystemConfig
 from raindrop_todoist_syncer.db_manage import DatabaseManager
+from raindrop_todoist_syncer.logging_config import configure_logging
 from raindrop_todoist_syncer.plist import AutomationManager
 from raindrop_todoist_syncer.rd_process import RaindropsProcessor
 from raindrop_todoist_syncer.rd_client import RaindropClient
 from raindrop_todoist_syncer.td_task import TodoistTaskCreator
-
-from raindrop_todoist_syncer.logging_config import configure_logging
-
-configure_logging()
 
 
 def fetch_raindrops_and_create_tasks(
@@ -41,31 +39,40 @@ def fetch_raindrops_and_create_tasks(
         database_manager.update_database([task])
 
 
-def driver(args: argparse.Namespace):
+def driver(args: argparse.Namespace, user_config: UserConfig):
     """
     Driver function.
 
     Parameters
     ----------
     args: argparse.Namespace
-        The parsed args
+        The parsed args.
+    system_config: SystemConfig
+        A user's system config object.
 
+    Raises
+    ------
+    NotImplementedError
+        Catch a command added to argparse but not configured in the dispatcher.
     """
     logger.info(f"Parsed args were {args}")
-    user_config = make_user_config()
 
     if args.command == "run":
         rc = RaindropClient(user_config)
         dbm = DatabaseManager(user_config)
         fetch_raindrops_and_create_tasks(user_config, rc, dbm)
 
-    if args.command == "automate_enable":
+    elif args.command == "automate_enable":
         am = AutomationManager(user_config)
         am.activate_automatic_rd_fetch_and_task_creation()
 
     elif args.command == "automate_disable":
         am = AutomationManager(user_config)
         am.deactivate_automatic_rd_fetch_and_task_creation()
+
+    else:
+        logger.error(f"Unhandled command: {args.command}")
+        raise NotImplementedError(f"No handler defined for command: {args.command}")
 
 
 def parse_args() -> None:
@@ -94,12 +101,17 @@ def parse_args() -> None:
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     """
     Entry point for raindrop todoist syncer.
     """
+    system_config = SystemConfig()
+    configure_logging(system_config)
+    logger.debug(system_config)
+
     args = parse_args()
-    driver(args)
+    user_config = UserConfig.from_env_file(system_config)
+    driver(args, user_config)
 
 
 if __name__ == "__main__":
@@ -110,12 +122,14 @@ if __name__ == "__main__":
         end = datetime.datetime.now()
         duration = (end - start).total_seconds()
         logger.info(
-            f"Run completed at {end.strftime('%Y-%m-%d %H:%M:%S')} | Run time {duration:.2f} seconds"
+            f"Run completed at {end.strftime('%Y-%m-%d %H:%M:%S')} | Run time "
+            f"{duration:.2f} seconds"
         )
     except Exception as e:
         end = datetime.datetime.now()
         duration = (end - start).total_seconds()
         logger.error(f"{e}\n{traceback.format_exc()}\n")
         logger.info(
-            f"Run terminated at {end.strftime('%Y-%m-%d %H:%M:%S')} | Run time to failure {duration:.2f} seconds"
+            f"Run terminated at {end.strftime('%Y-%m-%d %H:%M:%S')} | Run time to "
+            f"failure {duration:.2f} seconds"
         )
