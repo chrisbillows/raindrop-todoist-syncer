@@ -107,7 +107,7 @@ def main() -> None:
     """
     system_config = SystemConfig()
     configure_logging(system_config)
-    logger.debug(system_config)
+    logger.info(system_config)
 
     args = parse_args()
     user_config = UserConfig.from_env_file(system_config)
